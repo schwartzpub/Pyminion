@@ -57,45 +57,117 @@ def drawToPlayer(playerDeck, hand, card):
 
 def drawHand():
 	for i in range(5):
-		playerHand.append(playerDeck[0])
-		del playerDeck[0]
+		if len(playerDeck) > 0:
+			playerHand.append(playerDeck[0])
+			del playerDeck[0]
+		else:
+			playerDiscardToDeck()
+			playerHand.append(playerDeck[0])
+			del playerDeck[0]
 	return playerHand		
 
-def playTurn(actions, buys, treasure):
+def playTurn(actions, buys, treasure, hand):
 	playerTurnBuys = buys
 	playerTurnActions = actions
 	playerTurnTreasure = treasure
+	playerHand = hand
 	printPlayerHand(actions, buys, treasure)
 	playtype = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
-	if playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in playerHand) <= 0 or playtype.lower == 'a':
+	if playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in playerPlay) <= 0 or playtype.lower == 'a':
 		pass
-	if playtype.lower() == 'p':
-		i = int(raw_input("  Which would you like to play: (n)umber? "))
-		while True:
-			if i > (len(playerHand)):
-				i = int(raw_input("  Invalid choice, please pick a (n)umber: "))
-			elif playerHand[i - 1].cardType == 'treasure':
-				playerPlay.append(playerHand[i - 1])
-				playerTurnTreasure += playerHand[i - 1].value
-				del playerHand[i - 1]
-				playerTurnActions = 0
-				os.system('clear')
-				playTurn(playerTurnBuys, playerTurnActions, playerTurnTreasure)				
-			elif playerHand[i - 1].cardType == 'action':
-				break
-							
+	elif playtype.lower() == 'p':
+		play(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
 	elif playtype.lower() == 'b':
-		pass
+		buy(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
 	elif playtype.lower() == 'r':
 		readCard(raw_input("  Which card would you like to read: (n)umber? "))
 		os.system('clear')
-		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure)
+		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
 	else:
 		print " That is not an available choice...."
-		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure)
+		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
+
+def play(actions, buys, treasure, hand):
+	playerTurnActions = actions
+	playerTurnBuys = buys
+	playerTurnTreasure = treasure
+	playerHand = hand
+	i = int(raw_input("  Which would you like to play: (n)umber? "))
+        while True:
+		if i > (len(playerHand)):
+			i = int(raw_input("  Invalid choice, please pick a (n)umber: "))
+		elif playerHand[i - 1].cardType == 'treasure':
+                        playerPlay.append(playerHand[i - 1])
+                        playerTurnTreasure += playerHand[i - 1].value
+                        del playerHand[i - 1]
+                        playerTurnActions = 0
+                        os.system('clear')
+                        break
+		elif playerHand[i - 1].cardType == 'action':
+                        break
+        playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
+
+def buy(actions, buys, treasure, hand):
+        playerTurnActions = actions
+        playerTurnBuys = buys
+        playerTurnTreasure = treasure
+        playerHand = hand
+	i = raw_input("  Which card would you like to buy? ")
+        while True:
+        	if i not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+                	i = raw_input("  Invalid selection!  Which card would you like to buy? ")
+		else:
+                	if i.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
+                        	p = province[0]
+                                d = duchy[0]
+                                e = estate[0]
+                                g = gold[0]
+                                s = silver[0]
+                                c = copper[0]
+                                i = eval(i)
+                                playerPlay.append(i)
+                                playerTurnTreasure -= i.value
+                                del i
+                                playerTurnBuys -= 1
+                                break
+                        elif i in range(1,11):
+                                i = 'card' + str(int(i) - 1)
+                                playerPlay.append(action[i][0])
+                                playerTurnTreasure -= action[i][0].value
+                                del action[i][0]
+                                playerTurnBuys -= 1
+                                break
+	if playerTurnBuys < 1:
+        	playerHandCleanup(playerPlay, playerHand)
+                playerHand = drawHand()
+                playTurn(1, 1, 0, playerHand)
+        else:
+                playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure, playerHand)
+
+def playerHandCleanup(play, hand):
+	playerPlay = play
+	playerHand = hand
+	x = len(playerPlay)
+	y = len(playerHand)
+	while x == len(playerPlay) and x > 0:
+		playerDiscard.append(playerPlay[0])
+		del playerPlay[0]
+		x -= 1
+	while y == len(playerHand) and y > 0:
+		playerDiscard.append(playerHand[0])
+		del playerHand[0]
+		y -= 1
+
+def playerDiscardToDeck():
+	x = len(playerDiscard)
+	while x == len(playerDiscard) and x > 0:
+		playerDeck.append(playerDiscard[0])
+		del playerDiscard[0]
+		x -= 1
 
 # Printing methods
 def printDeckCards():
+	os.system('clear')
 	print "\n"
 	print "  " + ProvinceCard.cardColor + ProvinceCard.cardName + "\033[0m  (" + str(len(province)) + "): $" + str(ProvinceCard.cost) + "   " + GoldCard.cardColor + GoldCard.cardName + "\033[0m    (" + str(len(gold)) + "): $" + str(GoldCard.cost),
 	print "   " + action['card0'][0].cardColor +  action['card0'][0].cardName + "\033[0m  " + (" " * (12 - len(action['card0'][0].cardName))) + " (" + str(len(action['card0'])) + "): $" + str(action['card0'][0].cost),
@@ -160,5 +232,5 @@ playerDeck = drawToPlayer(playerDeck, 0, 0)
 
 #play turn
 playerHand = drawHand()
-playTurn(1, 1, 0)
+playTurn(1, 1, 0, playerHand)
 
