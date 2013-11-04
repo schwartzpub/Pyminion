@@ -66,8 +66,8 @@ def playTurn(actions, buys, treasure):
 	playerTurnActions = actions
 	playerTurnTreasure = treasure
 	printPlayerHand(actions, buys, treasure)
-	playtype = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss? ")
-	if playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in playerHand) <= 0:
+	playtype = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
+	if playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in playerHand) <= 0 or playtype.lower == 'a':
 		pass
 	if playtype.lower() == 'p':
 		i = int(raw_input("  Which would you like to play: (n)umber? "))
@@ -86,11 +86,13 @@ def playTurn(actions, buys, treasure):
 							
 	elif playtype.lower() == 'b':
 		pass
-	elif playtype.lower() == 'a':
-		pass				 
+	elif playtype.lower() == 'r':
+		readCard(raw_input("  Which card would you like to read: (n)umber? "))
+		os.system('clear')
+		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure)
 	else:
-		print "That is not an available choice...."
-		playTurn()
+		print " That is not an available choice...."
+		playTurn(playerTurnActions, playerTurnBuys, playerTurnTreasure)
 
 # Printing methods
 def printDeckCards():
@@ -136,6 +138,14 @@ def printTurnCount(actions, buys, treasure):
 	playerTurnBuys = buys
 	playerTurnTreasure = treasure
 	print "  Actions: " + str(playerTurnActions) + "    Buys ($" + str(playerTurnTreasure) + "): " + str(playerTurnBuys)  
+
+def readCard(number):
+	cardToRead = 'card' + str(int(number) - 1)
+	os.system('clear')
+	print "\033[36m  Card Name: \033[0m" + action[cardToRead][0].cardColor + action[cardToRead][0].cardName
+	print "\033[36m  Description: \033[0m" + action[cardToRead][0].description
+	print "\n\033[32m  Cost:\033[0m $" + str(action[cardToRead][0].cost)
+	raw_input("\n\n\033[1;31m  Press key...\033[0m")
  
 #Run Dominion Game
 os.system('clear')

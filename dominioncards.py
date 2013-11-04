@@ -98,6 +98,9 @@ class CellarCard(ActionCard):
 	cardsDiscarded = True
 	def __init__(self):
 		pass
+	
+	def displayCard():
+		pass
 
 class ChapelCard(ActionCard):
 	cardEval = "ChapelCard"
