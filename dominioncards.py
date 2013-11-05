@@ -115,7 +115,7 @@ class ChapelCard(ActionCard):
 class MoatCard(ActionCard):
 	cardEval = "MoatCard"
 	cardName = "Moat"
-        cardColor = "\033[34m"
+        cardColor = "\033[36m"
 	description = "+2 Cards.  When another player plays an Attack card, you may reveal this from your hand. if you do you are unaffected by that Attack."
 	cost = 2
 	cardsDrawn = True
