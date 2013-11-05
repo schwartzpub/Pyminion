@@ -39,15 +39,20 @@ class DomGame(object):
 						playerName = raw_input(" Player " + str(i + 1) + " name? ")
 						self.playerWait[i].playerName = playerName
 						playerRost.append(self.playerWait[i])
-						print playerRost[i].playerName
 				break
-			for i in range(len(playerRost)):
-                                playerRost[i].drawToPlayer(0)
-	                        playerRost[i].drawHand()
 			newGame.createGame(roomName, playerRost[0].playerName)
 			newDeck = DomDeck()
 			newDeck.buildDeck(int(players))
-		playerRost[0].playTurn(newDeck, 1, 1)
+		else:
+			print "That is not a valid option!"
+#			self.startGame()
+
+		for player in playerRost:
+			player.deck = newDeck
+			player.drawToPlayer(0)
+			player.drawHand()
+
+		playerRost[1].playTurn(newDeck, 1, 1)
 
 	def joinGame(self):
 		if roomName not in rooms:
