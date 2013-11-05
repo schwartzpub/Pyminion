@@ -39,7 +39,7 @@ class DomGame(object):
 						playerName = raw_input(" Player " + str(i + 1) + " name? ")
 						self.playerWait[i].playerName = playerName
 						playerRost.append(self.playerWait[i])
-				break
+					break
 			newGame.createGame(roomName, playerRost[0].playerName)
 			newDeck = DomDeck()
 			newDeck.buildDeck(int(players))
@@ -52,7 +52,7 @@ class DomGame(object):
 			player.drawToPlayer(0)
 			player.drawHand()
 
-		playerRost[1].playTurn(newDeck, 1, 1)
+		playerRost[0].playTurn(newDeck, 1, 1)
 
 	def joinGame(self):
 		if roomName not in rooms:

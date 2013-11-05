@@ -3,18 +3,18 @@ from dominioncards import *
 from dominiondeck import *
 
 class Player(object):
-	playerName = ''
-	playerHand = []
-	playerDeck = []
-	playerDiscard = []
-	playerPlay = []
-	playerTurnActions = 0
-	playerTurnBuys = 0
-	playerTurnTreasure = 0
-	playerRoom = ''
-	deck = ''
+
 	def __init__(self):
-		pass		
+		self.playerHand = []
+		self.playerName = ''
+		self.playerDeck = []
+		self.playerPlay = []
+		self.playerTurnActions = 0
+		self.playerTurnBuys = 0
+		self.playerTurnTreasure = 0
+		self.playerRoom = ''
+		self.deck = ''
+		self.playerDiscard = []
 		
 	def drawToPlayer(self, hand):
 		if hand == 0:
@@ -79,12 +79,12 @@ class Player(object):
 				i = raw_input("  Invalid selection!  Which card would you like to buy? ")
 			else:
 				if i.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
-					p = province
-					d = duchy
-					e = estate
-					g = gold
-					s = silver
-					c = copper
+					p = self.deck.provinceCards
+					d = self.deck.duchyCards
+					e = self.deck.estateCards
+					g = self.deck.goldCards
+					s = self.deck.silverCards
+					c = self.deck.copperCards
 					i = eval(i)
 					self.playerPlay.append(i[0])
 					self.playerTurnTreasure -= i[0].cost
@@ -93,19 +93,22 @@ class Player(object):
 					break
 				elif int(i) in range(10):
 					x = 'card' + str(int(i))
-					self.playerPlay.append(action[x][0])
-					self.playerTurnTreasure -= action[x][0].cost
-					del action[x][0]
+					self.playerPlay.append(self.deck.actionCards[x][0])
+					self.playerTurnTreasure -= self.deck.actionCards[x][0].cost
+					del self.deck.actionCards[x][0]
 					self.playerTurnBuys -= 1
 					break
 		if self.playerTurnBuys < 1:
-			self.playerHandCleanup(playerPlay, playerHand)
-			self.playerHand = drawHand()
+			self.playerHandCleanup()
+			self.drawHand()
 			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
 		else:
 			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
 
 	def playerHandCleanup(self):
+		self.playerTurnActions = 1
+		self.playerTurnBuys = 1
+		self.playerTurnTreasure = 0
 		x = len(self.playerPlay)
 		y = len(self.playerHand)
 		while x == len(self.playerPlay) and x > 0:
@@ -121,7 +124,7 @@ class Player(object):
 		x = len(self.playerDiscard)
 		while x == len(self.playerDiscard) and x > 0:
 			self.playerDeck.append(self.playerDiscard[0])
-			del selfplayerDiscard[0]
+			del self.playerDiscard[0]
 			x -= 1
 
 	def printPlayerHand(self):
@@ -129,8 +132,8 @@ class Player(object):
 		self.printPlayerCount()
 		self.printTurnCount()
 		print "\n  Current Hand (" + self.playerName + "):\n ",
-		for i in range(len(self.playerHand)):
-			print self.playerHand[i].cardColor + self.playerHand[i].cardName + " \033[0m",
+		for card in self.playerHand:
+			print card.cardColor + card.cardName + " \033[0m",
 
 	def printPlayerCount(self):
 		sys.stdout.write("\n\n  Deck [")
