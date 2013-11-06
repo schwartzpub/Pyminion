@@ -32,18 +32,17 @@ class Player(object):
 				self.playerHand.append(self.playerDeck[0])
 				del self.playerDeck[0]
 			else:
-				playerDiscardToDeck()
+				self.playerDiscardToDeck()
 				self.playerHand.append(self.playerDeck[0])
 				del self.playerDeck[0]
 
-	def playTurn(self, deck, actions, buys):
+	def playTurn(self, actions, buys):
 		self.playerTurnActions = actions
 		self.playerTurnBuys = buys
-		self.deck = deck
 		self.printPlayerHand()
 		playtype = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
 		if self.playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in self.playerPlay) <= 0 or playtype.lower == 'a':
-			pass
+			return
 		elif playtype.lower() == 'p':
 			self.play()
 		elif playtype.lower() == 'b':
@@ -51,10 +50,10 @@ class Player(object):
 		elif playtype.lower() == 'r':
 			self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
 			os.system('clear')
-			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
+			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 		else:
 			print " That is not an available choice...."
-			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
+			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def play(self):
 		i = int(raw_input("  Which would you like to play: (n)umber? "))
@@ -70,7 +69,7 @@ class Player(object):
 				break
 			elif self.playerHand[i - 1].cardType == 'action':
 				break
-		self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
+		self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def buy(self):
 		i = raw_input("  Which card would you like to buy? ")
@@ -101,9 +100,9 @@ class Player(object):
 		if self.playerTurnBuys < 1:
 			self.playerHandCleanup()
 			self.drawHand()
-			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
+			return
 		else:
-			self.playTurn(self.deck, self.playerTurnActions, self.playerTurnBuys)
+			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def playerHandCleanup(self):
 		self.playerTurnActions = 1

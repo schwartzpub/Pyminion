@@ -1,4 +1,4 @@
-a#Dominion card classes
+#Dominion card classes
 
 #Treasure Cards
 class TreasureCard(object):
@@ -99,8 +99,31 @@ class CellarCard(ActionCard):
 	def __init__(self):
 		pass
 	
-	def displayCard():
-		pass
+	def playCard(self, player, roster):
+		player = player
+		player.playerTurnActions += 1
+		while True:
+			cards = len(player.playerHand)
+			discard = raw_input("How many cards would you like to discard? ")
+			if discard == 0:
+				break
+			elif discard > len(player.playerHand)
+				print "That is not a valid number of cards!"
+				continue
+			else:
+				for i in discard:
+					if len(player.playerDeck) == 0:
+						player.playerDiscardToDeck()
+                                                choice = raw_input("Choose a card to discard: ")
+                                                player.playerDiscard.append(player.playerHand[choice])
+                                                del player.playerHand[choice]						
+					else:
+						choice = raw_input("Choose a card to discard: ")
+						player.playerDiscard.append(player.playerHand[choice])
+						del player.playerHand[choice]
+				for i in discard:
+					player.drawHand(self.discard)
+				break		
 
 class ChapelCard(ActionCard):
 	cardEval = "ChapelCard"
@@ -112,6 +135,10 @@ class ChapelCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster):
+		player = player
+		pass
+			
 class MoatCard(ActionCard):
 	cardEval = "MoatCard"
 	cardName = "Moat"

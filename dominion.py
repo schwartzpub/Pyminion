@@ -25,34 +25,37 @@ class DomGame(object):
 	def __init__(self):
 		pass
 	def startGame(self):
-		x = raw_input("Welcome to Dominion! (J)oin a game or (N)ew game? ")
-		if x.lower() == 'j':
-			pass
-		elif x.lower() == 'n':
-			roomName = raw_input("What will be the name of your room? ")
-			players = int(raw_input("How many players (2 - 4)? "))
-			while True:
-				if players > 4 or players < 2:
-					players = int(raw_input(" Invalid number of players, please choose a number between 2 and 4! "))
-				else:
-					for i in range(int(players)):
-						playerName = raw_input(" Player " + str(i + 1) + " name? ")
-						self.playerWait[i].playerName = playerName
-						playerRost.append(self.playerWait[i])
-					break
-			newGame.createGame(roomName, playerRost[0].playerName)
-			newDeck = DomDeck()
-			newDeck.buildDeck(int(players))
-		else:
-			print "That is not a valid option!"
-#			self.startGame()
+		while True:
+			x = raw_input("Welcome to Dominion! (J)oin a game or (N)ew game? ")
+			if x.lower() == 'j':
+				print "There are no current games to join!"
+				self.startGame()
+				break
+			elif x.lower() == 'n':
+				roomName = raw_input("What will be the name of your room? ")
+				players = int(raw_input("How many players (2 - 4)? "))
+				while True:
+					if players > 4 or players < 2:
+						players = int(raw_input(" Invalid number of players, please choose a number between 2 and 4! "))
+					else:
+						for i in range(int(players)):
+							playerName = raw_input(" Player " + str(i + 1) + " name? ")
+							self.playerWait[i].playerName = playerName
+							playerRost.append(self.playerWait[i])
+						break
+				newGame.createGame(roomName, playerRost[0].playerName)
+				newDeck = DomDeck()
+				newDeck.buildDeck(int(players))
+			else:
+				print "That is not a valid option!"
+				self.startGame()
+				break
+			for player in playerRost:
+				player.deck = newDeck
+				player.drawToPlayer(0)
+				player.drawHand()
 
-		for player in playerRost:
-			player.deck = newDeck
-			player.drawToPlayer(0)
-			player.drawHand()
-
-		playerRost[0].playTurn(newDeck, 1, 1)
+			self.playLoop()
 
 	def joinGame(self):
 		if roomName not in rooms:
@@ -65,6 +68,19 @@ class DomGame(object):
 		rooms.append(boardName)
 		os.system('clear')
 
+	def playLoop(self):
+		players = len(playerRost)
+		playerTurn = 0
+		while True:
+			if playerTurn < players:
+				playerRost[playerTurn].playTurn(1, 1)
+				playerTurn += 1
+				continue
+			elif playerTurn >= players:
+				playerTurn = 0
+				continue
+			break
+			
 #Run Dominion Game
 os.system('clear')
 newGame = DomGame()
