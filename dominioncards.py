@@ -1,4 +1,5 @@
 #Dominion card classes
+import os
 
 #Treasure Cards
 class TreasureCard(object):
@@ -71,6 +72,7 @@ class ActionCard(object):
 	actionCost = 1
 	quantity = 10
 	cost = 0
+	value = 0
 	cardsDiscarded = False
 	cardsTrashed = False
 	cardsDrawn = False
@@ -270,6 +272,39 @@ class BureaucratCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.roster = roster
+		self.player = player
+		self.deck = deck
+		self.reveal = []
+		if len(self.deck[silverCards]) == 0:
+			pass
+		else:
+			self.player.playerDeck.insert(0, self.deck[silverCards][0])
+			del self.deck[silverCards][0]
+		for each in self.roster:
+			while True:
+				if each != self.palyer:
+					raw_input(each.playerName + "`s reaction... Press any key when ready.")
+					os.system('clear')
+					print each.playerName + ": please choose a Victory card to reveal."
+					each.printRevealHand()
+					while True:
+						choice = raw_input("\n Which card would you like to reveal? ")
+						if any(i.cardType == 'victory' for i in each.playerHand):
+							if each.playerHand[(int(choice) - 1)].cardType != 'victory':
+								print "Invalid choice, please choose a Victory card."
+								continue
+							else:
+								self.reveal.append(each.playerName + " reveals " + each.playerHand[(int(choice) - 1).cardName + ".")
+								break
+						else:
+							self.reveal.append(each.playerName + " reveals " + ' '.join(each.playerHand.cardName) + ".")
+							break
+		raw_input(" Press any key to return to " + self.player.playerName + "`s hand...")
+		self.deck.printPlayerHand()
+		print "\n " + ' '.join(self.reveal)
+
 class FeastCard(ActionCard):
 	cardEval = "FeastCard"
 	cardName = "Feast"
@@ -282,12 +317,30 @@ class FeastCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.deck = deck
+		while True:
+			for card in self.player.playerHand:
+				if card.cardName == 'Feast':
+					del self.player.playerHand[card]
+					break
+		while True:
+			self.choice = raw_input("Please select a card that costs up to $5: ")
+			if self.deck['card' + self.choice][0].value > 5:
+				print "That card is too expensive! "
+			else:
+				self.player.playerDiscard.append(self.deck['card' + self.choice][0])
+				del self.deck['card' + self.choice][0]
+				break
+
 class GardensCard(ActionCard):
 	cardEval = "GardensCard"
 	cardName = "Gardens"
 	cardColor = "\033[32m"
 	description = "Worth 1 Victory for every 10 cards in your deck (rounded down)."
 	cost = 4
+	value = 1
 	def __init__(self):
 		pass
 
@@ -301,6 +354,26 @@ class MilitiaCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnTreasure += 2
+		for each in self.roster:
+			while True:
+				if each != self.player:
+					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
+					os.system('clear')
+					print each.playerName + ": you must discard down to three cards in hand."
+					each.printRevealHand()
+					while len(each.playerHand) > 3:
+						choice = raw_input(" Please choose a card to discard: "
+						if (int(choice - 1) not in range(len(each.playerHand)):
+							raw_input(" Please choose an appropriate card! ")
+						else:
+							each.playerDiscard.append(each.playerHand[int(choice) - 1])
+							del each.playerHand[int(choice) - 1])
+					break
+						
 class MoneylenderCard(ActionCard):
 	cardEval = "MoneylenderCard"
 	cardName = "Moneylender"
@@ -311,6 +384,22 @@ class MoneylenderCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		if any(i.cardType == 'copper' for i in self.player.playerHand):
+			while True:
+				choice = raw_input(" Would you like to trash a copper (y/n)? ")
+				if choice.lower() == 'y':
+					while True:
+						for card in self.player.playerHand:
+							if card.cardName == 'copper':
+								del self.player.playerHand[card]
+								self.player.playerTurnTreasure += 3
+								break
+				else:
+					break
+						
+				
 class RemodelCard(ActionCard):
 	cardEval = "RemodelCard"
 	cardName = "Remodel"
@@ -322,3 +411,43 @@ class RemodelCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.deck = deck
+		if len(self.player.playerHand) > 0:
+			while True:
+				choice = raw_input("\n Please choose a card to trash: ")
+				if (int(choice) - 1) not in range(len(self.player.playerHand):
+					print "Please choose an appropriate card! "
+				else:
+					value = 2 + self.player.playerHand[int(choice) - 1].cost
+					del self.player.playerHand[int(choice) - 1]
+					card = raw_input("Please choose a card to gain: ")
+					while True:
+						if card not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
+							card = raw_input("  Invalid selection!  Which card would you like to buy? ")
+						else:
+							if card.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
+								p = self.deck.provinceCards
+								d = self.deck.duchyCards
+								e = self.deck.estateCards
+								g = self.deck.goldCards
+								s = self.deck.silverCards
+								c = self.deck.copperCards
+								card = eval(card)
+								if card.cost > value or len(card) < 1:
+									card = raw_input("  Invalid selection!  Which card would you like to buy? ")
+								else:
+									self.player.playerDiscard.append(card[0])
+									del card[0]
+									break
+							elif int(card) in range(10):
+								x = 'card' + card
+								if len(self.deck.actionCards[x]) > 0 and self.deck.actionCards[x].cost <= value:
+									self.player.playerDiscard.append(self.deck.actionCards[x][0])
+									del self.deck.actionCards[x][0]
+									break
+
+									
+									
+								

@@ -141,6 +141,11 @@ class Player(object):
 		for card in self.playerHand:
 			print card.cardColor + card.cardName + " \033[0m",
 
+	def printPlayerReveal(self):
+		print "\n Current Hand (" + self.playerName + "):\n",
+		for card in self.playerHand:
+			print card.cardColor + card.cardName + "\033[0m",
+
 	def printPlayerCount(self):
 		sys.stdout.write("\n\n  Deck [")
 		for i in range(len(self.playerDeck)):
