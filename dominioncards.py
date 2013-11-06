@@ -99,30 +99,30 @@ class CellarCard(ActionCard):
 	def __init__(self):
 		pass
 	
-	def playCard(self, player, roster):
-		player = player
-		player.playerTurnActions += 1
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnActions += 1
 		while True:
-			cards = len(player.playerHand)
+			cards = len(self.player.playerHand)
 			discard = raw_input("How many cards would you like to discard? ")
 			if discard == 0:
 				break
-			elif discard > len(player.playerHand)
+			elif discard > len(self.player.playerHand)
 				print "That is not a valid number of cards!"
 				continue
 			else:
 				for i in discard:
-					if len(player.playerDeck) == 0:
-						player.playerDiscardToDeck()
-                                                choice = raw_input("Choose a card to discard: ")
-                                                player.playerDiscard.append(player.playerHand[choice])
-                                                del player.playerHand[choice]						
+					if len(self.player.playerDeck) == 0:
+						self.player.playerDiscardToDeck()
+                                                choice = int(raw_input("Choose a card to discard: "))
+                                                self.player.playerDiscard.append(self.player.playerHand[choice - 1])
+                                                del self.player.playerHand[choice - 1]						
 					else:
-						choice = raw_input("Choose a card to discard: ")
-						player.playerDiscard.append(player.playerHand[choice])
-						del player.playerHand[choice]
+						choice = int(raw_input("Choose a card to discard: "))
+						self.player.playerDiscard.append(self.player.playerHand[choice - 1])
+						del self.player.playerHand[choice - 1]
 				for i in discard:
-					player.drawHand(self.discard)
+					self.player.drawHand(self.discard)
 				break		
 
 class ChapelCard(ActionCard):
@@ -135,10 +135,24 @@ class ChapelCard(ActionCard):
 	def __init__(self):
 		pass
 
-	def playCard(self, player, roster):
-		player = player
-		pass
-			
+	def playCard(self, player, roster, deck):
+		self.player = player
+		if len(self.player.playerHand) > 4:
+			self.trash = 4
+		else:
+			self.trash = len(self.player.playerHand)
+		while True:
+			for i in self.trash:
+				choice = int(raw_input("Choose a card to trash ([0] for none): "))
+				if (choice - 1) not in range(self.player.playerHand):
+					print "That is not a valid choice!"
+					continue
+				elif (choice -1 ) == -1:
+					break
+				else:
+					del self.player.playerHand[choice - 1] 				
+					break
+
 class MoatCard(ActionCard):
 	cardEval = "MoatCard"
 	cardName = "Moat"
@@ -148,6 +162,18 @@ class MoatCard(ActionCard):
 	cardsDrawn = True
 	def __init__(self):
 		pass
+	
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.draw = 2
+		for i in draw:
+			if len(self.player.playerDeck) == 0:
+				self.player.playerDiscardToDeck()
+				self.player.playerHand.append(self.player.playerDeck[0]
+				del self.player.playerDeck[0]
+			else:
+				self.player.playerHand.append(self.player.playerDeck[0]
+				del self.player.playerDeck[0]		
 
 class ChancellorCard(ActionCard):
 	cardEval = "ChancellorCard"
@@ -158,6 +184,19 @@ class ChancellorCard(ActionCard):
 	cardsDiscarded = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnTreasure += 2
+		while True:
+			self.discard = raw_input("Would you like to place your deck into your discard pile (y/n)? "
+			if self.discard.lower() not in ['y', 'n']:
+				raw_input("That is not an available option, please choose (y)es or (n)o! "
+			elif self.discard.lower() == 'n':
+				break
+			elif self.discard.lower() == 'y':
+				self.player.playerDeckToDiscard()
+				break
 
 class VillageCard(ActionCard):
 	cardEval = "VillageCard"
@@ -170,6 +209,17 @@ class VillageCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		if len(self.player.playerDeck) == 0:
+			self.player.playerDiscardToDeck()
+			self.player.playerHand.append(self.player.playerDeck[0])
+			del self.player.playerDeck[0]
+		else:
+			self.player.playerHand.append(self.player.playerDeck[0])
+			del self.player.playerDeck[0]
+		self.player.playerTurnActions += 1
+
 class WoodcutterCard(ActionCard):
 	cardEval = "WoodcutterCard"
 	cardName = "Woodcutter"
@@ -181,6 +231,11 @@ class WoodcutterCard(ActionCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnBuys += 1
+		self.player.playerTurnTreasure += 2
+
 class WorkshopCard(ActionCard):
 	cardEval = "WorkshopCard"
 	cardName = "Workshop"
@@ -191,6 +246,18 @@ class WorkshopCard(ActionCard):
 	cardsGainedCost = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.deck = deck
+		while True:
+			self.choice = raw_input("Please select a card that costs up to $4: ")
+			if self.deck['card' + self.choice][0].value > 4:
+				print "That card is too expensive! "
+			else:
+				self.player.playerDiscard.append(self.deck['card' + self.choice][0])
+				del self.deck['card' + self.choice][0]
+				break
 
 class BureaucratCard(ActionCard):
 	cardEval = "BureaucratCard"

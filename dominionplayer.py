@@ -126,6 +126,13 @@ class Player(object):
 			del self.playerDiscard[0]
 			x -= 1
 
+	def playerDeckToDiscard(self):
+		x = len(self.playerDeck)
+		while x == len(self.playerDeck) and x > 0:
+			self.playerDiscard.append(self.playerDeck[0])
+			del self.playerDeck[0]
+			x -= 1
+	
 	def printPlayerHand(self):
 		self.deck.printDeckCards()
 		self.printPlayerCount()
