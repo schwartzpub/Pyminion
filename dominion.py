@@ -16,10 +16,10 @@ gameRoom = ""
 
 #Dominion Game Class
 class DomGame(object):
-	player1 = Player()
-	player2 = Player()
-	player3 = Player()
-	player4 = Player()
+	player1 = Player('hold')
+	player2 = Player('hold')
+	player3 = Player('hold')
+	player4 = Player('hold')
 	playerWait = [player1, player2, player3, player4]
 	boardName = ' '
 	def __init__(self):
@@ -52,6 +52,7 @@ class DomGame(object):
 				break
 			for player in playerRost:
 				player.deck = newDeck
+				player.roster = playerRost
 				player.drawToPlayer(0)
 				player.drawHand()
 

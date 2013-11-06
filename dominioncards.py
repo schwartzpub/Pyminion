@@ -107,13 +107,13 @@ class CellarCard(ActionCard):
 		while True:
 			cards = len(self.player.playerHand)
 			discard = raw_input("How many cards would you like to discard? ")
-			if discard == 0:
+			if int(discard) == 0:
 				break
-			elif discard > len(self.player.playerHand)
+			elif int(discard) > len(self.player.playerHand):
 				print "That is not a valid number of cards!"
 				continue
 			else:
-				for i in discard:
+				for i in range(int(discard)):
 					if len(self.player.playerDeck) == 0:
 						self.player.playerDiscardToDeck()
                                                 choice = int(raw_input("Choose a card to discard: "))
@@ -123,8 +123,8 @@ class CellarCard(ActionCard):
 						choice = int(raw_input("Choose a card to discard: "))
 						self.player.playerDiscard.append(self.player.playerHand[choice - 1])
 						del self.player.playerHand[choice - 1]
-				for i in discard:
-					self.player.drawHand(self.discard)
+				for i in int(discard):
+					self.player.drawHand(int(discard))
 				break		
 
 class ChapelCard(ActionCard):
@@ -171,10 +171,10 @@ class MoatCard(ActionCard):
 		for i in draw:
 			if len(self.player.playerDeck) == 0:
 				self.player.playerDiscardToDeck()
-				self.player.playerHand.append(self.player.playerDeck[0]
+				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]
 			else:
-				self.player.playerHand.append(self.player.playerDeck[0]
+				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]		
 
 class ChancellorCard(ActionCard):
@@ -191,12 +191,12 @@ class ChancellorCard(ActionCard):
 		self.player = player
 		self.player.playerTurnTreasure += 2
 		while True:
-			self.discard = raw_input("Would you like to place your deck into your discard pile (y/n)? "
-			if self.discard.lower() not in ['y', 'n']:
-				raw_input("That is not an available option, please choose (y)es or (n)o! "
-			elif self.discard.lower() == 'n':
+			discard = raw_input("Would you like to place your deck into your discard pile (y/n)? ")
+			if discard.lower() not in ['y', 'n']:
+				raw_input("That is not an available option, please choose (y)es or (n)o! ")
+			elif discard.lower() == 'n':
 				break
-			elif self.discard.lower() == 'y':
+			elif discard.lower() == 'y':
 				self.player.playerDeckToDiscard()
 				break
 
@@ -253,13 +253,25 @@ class WorkshopCard(ActionCard):
 		self.player = player
 		self.deck = deck
 		while True:
-			self.choice = raw_input("Please select a card that costs up to $4: ")
-			if self.deck['card' + self.choice][0].value > 4:
-				print "That card is too expensive! "
-			else:
-				self.player.playerDiscard.append(self.deck['card' + self.choice][0])
-				del self.deck['card' + self.choice][0]
+			choice = raw_input(" Please select a card that costs up to $4: ")
+			if choice.lower() not in ['e', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+				choice = raw_input("  Invalid selection!  Which card would you like to gain? ")
+			elif choice.lower() in ['e', 's', 'c']:
+				e = self.deck.estateCards
+				s = self.deck.silverCards
+				c = self.deck.copperCards
+				choice = eval(choice)
+				self.player.playerDiscard.append(choice[0])
+				del self.deck.choice[0]
 				break
+			elif int(choice) in range(10):
+				choice = 'card' + choice
+				if self.deck.actionCards[choice][0].value > 4:
+					choice = raw_input(" That card is too expensive! Please choose another: ")
+				else:
+					self.player.playerDiscard.append(self.deck.actionCards[choice][0])
+					del self.deck.actionCards[choice][0]
+					break
 
 class BureaucratCard(ActionCard):
 	cardEval = "BureaucratCard"
@@ -277,14 +289,14 @@ class BureaucratCard(ActionCard):
 		self.player = player
 		self.deck = deck
 		self.reveal = []
-		if len(self.deck[silverCards]) == 0:
+		if len(self.deck.silverCards) == 0:
 			pass
 		else:
-			self.player.playerDeck.insert(0, self.deck[silverCards][0])
-			del self.deck[silverCards][0]
+			self.player.playerDeck.insert(0, self.deck.silverCards[0])
+			del self.deck.silverCards[0]
 		for each in self.roster:
 			while True:
-				if each != self.palyer:
+				if each != self.player:
 					raw_input(each.playerName + "`s reaction... Press any key when ready.")
 					os.system('clear')
 					print each.playerName + ": please choose a Victory card to reveal."
@@ -296,11 +308,13 @@ class BureaucratCard(ActionCard):
 								print "Invalid choice, please choose a Victory card."
 								continue
 							else:
-								self.reveal.append(each.playerName + " reveals " + each.playerHand[(int(choice) - 1).cardName + ".")
+								self.reveal.append(each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".")
 								break
 						else:
 							self.reveal.append(each.playerName + " reveals " + ' '.join(each.playerHand.cardName) + ".")
 							break
+				else:
+					break
 		raw_input(" Press any key to return to " + self.player.playerName + "`s hand...")
 		self.deck.printPlayerHand()
 		print "\n " + ' '.join(self.reveal)
@@ -366,12 +380,12 @@ class MilitiaCard(ActionCard):
 					print each.playerName + ": you must discard down to three cards in hand."
 					each.printRevealHand()
 					while len(each.playerHand) > 3:
-						choice = raw_input(" Please choose a card to discard: "
-						if (int(choice - 1) not in range(len(each.playerHand)):
+						choice = raw_input(" Please choose a card to discard: ")
+						if (int(choice) - 1) not in range(len(each.playerHand)):
 							raw_input(" Please choose an appropriate card! ")
 						else:
 							each.playerDiscard.append(each.playerHand[int(choice) - 1])
-							del each.playerHand[int(choice) - 1])
+							del each.playerHand[int(choice) - 1]
 					break
 						
 class MoneylenderCard(ActionCard):
@@ -417,7 +431,7 @@ class RemodelCard(ActionCard):
 		if len(self.player.playerHand) > 0:
 			while True:
 				choice = raw_input("\n Please choose a card to trash: ")
-				if (int(choice) - 1) not in range(len(self.player.playerHand):
+				if (int(choice) - 1) not in range(len(self.player.playerHand)):
 					print "Please choose an appropriate card! "
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost

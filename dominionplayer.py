@@ -4,7 +4,8 @@ from dominiondeck import *
 
 class Player(object):
 
-	def __init__(self):
+	def __init__(self, roster):
+		self.player = self
 		self.playerHand = []
 		self.playerName = ''
 		self.playerDeck = []
@@ -15,6 +16,7 @@ class Player(object):
 		self.playerRoom = ''
 		self.deck = ''
 		self.playerDiscard = []
+		self.roster = roster
 		
 	def drawToPlayer(self, hand):
 		if hand == 0:
@@ -68,13 +70,21 @@ class Player(object):
 				os.system('clear')
 				break
 			elif self.playerHand[i - 1].cardType == 'action':
-				break
+				if self.playerTurnActions <= 0:
+					raw_input("  You have no Actions left this turn, please (B)uy or (P)ass: ")
+					break
+				else:
+					self.playerHand[i - 1].playCard(self.player, self.roster, self.deck)
+					self.playerTurnActions -= 1
+			elif self.playerHand[i - 1].cardType == 'victory':
+				i = int(raw_input("  Invalid choice, you cannot play a Victory card. Please pick a (n)umber: "))
+
 		self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def buy(self):
 		i = raw_input("  Which card would you like to buy? ")
 		while True:
-			if i not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
+			if i not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
 				i = raw_input("  Invalid selection!  Which card would you like to buy? ")
 			else:
 				if i.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
@@ -85,18 +95,26 @@ class Player(object):
 					s = self.deck.silverCards
 					c = self.deck.copperCards
 					i = eval(i)
-					self.playerPlay.append(i[0])
-					self.playerTurnTreasure -= i[0].cost
-					del i[0]
-					self.playerTurnBuys -= 1
-					break
+					if i[0].cost > self.playerTurnTreasure:
+						raw_input("  You do not have enough to buy this.")
+						break
+					else:	
+						self.playerPlay.append(i[0])
+						self.playerTurnTreasure -= i[0].cost
+						del i[0]
+						self.playerTurnBuys -= 1
+						break
 				elif int(i) in range(10):
 					x = 'card' + str(int(i))
-					self.playerPlay.append(self.deck.actionCards[x][0])
-					self.playerTurnTreasure -= self.deck.actionCards[x][0].cost
-					del self.deck.actionCards[x][0]
-					self.playerTurnBuys -= 1
-					break
+					if self.deck.actionCards[x][0].cost > self.playerTurnTreasure:
+						raw_input(" You do not have enough to buy this.")
+						break
+					else:
+						self.playerPlay.append(self.deck.actionCards[x][0])
+						self.playerTurnTreasure -= self.deck.actionCards[x][0].cost
+						del self.deck.actionCards[x][0]
+						self.playerTurnBuys -= 1
+						break
 		if self.playerTurnBuys < 1:
 			self.playerHandCleanup()
 			self.drawHand()
