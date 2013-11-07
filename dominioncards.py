@@ -123,13 +123,7 @@ class CellarCard(KingdomCard):
 					self.player.playerDiscard.append(self.player.playerHand[choice - 1])
 					del self.player.playerHand[choice - 1]
 				for i in range(int(discard)):
-					if len(self.player.playerDeck) == 0:
-						self.player.playerDiscardToDeck()
-						self.player.playerHand.append(self.player.playerDeck[0])
-						del self.player.playerDeck[0]
-					else:
-						self.player.playerHand.append(self.player.playerDeck[0])
-						del self.player.playerDeck[0]
+					self.player.drawOneCard()
 				break		
 
 class ChapelCard(KingdomCard):
@@ -256,26 +250,7 @@ class WorkshopCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
-		while True:
-			choice = raw_input("    Please select a card that costs up to $4: ")
-			if choice.lower() not in ['e', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-				choice = raw_input("    Invalid selection!  Which card would you like to gain? ")
-			elif choice.lower() in ['e', 's', 'c']:
-				e = self.deck.estateCards
-				s = self.deck.silverCards
-				c = self.deck.copperCards
-				choice = eval(choice)
-				self.player.playerDiscard.append(choice[0])
-				del self.deck.choice[0]
-				break
-			elif int(choice) in range(10):
-				choice = 'card' + choice
-				if self.deck.KingdomCards[choice][0].value > 4:
-					choice = raw_input("    That card is too expensive! Please choose another: ")
-				else:
-					self.player.playerDiscard.append(self.deck.KingdomCards[choice][0])
-					del self.deck.KingdomCards[choice][0]
-					break
+		self.player.gainCard(4, 1)		
 
 class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
@@ -345,27 +320,7 @@ class FeastCard(KingdomCard):
 				else:
 					continue
 			break
-		while True:
-                        choice = raw_input("    Please select a card that costs up to $4: ")
-                        if choice.lower() not in ['d', 'e', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-                                choice = raw_input("    Invalid selection!  Which card would you like to gain? ")
-                        elif choice.lower() in ['d', 'e', 's', 'c']:
-                                e = self.deck.estateCards
-                                s = self.deck.silverCards
-                                c = self.deck.copperCards
-				d = self.deck.duchyCards
-                                choice = eval(choice)
-                                self.player.playerDiscard.append(choice[0])
-                                del self.deck.choice[0]
-                                break
-                        elif int(choice) in range(10):
-                                choice = 'card' + choice
-                                if self.deck.KingdomCards[choice][0].value > 5:
-                                        choice = raw_input("    That card is too expensive! Please choose another: ")
-                                else:
-                                        self.player.playerDiscard.append(self.deck.KingdomCards[choice][0])
-                                        del self.deck.KingdomCards[choice][0]
-                                        break
+		self.player.gainCard(5, 1)
 
 class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
@@ -460,30 +415,7 @@ class RemodelCard(KingdomCard):
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
 					card = raw_input("Please choose a card to gain: ")
-					while True:
-						if card not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
-							card = raw_input("  Invalid selection!  Which card would you like to buy? ")
-						else:
-							if card.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
-								p = self.deck.provinceCards
-								d = self.deck.duchyCards
-								e = self.deck.estateCards
-								g = self.deck.goldCards
-								s = self.deck.silverCards
-								c = self.deck.copperCards
-								card = eval(card)
-								if card.cost > value or len(card) < 1:
-									card = raw_input("  Invalid selection!  Which card would you like to buy? ")
-								else:
-									self.player.playerDiscard.append(card[0])
-									del card[0]
-									break
-							elif int(card) in range(10):
-								x = 'card' + card
-								if len(self.deck.KingdomCards[x]) > 0 and self.deck.KingdomCards[x].cost <= value:
-									self.player.playerDiscard.append(self.deck.KingdomCards[x][0])
-									del self.deck.KingdomCards[x][0]
-									break
+					self.player.gainCard(value, 1)
 
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"

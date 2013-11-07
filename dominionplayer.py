@@ -46,6 +46,44 @@ class Player(object):
 			self.playerHand.append(self.playerDeck[0])
 			del self.playerDeck[0]
 
+	def gainCard(self, cost, number):
+		self.cost = cost
+		self.number = number
+		choices = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+		nonkingdom = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c']
+		kingdom = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+		while True:
+			for i in range(number):
+				choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
+					if choice.lower() not in choices:
+						print "    Invalid selection, please choose another card!"
+					elif choice.lower() in nonkingdom:
+						if choice.lower() == 'o' or choice.lower == 'l':
+							print "    Invalid selection, please choose another card!"
+						else:
+							p = self.deck.provinceCards
+							d = self.deck.duchyCards
+							e = self.deck.estateCards
+							g = self.deck.goldCards
+							s = self.deck.silverCards
+							c = self.deck.copperCards
+							u = self.deck.copperCards
+							choice = eval(choice.lower())
+								if choice.cost > cost:
+									print "    Invalid selection, please choose another card!"
+								else:
+									self.playerDiscard.append(choice[0])
+									del choice[0]
+									break
+					elif choice.lower() in kingdom:
+						x = 'card' + choice.lower()
+						if self.deck.kingdomCards[x][0].cost > cost:
+							print "    Invalid selection, please choose another card!"
+						else:
+							self.playerDiscard.append(self.deck.kingdomCards[x][0])
+							del self.deck.kingdomCards[x][0]
+							break
+
 	def playTurn(self, actions, buys):
 		self.playerTurnActions = actions
 		self.playerTurnBuys = buys
