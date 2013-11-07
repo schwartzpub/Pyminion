@@ -1,6 +1,7 @@
 # Dominion player class to create and manage player objects
 from dominioncards import *
 from dominiondeck import *
+import types
 
 class Player(object):
 
@@ -38,6 +39,13 @@ class Player(object):
 				self.playerHand.append(self.playerDeck[0])
 				del self.playerDeck[0]
 
+	def drawOneCard(self):
+		if len(player.playerDeck) == 0:
+			self.playerDiscardToDeck()
+		else:
+			self.playerHand.append(self.playerDeck[0])
+			del self.playerDeck[0]
+
 	def playTurn(self, actions, buys):
 		self.playerTurnActions = actions
 		self.playerTurnBuys = buys
@@ -58,10 +66,14 @@ class Player(object):
 			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def play(self):
-		i = int(raw_input("  Which would you like to play: (n)umber? "))
 		while True:
-			if i > (len(self.playerHand)):
-				i = int(raw_input("  Invalid choice, please pick a (n)umber: "))
+			i = raw_input("  Which would you like to play: (n)umber? ")
+			try:
+				i = int(i)
+			except:
+				continue
+			if int(i) > (len(self.playerHand)):
+				continue
 			elif self.playerHand[i - 1].cardType == 'treasure':
 				self.playerPlay.append(self.playerHand[i - 1])
 				self.playerTurnTreasure += self.playerHand[i - 1].value
@@ -80,7 +92,7 @@ class Player(object):
 					del self.playerHand[i - 1]
 					break
 			elif self.playerHand[i - 1].cardType == 'victory':
-				i = int(raw_input("  Invalid choice, you cannot play a Victory card. Please pick a (n)umber: "))
+				print "  Invalid choice, you cannot play a Victory card."
 
 		self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
@@ -109,13 +121,13 @@ class Player(object):
 						break
 				elif int(i) in range(10):
 					x = 'card' + str(int(i))
-					if self.deck.actionCards[x][0].cost > self.playerTurnTreasure:
+					if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 						raw_input(" You do not have enough to buy this.")
 						break
 					else:
-						self.playerPlay.append(self.deck.actionCards[x][0])
-						self.playerTurnTreasure -= self.deck.actionCards[x][0].cost
-						del self.deck.actionCards[x][0]
+						self.playerPlay.append(self.deck.kingdomCards[x][0])
+						self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
+						del self.deck.kingdomCards[x][0]
 						self.playerTurnBuys -= 1
 						break
 		if self.playerTurnBuys < 1:

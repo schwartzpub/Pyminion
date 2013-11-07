@@ -3,8 +3,9 @@ import os
 
 #Treasure Cards
 class TreasureCard(object):
-	sctionCost = 0
+	actionCost = 0
 	cardType = 'treasure'
+	treasure = True
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
@@ -39,6 +40,7 @@ class CopperCard(TreasureCard):
 class VictoryCard(object):
 	quantity = 12
 	cardType = 'victory'
+	victory = True
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
@@ -66,38 +68,41 @@ class EstateCard(VictoryCard):
 	def __init__(self):
 		pass
 
+#Curse Cards
+class CurseCard(object):
+	cardName = "Curse"
+	cardColor = "\033[35m"
+	cardType = 'curse'
+	value = -1
+	cost = 0
+	def __init__(self):
+		pass
+
 #Action Cards
-class ActionCard(object):
+class KingdomCard(object):
 	cardType = 'action'
-	actionCost = 1
 	quantity = 10
 	cost = 0
 	value = 0
-	cardsDiscarded = False
-	cardsTrashed = False
-	cardsDrawn = False
-	cardsGained = False
-	cardsGainedCost = False
-	actionsGained = False
-	treasureGained = False
-	buysGained = False
-	curseGained = False
-	cardsDiscarded_enemy = False
-	cardsRevealed = False
-	cardsRevealed_enemy = False
-	cardsRevealed_type = False
-	attackCard = False
+	reaction = False
+	action = True
+	attack = False
+	reaction = False
+	victory = False
+	duration = False
+	treasure = False
+	looter = False
+	ruins = False
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
-class CellarCard(ActionCard):
+class CellarCard(KingdomCard):
 	cardEval = "CellarCard"
 	cardName = "Cellar"
 	cardColor = "\033[0m"
 	description = "+1 Action.  Discard any number of cards.  +1 Card per card discarded."
 	cost = 2
-	actionsGained = True
-	cardsDiscarded = True
+	action = True
 	def __init__(self):
 		pass
 	
@@ -127,13 +132,13 @@ class CellarCard(ActionCard):
 						del self.player.playerDeck[0]
 				break		
 
-class ChapelCard(ActionCard):
+class ChapelCard(KingdomCard):
 	cardEval = "ChapelCard"
 	cardName = "Chapel"
 	cardColor = "\033[0m"
 	description = "Trash up to 4 cards from your hand."
 	cost = 2
-	cardsTrashed = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -156,13 +161,14 @@ class ChapelCard(ActionCard):
 					break
 			break
 
-class MoatCard(ActionCard):
+class MoatCard(KingdomCard):
 	cardEval = "MoatCard"
 	cardName = "Moat"
 	cardColor = "\033[36m"
 	description = "+2 Cards.  When another player plays an Attack card, you may reveal this from your hand. if you do you are unaffected by that Attack."
 	cost = 2
-	cardsDrawn = True
+	action = True
+	reaction = True
 	def __init__(self):
 		pass
 	
@@ -178,13 +184,13 @@ class MoatCard(ActionCard):
 				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]		
 
-class ChancellorCard(ActionCard):
+class ChancellorCard(KingdomCard):
 	cardEval = "ChancellorCard"
 	cardName = "Chancellor"
 	cardColor = "\033[0m"
 	description = "+$2.  You may immediately put your deck into your discard pile."
 	cost = 3
-	cardsDiscarded = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -201,14 +207,13 @@ class ChancellorCard(ActionCard):
 				self.player.playerDeckToDiscard()
 				break
 
-class VillageCard(ActionCard):
+class VillageCard(KingdomCard):
 	cardEval = "VillageCard"
 	cardName = "Village"
 	cardColor = "\033[0m"
 	description = "+1 Card. +2 Actions."
 	cost = 3
-	cardsDrawn = True
-	actionsGained = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -223,14 +228,13 @@ class VillageCard(ActionCard):
 			del self.player.playerDeck[0]
 		self.player.playerTurnActions += 1
 
-class WoodcutterCard(ActionCard):
+class WoodcutterCard(KingdomCard):
 	cardEval = "WoodcutterCard"
 	cardName = "Woodcutter"
 	cardColor = "\033[0m"
 	description = "+1 Buy. +$2."
 	cost = 3	
-	buysGained = True
-	treasureGained = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -239,14 +243,13 @@ class WoodcutterCard(ActionCard):
 		self.player.playerTurnBuys += 1
 		self.player.playerTurnTreasure += 2
 
-class WorkshopCard(ActionCard):
+class WorkshopCard(KingdomCard):
 	cardEval = "WorkshopCard"
 	cardName = "Workshop"
 	cardColor = "\033[0m"
 	description = "Gain a card costing up to $4."
 	cost = 3
-	cardsGained = True
-	cardsGainedCost = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -267,21 +270,21 @@ class WorkshopCard(ActionCard):
 				break
 			elif int(choice) in range(10):
 				choice = 'card' + choice
-				if self.deck.actionCards[choice][0].value > 4:
+				if self.deck.KingdomCards[choice][0].value > 4:
 					choice = raw_input("    That card is too expensive! Please choose another: ")
 				else:
-					self.player.playerDiscard.append(self.deck.actionCards[choice][0])
-					del self.deck.actionCards[choice][0]
+					self.player.playerDiscard.append(self.deck.KingdomCards[choice][0])
+					del self.deck.KingdomCards[choice][0]
 					break
 
-class BureaucratCard(ActionCard):
+class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
 	cardName = "Bureaucrat"
 	cardColor = "\033[1;31m"
 	description = "Gain a silver card; put it on top of your deck. Each other player reveals a Victory card from his hand and puts it on his deck (or reveals a hand with no Victory cards)."
 	cost = 4
-	cardsGained = True
-	cardsRevealed_enemy = True
+	action = True
+	attack = True
 	def __init__(self):
 		pass
 
@@ -321,15 +324,13 @@ class BureaucratCard(ActionCard):
 		print "\n " + ' '.join(self.reveal)
 		raw_input(" Press any key when done viewing reveal. ")
 
-class FeastCard(ActionCard):
+class FeastCard(KingdomCard):
 	cardEval = "FeastCard"
 	cardName = "Feast"
 	cardColor = "\033[0m"
 	description = "Trash this card. Gain a card costing up to $5."
 	cost = 4
-	cardsGained = True
-	cardsGainedCost = True
-	cardsTrashed = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -359,30 +360,33 @@ class FeastCard(ActionCard):
                                 break
                         elif int(choice) in range(10):
                                 choice = 'card' + choice
-                                if self.deck.actionCards[choice][0].value > 5:
+                                if self.deck.KingdomCards[choice][0].value > 5:
                                         choice = raw_input("    That card is too expensive! Please choose another: ")
                                 else:
-                                        self.player.playerDiscard.append(self.deck.actionCards[choice][0])
-                                        del self.deck.actionCards[choice][0]
+                                        self.player.playerDiscard.append(self.deck.KingdomCards[choice][0])
+                                        del self.deck.KingdomCards[choice][0]
                                         break
 
-class GardensCard(ActionCard):
+class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
 	cardName = "Gardens"
 	cardColor = "\033[32m"
 	description = "Worth 1 Victory for every 10 cards in your deck (rounded down)."
 	cost = 4
 	value = 1
+	action = False
+	victory = True
 	def __init__(self):
 		pass
 
-class MilitiaCard(ActionCard):
+class MilitiaCard(KingdomCard):
 	cardEval = "MilitiaCard"
 	cardName = "Militia"
 	cardColor = "\033[1;31m"
 	description = "+$2.  Each other player discards down to 3 cards in his hand."
 	cost = 4
-	cardsDiscarded_enemy = True
+	action = True
+	attack = True
 	def __init__(self):
 		pass
 
@@ -390,29 +394,30 @@ class MilitiaCard(ActionCard):
 		self.player = player
 		self.roster = roster
 		self.player.playerTurnTreasure += 2
-		for each in self.roster:
-			while True:
+		while True:
+			for each in self.roster:
 				if each != self.player:
 					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
 					os.system('clear')
 					print each.playerName + ": you must discard down to three cards in hand."
-					each.playerRevealHand()
+					each.printPlayerReveal()
 					while len(each.playerHand) > 3:
-						choice = raw_input(" Please choose a card to discard: ")
+						choice = raw_input("   Please choose a card to discard: ")
 						if (int(choice) - 1) not in range(len(each.playerHand)):
-							raw_input(" Please choose an appropriate card! ")
+							raw_input("   Please choose an appropriate card! ")
 						else:
 							each.playerDiscard.append(each.playerHand[int(choice) - 1])
 							del each.playerHand[int(choice) - 1]
-					break
+							each.printPlayerReveal()
+			break
 						
-class MoneylenderCard(ActionCard):
+class MoneylenderCard(KingdomCard):
 	cardEval = "MoneylenderCard"
 	cardName = "Moneylender"
 	cardColor = "\033[0m"
 	description = "Trash a Copper from your hand. If you do, +$3."
 	cost = 4
-	cardsTrashed = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -433,14 +438,13 @@ class MoneylenderCard(ActionCard):
 		else:
 			return				
 				
-class RemodelCard(ActionCard):
+class RemodelCard(KingdomCard):
 	cardEval = "RemodelCard"
 	cardName = "Remodel"
 	cardColor = "\033[0m"
 	description = "Trash a card from your hand. Gain a card costing up to $2 more than the trashed card."
 	cost = 4
-	cardsTrashed = True
-	cardsGained = True
+	action = True
 	def __init__(self):
 		pass
 
@@ -476,11 +480,23 @@ class RemodelCard(ActionCard):
 									break
 							elif int(card) in range(10):
 								x = 'card' + card
-								if len(self.deck.actionCards[x]) > 0 and self.deck.actionCards[x].cost <= value:
-									self.player.playerDiscard.append(self.deck.actionCards[x][0])
-									del self.deck.actionCards[x][0]
+								if len(self.deck.KingdomCards[x]) > 0 and self.deck.KingdomCards[x].cost <= value:
+									self.player.playerDiscard.append(self.deck.KingdomCards[x][0])
+									del self.deck.KingdomCards[x][0]
 									break
 
-									
-									
-								
+class SmithyCard(KingdomCard):
+	cardEval = "SmithyCard"
+	cardName = "Smithy"
+	cardColor = "\033[0m"
+	description = "+3 Cards."
+	cost = 4
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		for i in range(3):
+			self.player.drawOneCard()
+		
