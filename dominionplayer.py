@@ -42,8 +42,8 @@ class Player(object):
 		self.playerTurnActions = actions
 		self.playerTurnBuys = buys
 		self.printPlayerHand()
-		playtype = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
-		if self.playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in self.playerPlay) <= 0 or playtype.lower == 'a':
+		playtype = raw_input("\n\n  What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
+		if self.playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in self.playerPlay) <= 0 and self.playerTurnBuys <= 0 or playtype.lower == 'a':
 			return
 		elif playtype.lower() == 'p':
 			self.play()
@@ -54,7 +54,7 @@ class Player(object):
 			os.system('clear')
 			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 		else:
-			print " That is not an available choice...."
+			print "  That is not an available choice...."
 			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
 
 	def play(self):
@@ -76,6 +76,9 @@ class Player(object):
 				else:
 					self.playerHand[i - 1].playCard(self.player, self.roster, self.deck)
 					self.playerTurnActions -= 1
+					self.playerDiscard.append(self.playerHand[i - 1])
+					del self.playerHand[i - 1]
+					break
 			elif self.playerHand[i - 1].cardType == 'victory':
 				i = int(raw_input("  Invalid choice, you cannot play a Victory card. Please pick a (n)umber: "))
 
@@ -143,6 +146,7 @@ class Player(object):
 			self.playerDeck.append(self.playerDiscard[0])
 			del self.playerDiscard[0]
 			x -= 1
+		random.shuffle(self.playerDeck)
 
 	def playerDeckToDiscard(self):
 		x = len(self.playerDeck)

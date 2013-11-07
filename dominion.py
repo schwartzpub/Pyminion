@@ -33,15 +33,22 @@ class DomGame(object):
 				break
 			elif x.lower() == 'n':
 				roomName = raw_input("What will be the name of your room? ")
-				players = int(raw_input("How many players (2 - 4)? "))
+				players = raw_input("How many players (2 - 4)? ")
 				while True:
-					if players > 4 or players < 2:
-						players = int(raw_input(" Invalid number of players, please choose a number between 2 and 4! "))
+					if not players or players not in ['2', '3', '4']:
+						players = raw_input(" Invalid number of players, please choose a number between 2 and 4! ")
+					elif int(players) > 4 or int(players) < 2:
+						players = raw_input(" Invalid number of players, please choose a number between 2 and 4! ")
 					else:
-						for i in range(int(players)):
+						for i in range(int(players)):	
 							playerName = raw_input(" Player " + str(i + 1) + " name? ")
-							self.playerWait[i].playerName = playerName
-							playerRost.append(self.playerWait[i])
+							while True:
+								if not playerName:
+									continue
+								else:
+									self.playerWait[i].playerName = playerName
+									playerRost.append(self.playerWait[i])
+									break
 						break
 				newGame.createGame(roomName, playerRost[0].playerName)
 				newDeck = DomDeck()

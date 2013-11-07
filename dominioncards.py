@@ -106,25 +106,25 @@ class CellarCard(ActionCard):
 		self.player.playerTurnActions += 1
 		while True:
 			cards = len(self.player.playerHand)
-			discard = raw_input("How many cards would you like to discard? ")
+			discard = raw_input("    How many cards would you like to discard? ")
 			if int(discard) == 0:
 				break
 			elif int(discard) > len(self.player.playerHand):
-				print "That is not a valid number of cards!"
+				print "    That is not a valid number of cards!"
 				continue
 			else:
 				for i in range(int(discard)):
+					choice = int(raw_input("      Choose a card to discard: "))
+					self.player.playerDiscard.append(self.player.playerHand[choice - 1])
+					del self.player.playerHand[choice - 1]
+				for i in range(int(discard)):
 					if len(self.player.playerDeck) == 0:
 						self.player.playerDiscardToDeck()
-                                                choice = int(raw_input("Choose a card to discard: "))
-                                                self.player.playerDiscard.append(self.player.playerHand[choice - 1])
-                                                del self.player.playerHand[choice - 1]						
+						self.player.playerHand.append(self.player.playerDeck[0])
+						del self.player.playerDeck[0]
 					else:
-						choice = int(raw_input("Choose a card to discard: "))
-						self.player.playerDiscard.append(self.player.playerHand[choice - 1])
-						del self.player.playerHand[choice - 1]
-				for i in int(discard):
-					self.player.drawHand(int(discard))
+						self.player.playerHand.append(self.player.playerDeck[0])
+						del self.player.playerDeck[0]
 				break		
 
 class ChapelCard(ActionCard):
@@ -140,20 +140,21 @@ class ChapelCard(ActionCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		if len(self.player.playerHand) > 4:
-			self.trash = 4
+			trash = 4
 		else:
-			self.trash = len(self.player.playerHand)
+			trash = len(self.player.playerHand)
 		while True:
-			for i in self.trash:
-				choice = int(raw_input("Choose a card to trash ([0] for none): "))
-				if (choice - 1) not in range(self.player.playerHand):
-					print "That is not a valid choice!"
+			for i in range(trash):
+				choice = int(raw_input("    Choose a card to trash ([0] for none): "))
+				if (choice - 1) not in range(len(self.player.playerHand)):
+					print "    That is not a valid choice!"
 					continue
-				elif (choice -1 ) == -1:
+				elif (choice - 1 ) == -1:
 					break
 				else:
 					del self.player.playerHand[choice - 1] 				
 					break
+			break
 
 class MoatCard(ActionCard):
 	cardEval = "MoatCard"
@@ -253,9 +254,9 @@ class WorkshopCard(ActionCard):
 		self.player = player
 		self.deck = deck
 		while True:
-			choice = raw_input(" Please select a card that costs up to $4: ")
+			choice = raw_input("    Please select a card that costs up to $4: ")
 			if choice.lower() not in ['e', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-				choice = raw_input("  Invalid selection!  Which card would you like to gain? ")
+				choice = raw_input("    Invalid selection!  Which card would you like to gain? ")
 			elif choice.lower() in ['e', 's', 'c']:
 				e = self.deck.estateCards
 				s = self.deck.silverCards
@@ -267,7 +268,7 @@ class WorkshopCard(ActionCard):
 			elif int(choice) in range(10):
 				choice = 'card' + choice
 				if self.deck.actionCards[choice][0].value > 4:
-					choice = raw_input(" That card is too expensive! Please choose another: ")
+					choice = raw_input("    That card is too expensive! Please choose another: ")
 				else:
 					self.player.playerDiscard.append(self.deck.actionCards[choice][0])
 					del self.deck.actionCards[choice][0]
@@ -297,27 +298,28 @@ class BureaucratCard(ActionCard):
 		for each in self.roster:
 			while True:
 				if each != self.player:
-					raw_input(each.playerName + "`s reaction... Press any key when ready.")
+					raw_input("    " + each.playerName + "`s reaction... Press any key when ready.")
 					os.system('clear')
-					print each.playerName + ": please choose a Victory card to reveal."
-					each.printRevealHand()
-					while True:
-						choice = raw_input("\n Which card would you like to reveal? ")
-						if any(i.cardType == 'victory' for i in each.playerHand):
-							if each.playerHand[(int(choice) - 1)].cardType != 'victory':
-								print "Invalid choice, please choose a Victory card."
+					if any(i.cardType == 'victory' for i in each.playerHand):
+						while True:
+							print " ",
+							each.printPlayerReveal()
+							choice = raw_input("\n Which card would you like to reveal? ")
+							if each.playerHand[int(choice) - 1].cardType != 'victory':
+								print "\n Invalid choice, please choose a Victory card."
 								continue
 							else:
-								self.reveal.append(each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".")
+								self.reveal.append("\n " + each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".")
 								break
-						else:
-							self.reveal.append(each.playerName + " reveals " + ' '.join(each.playerHand.cardName) + ".")
-							break
+					else:
+						self.reveal.append("\n" + each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".")
+					break
 				else:
 					break
 		raw_input(" Press any key to return to " + self.player.playerName + "`s hand...")
-		self.deck.printPlayerHand()
+		os.system('clear')
 		print "\n " + ' '.join(self.reveal)
+		raw_input(" Press any key when done viewing reveal. ")
 
 class FeastCard(ActionCard):
 	cardEval = "FeastCard"
@@ -337,16 +339,32 @@ class FeastCard(ActionCard):
 		while True:
 			for card in self.player.playerHand:
 				if card.cardName == 'Feast':
-					del self.player.playerHand[card]
+					self.player.playerHand.remove(card)
 					break
+				else:
+					continue
+			break
 		while True:
-			self.choice = raw_input("Please select a card that costs up to $5: ")
-			if self.deck['card' + self.choice][0].value > 5:
-				print "That card is too expensive! "
-			else:
-				self.player.playerDiscard.append(self.deck['card' + self.choice][0])
-				del self.deck['card' + self.choice][0]
-				break
+                        choice = raw_input("    Please select a card that costs up to $4: ")
+                        if choice.lower() not in ['d', 'e', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+                                choice = raw_input("    Invalid selection!  Which card would you like to gain? ")
+                        elif choice.lower() in ['d', 'e', 's', 'c']:
+                                e = self.deck.estateCards
+                                s = self.deck.silverCards
+                                c = self.deck.copperCards
+				d = self.deck.duchyCards
+                                choice = eval(choice)
+                                self.player.playerDiscard.append(choice[0])
+                                del self.deck.choice[0]
+                                break
+                        elif int(choice) in range(10):
+                                choice = 'card' + choice
+                                if self.deck.actionCards[choice][0].value > 5:
+                                        choice = raw_input("    That card is too expensive! Please choose another: ")
+                                else:
+                                        self.player.playerDiscard.append(self.deck.actionCards[choice][0])
+                                        del self.deck.actionCards[choice][0]
+                                        break
 
 class GardensCard(ActionCard):
 	cardEval = "GardensCard"
@@ -378,7 +396,7 @@ class MilitiaCard(ActionCard):
 					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
 					os.system('clear')
 					print each.playerName + ": you must discard down to three cards in hand."
-					each.printRevealHand()
+					each.playerRevealHand()
 					while len(each.playerHand) > 3:
 						choice = raw_input(" Please choose a card to discard: ")
 						if (int(choice) - 1) not in range(len(each.playerHand)):
@@ -400,7 +418,7 @@ class MoneylenderCard(ActionCard):
 
 	def playCard(self, player, roster, deck):
 		self.player = player
-		if any(i.cardType == 'copper' for i in self.player.playerHand):
+		if any(i.cardName == 'copper' for i in self.player.playerHand):
 			while True:
 				choice = raw_input(" Would you like to trash a copper (y/n)? ")
 				if choice.lower() == 'y':
@@ -412,7 +430,8 @@ class MoneylenderCard(ActionCard):
 								break
 				else:
 					break
-						
+		else:
+			return				
 				
 class RemodelCard(ActionCard):
 	cardEval = "RemodelCard"
