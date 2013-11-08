@@ -22,7 +22,8 @@ class Player(object):
 		self.playerSetAside = []
 		self.playerTreasurePlayed = False
 		self.game = ''		
-
+		self.reactionImmunity = False
+		self.durationImmunity = False
 	def drawToPlayer(self, hand):
 		if hand == 0:
 			for i in range(3):
@@ -68,20 +69,20 @@ class Player(object):
 			for i in range(self.number):
 		                if self.type == 'treasure':
                 		        choice = raw_input("    Please select a Treasure card that costs up to $" + str(self.cost) + ": ")
-						if choice.lower() not in ['l', 'g', 's', 'c']:
-							print "    Invalid selection, please choose a Treasure card!"
+					if choice.lower() not in ['l', 'g', 's', 'c']:
+						print "    Invalid selection, please choose a Treasure card!"
 		                elif self.type == 'kingdom':
                 		        choice = raw_input("    Please select a Kingdom card that costs up to $" + str(self.cost) + ": ")
-						if choice.lower() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-							print "    Invalid selection, please choose a Kingdom card!"
-		                elif: self.type == 'victory':
+					if choice.lower() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+						print "    Invalid selection, please choose a Kingdom card!"
+		                elif self.type == 'victory':
                 		        choice = raw_input("    Please select a Victory card that costs up to $" + str(self.cost) + ": ")
-						if choice.lower() not in ['o', 'p', 'd', 'e']:
-							print "    Invalid Selection, please choose a Victory card!"
-		                elif: self.type == 'any':
+					if choice.lower() not in ['o', 'p', 'd', 'e']:
+						print "    Invalid Selection, please choose a Victory card!"
+		                elif self.type == 'any':
                 		        choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
-						if choice.lower() not in choices:
-							print "    Invalid selection, please choose another card!"
+					if choice.lower() not in choices:
+						print "    Invalid selection, please choose another card!"
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
 						print "    Invalid selection, please choose another card!"
@@ -94,7 +95,7 @@ class Player(object):
 						c = self.deck.copperCards
 						u = self.deck.curseCards
 						choice = eval(choice.lower())
-						if choice.cost > cost:
+						if choice.cost > self.cost:
 							print "    Invalid selection, please choose another card!"
 						else:
 							self.location.append(choice[0])
@@ -319,6 +320,21 @@ class Player(object):
 			pass
 		else:
 			return
+
+	def checkReactions(self, type):
+		self.type = type
+		if self.type == 'attack':
+			for each in self.roster:
+				if each != self:
+					if any(i.reaction == True for i in each.playerHand):
+						each.playerHand[i].reactCard('attack')
+					else:
+						pass
+		elif self.type == 'gain':
+			for each in self.roster:
+				if any(i.reaction == True for i in each.playerHand):
+					each.playerHand[i].reactCard('gain')
+
 
 	def checkPlayerDeck(self):
 		if len(self.playerDeck) == 0:

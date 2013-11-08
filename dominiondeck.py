@@ -22,6 +22,18 @@ class DomDeck(object):
 	militiaCard = MilitiaCard()
 	moneylenderCard = MoneylenderCard()
 	remodelCard = RemodelCard()
+	smithyCard = SmithyCard()
+	spyCard = SpyCard()
+	thiefCard = ThiefCard()
+	throneRoomCard = ThroneRoomCard()
+	councilRoomCard = CouncilRoomCard()
+	festivalCard = FestivalCard()
+	laboratoryCard = LaboratoryCard()
+	libraryCard = LibraryCard()
+	marketCard = MarketCard()
+	mineCard = MineCard()
+	witchCard = WitchCard()
+	adventurerCard = AdventurerCard()
 		
 	#Treasure Cards --- [Cost, Value]
 	goldCard = GoldCard()
@@ -57,7 +69,19 @@ class DomDeck(object):
 		gardensCard,
 		militiaCard,
 		moneylenderCard,
-		remodelCard]
+		remodelCard,
+		spyCard,
+		smithyCard,
+		thiefCard,
+		throneRoomCard,
+		councilRoomCard,
+		festivalCard,
+		laboratoryCard,
+		libraryCard,
+		marketCard,
+		mineCard,
+		adventurerCard]
+		
 	kingdomCardPicks = []
 	kingdomCards = {}
 
@@ -120,7 +144,7 @@ class DomDeck(object):
 		print "					    ",
 		print "   [3]" + self.kingdomCards['card3'][0].cardColor +  self.kingdomCards['card3'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card3'][0].cardName))) + " (" + str(len(self.kingdomCards['card3'])).zfill(2) + "): $" + str(self.kingdomCards['card3'][0].cost),
 		print "   [8]" + self.kingdomCards['card8'][0].cardColor +  self.kingdomCards['card8'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card8'][0].cardName))) + " (" + str(len(self.kingdomCards['card8'])).zfill(2) + "): $" + str(self.kingdomCards['card8'][0].cost)
-		print "  [U]" + CurseCard.cardColor + CurseCard.cardName + "\033[0m    (" + str(len(self.curseCards)) + "): $" + str(CurseCard.cost) + "                      ",
+		print "  [U]" + CurseCard.cardColor + CurseCard.cardName + "\033[0m    (" + str(len(self.curseCards)).zfill(2) + "): $" + str(CurseCard.cost) + "                      ",
 		print "   [4]" + self.kingdomCards['card4'][0].cardColor +  self.kingdomCards['card4'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card4'][0].cardName))) + " (" + str(len(self.kingdomCards['card4'])).zfill(2) + "): $" + str(self.kingdomCards['card4'][0].cost),
 		print "   [9]" + self.kingdomCards['card9'][0].cardColor +  self.kingdomCards['card9'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card9'][0].cardName))) + " (" + str(len(self.kingdomCards['card9'])).zfill(2) + "): $" + str(self.kingdomCards['card9'][0].cost)
 

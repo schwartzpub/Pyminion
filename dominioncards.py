@@ -147,6 +147,7 @@ class CellarCard(KingdomCard):
 					self.player.playerDiscard.append(self.player.playerHand[choice - 1])
 					del self.player.playerHand[choice - 1]
 				for i in range(int(discard)):
+					self.player.checkPlayerDeck()
 					self.player.drawOneCard()
 				break		
 
@@ -201,6 +202,22 @@ class MoatCard(KingdomCard):
 			else:
 				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]		
+
+	def reactCard(self, player, type):
+		self.type = type
+		if self.type == 'attack':
+			while True:
+				choice = raw_input("  " + self.player.playerName + ": Would you like to reveal your Moat ((y)es or (n)o)? ")
+				if choice.lower() not in ['y', 'n']:
+					continue
+				elif choice.lower() == 'y':
+					print "  " + self.player.playerName + " reveals a Moat!" 
+					self.player.reactionImmunity = True
+					break
+				elif choice.lower() == 'n':
+					break
+		else:
+			return
 
 class ChancellorCard(KingdomCard):
 	cardEval = "ChancellorCard"
@@ -292,6 +309,7 @@ class BureaucratCard(KingdomCard):
 		self.player = player
 		self.deck = deck
 		self.reveal = []
+		self.player.checkReactions('attack')
 		if len(self.deck.silverCards) == 0:
 			pass
 		else:
@@ -299,7 +317,7 @@ class BureaucratCard(KingdomCard):
 			del self.deck.silverCards[0]
 		for each in self.roster:
 			while True:
-				if each != self.player:
+				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 					raw_input("    " + each.playerName + "`s reaction... Press any key when ready.")
 					os.system('clear')
 					if any(i.cardType == 'victory' for i in each.playerHand):
@@ -322,6 +340,8 @@ class BureaucratCard(KingdomCard):
 		os.system('clear')
 		print "\n " + ' '.join(self.reveal)
 		raw_input(" Press any key when done viewing reveal. ")
+		for each in self.roster:
+			each.reactionImmunity = False
 
 class FeastCard(KingdomCard):
 	cardEval = "FeastCard"
@@ -373,9 +393,10 @@ class MilitiaCard(KingdomCard):
 		self.player = player
 		self.roster = roster
 		self.player.playerTurnTreasure += 2
+		self.player.checkReactions('attack')
 		while True:
 			for each in self.roster:
-				if each != self.player:
+				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
 					os.system('clear')
 					print each.playerName + ": you must discard down to three cards in hand."
@@ -389,6 +410,8 @@ class MilitiaCard(KingdomCard):
 							del each.playerHand[int(choice) - 1]
 							each.printPlayerReveal()
 			break
+		for each in self.roster:
+			each.reactionImmunity = False
 						
 class MoneylenderCard(KingdomCard):
 	cardEval = "MoneylenderCard"
@@ -402,13 +425,13 @@ class MoneylenderCard(KingdomCard):
 
 	def playCard(self, player, roster, deck):
 		self.player = player
-		if any(i.cardName == 'copper' for i in self.player.playerHand):
+		if any(i.cardName == 'Copper' for i in self.player.playerHand):
 			while True:
 				choice = raw_input(" Would you like to trash a copper (y/n)? ")
 				if choice.lower() == 'y':
 					while True:
 						for card in self.player.playerHand:
-							if card.cardName == 'copper':
+							if card.cardName == 'Copper':
 								del self.player.playerHand[card]
 								self.player.playerTurnTreasure += 3
 								break
@@ -438,7 +461,7 @@ class RemodelCard(KingdomCard):
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
-					card = raw_input("Please choose a card to gain: ")
+					card = raw_input("Please choose a card, that costs up to $" + value + ", to gain: ")
 					self.player.gainCard(value, 1, 'discard', 'any')
 
 class SmithyCard(KingdomCard):
@@ -472,18 +495,23 @@ class SpyCard(KingdomCard):
 		self.roster = roster
 		self.player.drawOneCard()
 		self.player.playerTurnActions += 1
+		self.player.checkReactions('attack')
 		for each in self.roster:
-			print each.playerName + " reveals: " + each.playerDeck[0].cardname + "..."
-			while True:
-				choice = raw_input("  Would you like this player to (k)eep or (d)iscard this card? ")
-				if choice.lower() not in ['d', 'k']:
-					continue
-				elif choice.lower == 'd':
-					each.playerDiscard.append(each.playerDeck[0])
-					del each.playerDeck[0]
-					break
-				elif choice.lower == 'k':
-					break
+			if each.reactionImmunity == False and each.durationImmunity == False:
+				each.checkPlayerDeck()
+				print each.playerName + " reveals: " + each.playerDeck[0].cardName + "..."
+				while True:
+					choice = raw_input("  Would you like this player to (k)eep or (d)iscard this card? ")
+					if choice.lower() not in ['d', 'k']:
+						continue
+					elif choice.lower == 'd':
+						each.playerDiscard.append(each.playerDeck[0])
+						del each.playerDeck[0]
+						break
+					elif choice.lower == 'k':
+						break
+		for each in self.roster:
+			each.reactionImmunity = False
 
 class ThiefCard(KingdomCard):
 	cardEval = "ThiefCard"
@@ -501,8 +529,9 @@ class ThiefCard(KingdomCard):
 		self.roster = roster
 		self.deck = deck
 		self.trash = []
+		self.player.checkReactions('attack')
 		for each in self.roster:
-			if each != self.player:
+			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 				print "  " + each.playerName + " reveals: [1]" + each.playerDeck[-1].cardName + " and [2]" + each.playerDeck[-2].cardName + "."
 				while True:
 					choice = raw_input("  Which card would you like to trash: ")
@@ -522,7 +551,7 @@ class ThiefCard(KingdomCard):
 							del each.playerDeck[-2]
 							break
 				while True:
-					choice = raw_input(" Would you like to (k)eep or (t)rash: " + self.trash[0].cardName "?")
+					choice = raw_input(" Would you like to (k)eep or (t)rash: " + self.trash[0].cardName + "?")
 					if choice.lower() not in ['k', 't']:
 						continue
 					elif choice.lower() == 'k':
@@ -534,6 +563,8 @@ class ThiefCard(KingdomCard):
 						break
 			else:
 				pass
+		for each in self.roster:
+			each.reactionImmunity = False
 
 class ThroneRoomCard(KingdomCard):
 	cardEval = "ThroneRoomCard"
@@ -556,10 +587,12 @@ class ThroneRoomCard(KingdomCard):
 			while True:
 				i = raw_input("  " + self.description + ": ")
 				try:
-					i = int(i) - 1
+					i = int(i)
 				except:
 					continue
-				if i not in range(len(self.player.playerHand):
+				if i not in range(len(self.player.playerHand)):
+					continue
+				elif self.player.playerHand[i - 1].action != True:
 					continue
 				else:
 					playTwice = self.player.playerHand[i - 1]
@@ -590,8 +623,7 @@ class CouncilRoomCard(KingdomCard):
 				each.drawOneCard()
 			else:
 				return
-		return
-
+		
 class FestivalCard(KingdomCard):
 	cardEval = "FestivalCard"
 	cardName = "Festival"
@@ -690,13 +722,14 @@ class MineCard(KingdomCard):
 		pass
 
 	def playCard(self, player, roster, deck):
+		self.player = player
 		while True:
 			i = raw_input("  Trash a treasure card from your hand: ")
 			try:
 				i = int(i)
 			except:
 				continue
-			if self.player.playerHand[i - 1].treasure != True
+			if self.player.playerHand[i - 1].treasure != True:
 				continue
 			else:
 				value = self.player.playerHand[i - 1].cost + 3
@@ -719,12 +752,16 @@ class WitchCard(KingdomCard):
 		self.roster = roster
 		self.deck = deck
 		self.player.drawOneCard()
+		self.player.drawOneCard()
+		self.palyer.checkReactions('attack')
 		for each in self.roster:
-			if each != self.player:
+			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 				each.playerDiscard.append(self.deck.curseCards[0])
 				del self.deck.curseCards[0]
 			else:
 				pass
+		for each in self.roster:
+			each.reactionImmunity = False
 
 class AdventurerCard(KingdomCard):
 	cardEval = "AdventurerCard"
