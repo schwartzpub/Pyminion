@@ -107,6 +107,7 @@ class KingdomCard(object):
 	treasure = False
 	looter = False
 	ruins = False
+	bain = False
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
@@ -264,7 +265,7 @@ class WorkshopCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
-		self.player.gainCard(4, 1)		
+		self.player.gainCard(4, 1, 'discard')		
 
 class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
@@ -334,7 +335,7 @@ class FeastCard(KingdomCard):
 				else:
 					continue
 			break
-		self.player.gainCard(5, 1)
+		self.player.gainCard(5, 1, 'discard')
 
 class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
@@ -429,7 +430,7 @@ class RemodelCard(KingdomCard):
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
 					card = raw_input("Please choose a card to gain: ")
-					self.player.gainCard(value, 1)
+					self.player.gainCard(value, 1, 'discard')
 
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"

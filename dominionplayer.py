@@ -22,6 +22,7 @@ class Player(object):
 		self.playerSetAside = []
 		self.playerTreasurePlayed = False
 		self.game = ''		
+
 	def drawToPlayer(self, hand):
 		if hand == 0:
 			for i in range(3):
@@ -49,9 +50,16 @@ class Player(object):
 			self.playerHand.append(self.playerDeck[0])
 			del self.playerDeck[0]
 
-	def gainCard(self, cost, number):
+	def gainCard(self, cost, number, location):
 		self.cost = cost
 		self.number = number
+		self.location = location
+		if self.location == 'discard':
+			self.location = self.playerDiscard
+		elif: self.location == 'hand':
+			self.location = self.playerHand
+		elif: self.location == 'deck':
+			self.location = self.playerDeck
 		choices = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		nonkingdom = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c']
 		kingdom = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -70,12 +78,12 @@ class Player(object):
 						g = self.deck.goldCards
 						s = self.deck.silverCards
 						c = self.deck.copperCards
-						u = self.deck.copperCards
+						u = self.deck.curseCards
 						choice = eval(choice.lower())
 						if choice.cost > cost:
 							print "    Invalid selection, please choose another card!"
 						else:
-							self.playerDiscard.append(choice[0])
+							self.location.append(choice[0])
 							del choice[0]
 							break
 				elif choice.lower() in kingdom:
@@ -83,7 +91,7 @@ class Player(object):
 					if self.deck.kingdomCards[x][0].cost > cost:
 						print "    Invalid selection, please choose another card!"
 					else:
-						self.playerDiscard.append(self.deck.kingdomCards[x][0])
+						self.location.append(self.deck.kingdomCards[x][0])
 						del self.deck.kingdomCards[x][0]
 						break
 
