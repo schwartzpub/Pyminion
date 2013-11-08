@@ -44,7 +44,7 @@ class Player(object):
 				del self.playerDeck[0]
 
 	def drawOneCard(self):
-		if len(player.playerDeck) == 0:
+		if len(self.playerDeck) == 0:
 			self.playerDiscardToDeck()
 		else:
 			self.playerHand.append(self.playerDeck[0])
@@ -56,9 +56,9 @@ class Player(object):
 		self.location = location
 		if self.location == 'discard':
 			self.location = self.playerDiscard
-		elif: self.location == 'hand':
+		elif self.location == 'hand':
 			self.location = self.playerHand
-		elif: self.location == 'deck':
+		elif self.location == 'deck':
 			self.location = self.playerDeck
 		choices = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		nonkingdom = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c']
@@ -123,6 +123,42 @@ class Player(object):
 					actionPhaseCount += 1
 					continue
 				elif actionType.lower() == 'b':
+                                        while True:
+                                                i = raw_input("  Which card would you like to buy? ")
+                                                if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+                                                        print "  Invalid selection!"
+                                                elif i.lower() in ['o', 'l', 't']:
+                                                        continue
+                                                elif i.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
+                                                        p = self.deck.provinceCards
+                                                        d = self.deck.duchyCards
+                                                        e = self.deck.estateCards
+                                                        g = self.deck.goldCards
+                                                        s = self.deck.silverCards
+                                                        c = self.deck.copperCards
+                                                        u = self.deck.curseCards
+                                                        i = eval(i.lower())
+                                                        if i[0].cost > self.playerTurnTreasure:
+                                                                raw_input("  You do not have enough to buy this." )
+                                                                continue
+                                                        else:
+                                                                self.playerPlay.append(i[0])
+                                                                self.playerTurnTreasure -= i[0].cost
+                                                                del i[0]
+                                                                self.playerTurnBuys -= 1
+                                                                break
+                                                elif int(i) in range(10):
+                                                        x = 'card' + i
+                                                        if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
+                                                                raw_input("  You do not have enough to buy this." )
+                                                                continue
+                                                        else:
+                                                                self.playerPlay.append(self.deck.kingdomCards[x][0])
+                                                                self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
+                                                                del self.deck.kingdomCards[x][0]
+                                                                self.playerTurnBuys -= 1
+                                                                break
+                                                break
 					self.buyPhase()
 					break
 				elif actionType.lower() == 'a':
@@ -240,6 +276,7 @@ class Player(object):
 		self.playerTurnActions = 1
 		self.playerTurnBuys = 1
 		self.playerTurnTreasure = 0
+		self.playerTreasurePlayed = False
 		x = len(self.playerPlay)
 		y = len(self.playerHand)
 		while x == len(self.playerPlay) and x > 0:
