@@ -18,7 +18,10 @@ class Player(object):
 		self.deck = ''
 		self.playerDiscard = []
 		self.roster = roster
-		
+		self.playerHasDuration = False
+		self.playerSetAside = []
+		self.playerTreasurePlayed = False
+		self.game = ''		
 	def drawToPlayer(self, hand):
 		if hand == 0:
 			for i in range(3):
@@ -55,127 +58,177 @@ class Player(object):
 		while True:
 			for i in range(number):
 				choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
-					if choice.lower() not in choices:
+				if choice.lower() not in choices:
+					print "    Invalid selection, please choose another card!"
+				elif choice.lower() in nonkingdom:
+					if choice.lower() == 'o' or choice.lower == 'l':
 						print "    Invalid selection, please choose another card!"
-					elif choice.lower() in nonkingdom:
-						if choice.lower() == 'o' or choice.lower == 'l':
+					else:
+						p = self.deck.provinceCards
+						d = self.deck.duchyCards
+						e = self.deck.estateCards
+						g = self.deck.goldCards
+						s = self.deck.silverCards
+						c = self.deck.copperCards
+						u = self.deck.copperCards
+						choice = eval(choice.lower())
+						if choice.cost > cost:
 							print "    Invalid selection, please choose another card!"
 						else:
-							p = self.deck.provinceCards
-							d = self.deck.duchyCards
-							e = self.deck.estateCards
-							g = self.deck.goldCards
-							s = self.deck.silverCards
-							c = self.deck.copperCards
-							u = self.deck.copperCards
-							choice = eval(choice.lower())
-								if choice.cost > cost:
-									print "    Invalid selection, please choose another card!"
-								else:
-									self.playerDiscard.append(choice[0])
-									del choice[0]
-									break
-					elif choice.lower() in kingdom:
-						x = 'card' + choice.lower()
-						if self.deck.kingdomCards[x][0].cost > cost:
-							print "    Invalid selection, please choose another card!"
-						else:
-							self.playerDiscard.append(self.deck.kingdomCards[x][0])
-							del self.deck.kingdomCards[x][0]
+							self.playerDiscard.append(choice[0])
+							del choice[0]
 							break
+				elif choice.lower() in kingdom:
+					x = 'card' + choice.lower()
+					if self.deck.kingdomCards[x][0].cost > cost:
+						print "    Invalid selection, please choose another card!"
+					else:
+						self.playerDiscard.append(self.deck.kingdomCards[x][0])
+						del self.deck.kingdomCards[x][0]
+						break
 
-	def playTurn(self, actions, buys):
-		self.playerTurnActions = actions
-		self.playerTurnBuys = buys
-		self.printPlayerHand()
-		playtype = raw_input("\n\n  What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
-		if self.playerTurnActions == 0 and sum(p.cardType == 'treasure' for p in self.playerPlay) <= 0 and self.playerTurnBuys <= 0 or playtype.lower == 'a':
-			return
-		elif playtype.lower() == 'p':
-			self.play()
-		elif playtype.lower() == 'b':
-			self.buy()
-		elif playtype.lower() == 'r':
-			self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
-			os.system('clear')
-			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
+	def playTurn(self):
+		self.checkPlayerDeck()
+		self.checkDurationEffects()
+		self.checkSetAside()
+		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
+			self.actionPhase()
 		else:
-			print "  That is not an available choice...."
-			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
-
-	def play(self):
+			self.playerTurnActions = 1
+			self.playerTurnBuys = 1
+			self.playerTurnTreasure = 0
+			self.playerTreasurePlayed = False
+			self.actionPhase()
+		
+	def actionPhase(self):
+		actionPhaseCount = 1
 		while True:
-			i = raw_input("  Which would you like to play: (n)umber? ")
+			if self.playerTurnActions == 0 or self.playerTreasurePlayed == True:
+				self.buyPhase()
+			else:
+				self.printPlayerHand()
+				actionType = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
+				if actionType.lower() not in ['p', 'b', 'a', 'r']:
+					continue
+				elif actionType.lower() == 'p':
+					self.playCard()
+					actionPhaseCount += 1
+					continue
+				elif actionType.lower() == 'b':
+					self.buyPhase()
+					break
+				elif actionType.lower() == 'a':
+					self.cleanUpPhase()
+				elif actionType.lower() == 'r':
+					self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
+					continue
+
+	def playCard(self):
+		while True:
+			i = raw_input("  Which card would you like to play: (n)umber? ")
 			try:
 				i = int(i)
 			except:
 				continue
-			if int(i) > (len(self.playerHand)):
+			if i > len(self.playerHand):
 				continue
-			elif self.playerHand[i - 1].cardType == 'treasure':
+			elif self.playerHand[i - 1].treasure == True:
 				self.playerPlay.append(self.playerHand[i - 1])
 				self.playerTurnTreasure += self.playerHand[i - 1].value
 				del self.playerHand[i - 1]
 				self.playerTurnActions = 0
-				os.system('clear')
+				self.playerTreasurePlayed = True
+				self.buyPhase()
 				break
-			elif self.playerHand[i - 1].cardType == 'action':
+			elif self.playerHand[i - 1].action == True:
 				if self.playerTurnActions <= 0:
 					raw_input("  You have no Actions left this turn, please (B)uy or (P)ass: ")
-					break
+					self.buyPhase()
 				else:
 					self.playerHand[i - 1].playCard(self.player, self.roster, self.deck)
 					self.playerTurnActions -= 1
 					self.playerDiscard.append(self.playerHand[i - 1])
 					del self.playerHand[i - 1]
 					break
-			elif self.playerHand[i - 1].cardType == 'victory':
+			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
 				print "  Invalid choice, you cannot play a Victory card."
+		return
 
-		self.playTurn(self.playerTurnActions, self.playerTurnBuys)
-
-	def buy(self):
-		i = raw_input("  Which card would you like to buy? ")
-		while True:
-			if i not in ['p', 'd', 'e', 'g', 's', 'c', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-				i = raw_input("  Invalid selection!  Which card would you like to buy? ")
-			else:
-				if i.lower() in ['p', 'd', 'e', 'g', 's', 'c']:
-					p = self.deck.provinceCards
-					d = self.deck.duchyCards
-					e = self.deck.estateCards
-					g = self.deck.goldCards
-					s = self.deck.silverCards
-					c = self.deck.copperCards
-					i = eval(i)
-					if i[0].cost > self.playerTurnTreasure:
-						raw_input("  You do not have enough to buy this.")
-						break
-					else:	
-						self.playerPlay.append(i[0])
-						self.playerTurnTreasure -= i[0].cost
-						del i[0]
-						self.playerTurnBuys -= 1
-						break
-				elif int(i) in range(10):
-					x = 'card' + str(int(i))
-					if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
-						raw_input(" You do not have enough to buy this.")
-						break
-					else:
-						self.playerPlay.append(self.deck.kingdomCards[x][0])
-						self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
-						del self.deck.kingdomCards[x][0]
-						self.playerTurnBuys -= 1
-						break
-		if self.playerTurnBuys < 1:
-			self.playerHandCleanup()
-			self.drawHand()
-			return
+	def buyPhase(self):
+		if self.playerTurnBuys == 0:
+			self.cleanUpPhase()
 		else:
-			self.playTurn(self.playerTurnActions, self.playerTurnBuys)
+			while True:
+				self.printPlayerHand()
+				actionType = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
+				if actionType.lower() not in ['p', 'b', 'a', 'r']:
+					continue
+				elif actionType.lower() == 'p':
+					while True:
+						i = raw_input("  Which card would you like to play: (n)umber? ")
+						try:
+							i = int(i)
+						except:
+							continue
+						if i > len(self.playerHand):
+							continue
+						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
+							raw_input("  You are in the buy phase, please play a Treasure. ")
+							continue
+						else:
+							self.playerPlay.append(self.playerHand[i - 1])
+							self.playerTurnTreasure += self.playerHand[i - 1].value
+							del self.playerHand[i - 1]
+							break
+				elif actionType.lower() == 'b':
+					while True:
+						i = raw_input("  Which card would you like to buy? ")
+						if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+							print "  Invalid selection!"
+						elif i.lower() in ['o', 'l', 't']:
+							continue
+						elif i.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
+							p = self.deck.provinceCards
+							d = self.deck.duchyCards
+							e = self.deck.estateCards
+							g = self.deck.goldCards
+							s = self.deck.silverCards
+							c = self.deck.copperCards
+							u = self.deck.curseCards	
+							i = eval(i.lower())
+							if i[0].cost > self.playerTurnTreasure:
+								raw_input("  You do not have enough to buy this." )
+								continue
+							else:
+								self.playerPlay.append(i[0])
+								self.playerTurnTreasure -= i[0].cost
+								del i[0]
+								self.playerTurnBuys -= 1
+								break
+						elif int(i) in range(10):
+							x = 'card' + i
+							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
+								raw_input("  You do not have enough to buy this." )
+								continue
+							else:
+								self.playerPlay.append(self.deck.kingdomCards[x][0])
+								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
+								del self.deck.kingdomCards[x][0]
+								self.playerTurnBuys -= 1
+								break
+						break
+					break
+				elif actionType.lower() == 'a':
+					self.cleanUpPhase()
+				elif actionType.lower() == 'r':
+					self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
+					break
+			if self.playerTurnBuys < 1:
+				self.cleanUpPhase()
+			else:
+				self.buyPhase()
 
-	def playerHandCleanup(self):
+	def cleanUpPhase(self):
 		self.playerTurnActions = 1
 		self.playerTurnBuys = 1
 		self.playerTurnTreasure = 0
@@ -189,6 +242,30 @@ class Player(object):
 			self.playerDiscard.append(self.playerHand[0])
 			del self.playerHand[0]
 			y -= 1
+		self.drawHand()
+		self.passTurn()
+
+	def passTurn(self):
+		self.game.playerTurn += 1
+		self.game.playLoop()
+
+	def checkDurationEffects(self):
+		if self.playerHasDuration == True:
+			pass
+		else:
+			return
+
+	def checkSetAside(self):
+		if len(self.playerSetAside) > 0:
+			pass
+		else:
+			return
+
+	def checkPlayerDeck(self):
+		if len(self.playerDeck) == 0:
+			self.playerDiscardToDeck()
+		else:
+			return
 
 	def playerDiscardToDeck(self):
 		x = len(self.playerDiscard)
@@ -206,6 +283,7 @@ class Player(object):
 			x -= 1
 	
 	def printPlayerHand(self):
+		os.system('clear')
 		self.deck.printDeckCards()
 		self.printPlayerCount()
 		self.printTurnCount()

@@ -22,6 +22,7 @@ class DomGame(object):
 	player4 = Player('hold')
 	playerWait = [player1, player2, player3, player4]
 	boardName = ' '
+	playerTurn = 0
 	def __init__(self):
 		pass
 	def startGame(self):
@@ -62,7 +63,7 @@ class DomGame(object):
 				player.roster = playerRost
 				player.drawToPlayer(0)
 				player.drawHand()
-
+				player.game = self
 			self.playLoop()
 
 	def joinGame(self):
@@ -78,14 +79,13 @@ class DomGame(object):
 
 	def playLoop(self):
 		players = len(playerRost)
-		playerTurn = 0
 		while True:
-			if playerTurn < players:
-				playerRost[playerTurn].playTurn(1, 1)
-				playerTurn += 1
+			if self.playerTurn < players:
+				playerRost[self.playerTurn].playTurn()
+				self.playerTurn += 1
 				continue
-			elif playerTurn >= players:
-				playerTurn = 0
+			elif self.playerTurn >= players:
+				self.playerTurn = 0
 				continue
 			break
 			

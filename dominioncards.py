@@ -6,6 +6,13 @@ class TreasureCard(object):
 	actionCost = 0
 	cardType = 'treasure'
 	treasure = True
+	victory = False
+	action = False
+	attack = False
+	reaction = False
+	ruins = False
+	duration = False
+	looter = False
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
@@ -41,6 +48,13 @@ class VictoryCard(object):
 	quantity = 12
 	cardType = 'victory'
 	victory = True
+	action = False
+	attack = False
+	reaction = False
+	ruins = False
+	duration = False
+	looter = False
+	treasure = False
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
