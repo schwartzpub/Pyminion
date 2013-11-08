@@ -50,10 +50,11 @@ class Player(object):
 			self.playerHand.append(self.playerDeck[0])
 			del self.playerDeck[0]
 
-	def gainCard(self, cost, number, location):
+	def gainCard(self, cost, number, location, type):
 		self.cost = cost
 		self.number = number
 		self.location = location
+		self.type = type
 		if self.location == 'discard':
 			self.location = self.playerDiscard
 		elif self.location == 'hand':
@@ -64,11 +65,24 @@ class Player(object):
 		nonkingdom = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c']
 		kingdom = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 		while True:
-			for i in range(number):
-				choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
-				if choice.lower() not in choices:
-					print "    Invalid selection, please choose another card!"
-				elif choice.lower() in nonkingdom:
+			for i in range(self.number):
+		                if self.type == 'treasure':
+                		        choice = raw_input("    Please select a Treasure card that costs up to $" + str(self.cost) + ": ")
+						if choice.lower() not in ['l', 'g', 's', 'c']:
+							print "    Invalid selection, please choose a Treasure card!"
+		                elif self.type == 'kingdom':
+                		        choice = raw_input("    Please select a Kingdom card that costs up to $" + str(self.cost) + ": ")
+						if choice.lower() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+							print "    Invalid selection, please choose a Kingdom card!"
+		                elif: self.type == 'victory':
+                		        choice = raw_input("    Please select a Victory card that costs up to $" + str(self.cost) + ": ")
+						if choice.lower() not in ['o', 'p', 'd', 'e']:
+							print "    Invalid Selection, please choose a Victory card!"
+		                elif: self.type == 'any':
+                		        choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
+						if choice.lower() not in choices:
+							print "    Invalid selection, please choose another card!"
+				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
 						print "    Invalid selection, please choose another card!"
 					else:
@@ -189,10 +203,10 @@ class Player(object):
 					raw_input("  You have no Actions left this turn, please (B)uy or (P)ass: ")
 					self.buyPhase()
 				else:
-					self.playerHand[i - 1].playCard(self.player, self.roster, self.deck)
-					self.playerTurnActions -= 1
-					self.playerDiscard.append(self.playerHand[i - 1])
+					self.playerPlay.append(self.playerHand[i - 1])
 					del self.playerHand[i - 1]
+					self.playerTurnActions -= 1
+					self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
 					break
 			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
 				print "  Invalid choice, you cannot play a Victory card."

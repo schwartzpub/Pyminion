@@ -89,6 +89,15 @@ class CurseCard(object):
 	cardType = 'curse'
 	value = -1
 	cost = 0
+	action = False
+	treasure = False
+	victory = True
+	ruins = False
+	duration = False
+	looter = False
+	bane = False
+	reaction = False
+	attack = False
 	def __init__(self):
 		pass
 
@@ -265,7 +274,7 @@ class WorkshopCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
-		self.player.gainCard(4, 1, 'discard')		
+		self.player.gainCard(4, 1, 'discard', 'any')		
 
 class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
@@ -335,7 +344,7 @@ class FeastCard(KingdomCard):
 				else:
 					continue
 			break
-		self.player.gainCard(5, 1, 'discard')
+		self.player.gainCard(5, 1, 'discard', 'any')
 
 class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
@@ -430,7 +439,7 @@ class RemodelCard(KingdomCard):
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
 					card = raw_input("Please choose a card to gain: ")
-					self.player.gainCard(value, 1, 'discard')
+					self.player.gainCard(value, 1, 'discard', 'any')
 
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"
@@ -447,3 +456,254 @@ class SmithyCard(KingdomCard):
 		for i in range(3):
 			self.player.drawOneCard()
 		
+class SpyCard(KingdomCard):
+	cardEval = "SpyCard"
+	cardName = "Spy"
+	cardColor = "\033[1;31m"
+	description = "+1 Card; +1 Action.  Each player (including you) reveals the top card of his deck and either discards it or puts it back, your choice."
+	cost = 4
+	action = True
+	attack = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		pass
+
+class ThiefCard(KingdomCard):
+	cardEval = "ThiefCard"
+	cardName = "Thief"
+	cardColor = "\033[1;31m"
+	description = "Each other player reveals the top 2 cards of his deck. if they revealed any Treasure cards, they trash one of them that you choose. You may gain any or all of these trashed cards. They discard the other revealed cards."
+	cost = 4
+	action = True
+	attack = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		pass
+
+class ThroneRoomCard(KingdomCard):
+	cardEval = "ThroneRoomCard"
+	cardName = "Throne Room"
+	cardColor = "\033[0m"
+	description = "Choose an Action card in your hand. Play it twice."
+	cost = 4
+	action = True
+	def __init__(self):
+		pass
+	
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		if not any(i.action == True for i in self.player.playerHand):
+			return
+		else:
+			self.player.printPlayerReveal()
+			while True:
+				i = raw_input("  " + self.description + ": ")
+				try:
+					i = int(i) - 1
+				except:
+					continue
+				if i not in range(len(self.player.playerHand):
+					continue
+				else:
+					playTwice = self.player.playerHand[i - 1]
+					self.player.playerPlay.append(self.player.playerHand[i - 1])
+					del self.player.playerHand[i - 1]
+					playTwice.playCard(self.player, self.roster, self.deck)
+					playTwice.playCard(self.player, self.roster, self.deck)
+
+
+class CouncilRoomCard(KingdomCard):
+	cardEval = "CouncilRoomCard"
+	cardName = "Council Room"
+	cardColor = "\033[0m"
+	description = "+4 Cards; +1 Buy.  Each other player draws a card."
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		for i in range(4):
+			self.player.drawOneCard()
+		self.player.playerTurnBuys += 1
+		for each in self.roster:
+			if each != self.player:
+				each.drawOneCard()
+			else:
+				return
+		return
+
+class FestivalCard(KingdomCard):
+	cardEval = "FestivalCard"
+	cardName = "Festival"
+	cardColor = "\033[0m"
+	description = "+2 Actions; +1 Buy; +$2"
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnActions += 2
+		self.player.playerTurnBuys += 1
+		self.player.playerTurnTreasure += 2
+
+class LaboratoryCard(KingdomCard):
+	cardEval = "LaboratoryCard"
+	cardName = "Laboratory"
+	cardColor = "\033[0m"
+	description = "+2 Cards; +1 Action"
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+	
+	def playCard(self, player, roster, deck):
+		self.player = player
+		for i in range(2):
+			self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+
+class LibraryCard(KingdomCard):
+	cardEval = "LibraryCard"
+	cardName = "Library"
+	cardColor = "\033[0m"
+	description = "Draw until you have 7 cards in hand. You may set aside any Action cards drawn this way, as you draw them; discard the set aside cards after you finish drawing."
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.setAside = False
+		self.setAsideNum = 0
+		while len(self.player.playerHand) < 7:
+			i = self.player.playerDeck[0]
+			if i.action != True:
+				self.player.playerHand.append(i)
+				del i
+			else:
+				while True:
+					choice = raw_input("  Would you like to (k)eep or (s)et this card aside? ")
+					if choice.lower() not in ['k', 's']:
+						continue
+					elif choice.lower() == k:
+						self.player.playerHand.append(i)
+						del i
+						break
+					elif choice.lower() == s:
+						self.setAside = True
+						self.setAsideNum += 1
+						self.player.playerSetAside.append(i)
+						del i
+						break
+		for i in range(self.setAsideNum):
+			self.player.playerDiscard.append(self.player.playerSetAside[-1])
+			del self.player.playerSetAside[-1]
+
+class MarketCard(KingdomCard):
+	cardEval = "MarketCard"
+	cardName = "Market"
+	cardColor = "\033[0m"
+	description = "+1 Card; +1 Action; +1 Buy, +$1"
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		self.player.playerTurnBuys += 1
+		self.player.playerTurnTreasure += 1
+
+class MineCard(KingdomCard):
+	cardEval = "MineCard"
+	cardName = "Mine"
+	cardColor = "\033[0m"
+	description = "Trash a tresure card from your hand. gain a Treasure card costing up to $3 more; put it into your hand."
+	cost = 5
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		while True:
+			i = raw_input("  Trash a treasure card from your hand: ")
+			try:
+				i = int(i)
+			except:
+				continue
+			if self.player.playerHand[i - 1].treasure != True
+				continue
+			else:
+				value = self.player.playerHand[i - 1].cost + 3
+				del self.player.playerHand[i - 1]
+				self.player.gainCard(value, 1, hand, 'treasure')
+
+class WitchCard(KingdomCard):
+	cardEval = "WitchCard"
+	cardName = "Witch"
+	cardColor = "\033[1;31m"
+	description = "+2 Cards.  Each other player gains a Curse card."
+	cost = 5
+	action = True
+	attack = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		self.player.drawOneCard()
+		for each in self.roster:
+			if each != self.player:
+				each.playerDiscard.append(self.deck.curseCards[0])
+				del self.deck.curseCards[0]
+			else:
+				pass
+
+class AdventurerCard(KingdomCard):
+	cardEval = "AdventurerCard"
+	cardName = "Adventurer"
+	cardColor = "\033[0m"
+	description = "Reveal cards from your deck until you reveal 2 Treasure cards. Put those Treasure cards in your hand and discard the other revealed cards."
+	cost = 6
+	action = True
+	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.treasureCount = 0
+		self.revealCount = 0
+		while self.treasureCount < 2:
+			print self.player.playerName + " reveals a: " + self.player.playerDeck[0].cardName + "."
+			if self.player.playerDeck[0].treasure != True:
+				self.player.playerSetAside.append(self.player.playerDeck[0])
+				del self.player.playerDeck[0]
+				self.revealCount += 1
+			else:
+				self.player.playerSetAside.append(self.player.playerDeck[0])
+				del self.player.playerDeck[0]
+				self.revealCount += 1
+				self.treasureCount += 1
+		for i in self.revealCount:
+			if self.player.setAside[-1].treasure != true:
+				self.player.playerDiscard.append(self.player.playerSetAside[-1])
+				del self.player.playerSetAside[-1]
+			else:
+				self.player.playerHand.append(self.player.playerSetAside[-1])
+				del self.player.playerSetAside[-1]
