@@ -468,7 +468,22 @@ class SpyCard(KingdomCard):
 		pass
 
 	def playCard(self, player, roster, deck):
-		pass
+		self.player = player
+		self.roster = roster
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		for each in self.roster:
+			print each.playerName + " reveals: " + each.playerDeck[0].cardname + "..."
+			while True:
+				choice = raw_input("  Would you like this player to (k)eep or (d)iscard this card? ")
+				if choice.lower() not in ['d', 'k']:
+					continue
+				elif choice.lower == 'd':
+					each.playerDiscard.append(each.playerDeck[0])
+					del each.playerDeck[0]
+					break
+				elif choice.lower == 'k':
+					break
 
 class ThiefCard(KingdomCard):
 	cardEval = "ThiefCard"
@@ -482,7 +497,43 @@ class ThiefCard(KingdomCard):
 		pass
 
 	def playCard(self, player, roster, deck):
-		pass
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		self.trash = []
+		for each in self.roster:
+			if each != self.player:
+				print "  " + each.playerName + " reveals: [1]" + each.playerDeck[-1].cardName + " and [2]" + each.playerDeck[-2].cardName + "."
+				while True:
+					choice = raw_input("  Which card would you like to trash: ")
+					try:
+						choice = int(choice)
+					except:
+						continue
+					if choice not in [1, 2]:
+						continue
+					else:
+						if choice == 1:
+							self.trash.append(each.playerDeck[-1])
+							del each.playerDeck[-1]
+							break
+						elif choice == 2:
+							self.trash.append(each.playerDeck[-2])
+							del each.playerDeck[-2]
+							break
+				while True:
+					choice = raw_input(" Would you like to (k)eep or (t)rash: " + self.trash[0].cardName "?")
+					if choice.lower() not in ['k', 't']:
+						continue
+					elif choice.lower() == 'k':
+						self.player.playerDiscard.append(self.trash[0])
+						del self.trash[0]
+						break
+					elif choice.lower() == 't':
+						del self.trash[0]
+						break
+			else:
+				pass
 
 class ThroneRoomCard(KingdomCard):
 	cardEval = "ThroneRoomCard"
