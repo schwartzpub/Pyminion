@@ -1,0 +1,37 @@
+1) Set up the current turn (playTurn method)
+	- deploy 1 action to playerTurnActions
+	- deploy 1 buy to playerTurnBuys
+	- ensure playerTurnCoins is 0
+	- check length of playerDeck to ensure it is > 0
+		- if playerDeck length is 0, shuffle playerDiscard into playerDeck (this should be its own method)
+	- check for any duration effects before entering the Action phase
+		- apply duration effects and adjust their iterations
+	- check for cards in the setAside pile that should be placed into this hand
+	- enter the Action phase
+
+2) Set up and perform the actionPhase (actionPhase method)
+	- loop through the action phase until:
+		- playerTurnActions == 0
+		- player chooses to leave Action phase
+			- pass turn
+			- plays a treasure
+	- when player plays a card, check for reactions from other players prior to initiating the card
+		- play through each players reaction in order from the next player whose turn it is
+	- if a player discards any cards during the action phase, check for reactions to the discard
+	- any card that is set aside goes into the setAside list for the next turn
+	- iterate loops of action phase to keep track of how many actions have been performed, and how many cards have been played
+	- any time a card is pulled from the deck, check the deck to ensure it doesnt need to have the discard pile shuffled into it (this should be a function called in any cardDraw method)
+	- when action phase ending criteria have been met, enter the buy phase
+
+3) Set up and perform the buyPhase (buyPhase method)
+	- allow player to place appropriate treasure cards into playArea.
+		- iterate playerTurnCoins for each coin value played
+	- only allow players to buy cards equal to or less than the value of coins in their playerTurnCoins
+	- after each card is purchased, check for player reactions
+	- when playerTurnBuys == 0, or player chooses to exit Buy phase, enter cleanUpPhase
+
+4) Set up and perform the cleanUpPhase 
+	- move all cards from playArea on top of the discard pile (append to end of playerDiscard)
+	- move all cards from playerHand on top of the discard pile
+	- leave cards in the setAside pile for the next turn
+	- exit cleanUpPhase and pass playTurn on to next player
