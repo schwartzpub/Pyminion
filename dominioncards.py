@@ -432,7 +432,7 @@ class MoneylenderCard(KingdomCard):
 					while True:
 						for card in self.player.playerHand:
 							if card.cardName == 'Copper':
-								del self.player.playerHand[card]
+								self.player.playerHand.remove(card)
 								self.player.playerTurnTreasure += 3
 								break
 				else:
@@ -461,7 +461,7 @@ class RemodelCard(KingdomCard):
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
-					card = raw_input("Please choose a card, that costs up to $" + value + ", to gain: ")
+					card = raw_input("Please choose a card, that costs up to $" + str(value) + ", to gain: ")
 					self.player.gainCard(value, 1, 'discard', 'any')
 
 class SmithyCard(KingdomCard):
@@ -504,11 +504,11 @@ class SpyCard(KingdomCard):
 					choice = raw_input("  Would you like this player to (k)eep or (d)iscard this card? ")
 					if choice.lower() not in ['d', 'k']:
 						continue
-					elif choice.lower == 'd':
+					elif choice.lower() == 'd':
 						each.playerDiscard.append(each.playerDeck[0])
 						del each.playerDeck[0]
 						break
-					elif choice.lower == 'k':
+					elif choice.lower() == 'k':
 						break
 		for each in self.roster:
 			each.reactionImmunity = False
@@ -588,6 +588,7 @@ class ThroneRoomCard(KingdomCard):
 				i = raw_input("  " + self.description + ": ")
 				try:
 					i = int(i)
+					i = i - 1
 				except:
 					continue
 				if i not in range(len(self.player.playerHand)):
@@ -600,6 +601,7 @@ class ThroneRoomCard(KingdomCard):
 					del self.player.playerHand[i - 1]
 					playTwice.playCard(self.player, self.roster, self.deck)
 					playTwice.playCard(self.player, self.roster, self.deck)
+					break
 
 
 class CouncilRoomCard(KingdomCard):
@@ -734,7 +736,8 @@ class MineCard(KingdomCard):
 			else:
 				value = self.player.playerHand[i - 1].cost + 3
 				del self.player.playerHand[i - 1]
-				self.player.gainCard(value, 1, hand, 'treasure')
+				self.player.gainCard(value, 1, 'hand', 'treasure')
+				break
 
 class WitchCard(KingdomCard):
 	cardEval = "WitchCard"

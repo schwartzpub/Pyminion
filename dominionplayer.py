@@ -95,7 +95,7 @@ class Player(object):
 						c = self.deck.copperCards
 						u = self.deck.curseCards
 						choice = eval(choice.lower())
-						if choice.cost > self.cost:
+						if choice[0].cost > self.cost:
 							print "    Invalid selection, please choose another card!"
 						else:
 							self.location.append(choice[0])
@@ -109,6 +109,7 @@ class Player(object):
 						self.location.append(self.deck.kingdomCards[x][0])
 						del self.deck.kingdomCards[x][0]
 						break
+			break
 
 	def playTurn(self):
 		self.checkPlayerDeck()
