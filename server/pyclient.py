@@ -2,7 +2,7 @@ import socket
 from threading import Thread
 import SocketServer
 import sys
-
+import os
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -14,6 +14,9 @@ sock.connect(server_address)
 def recv():
 	while True:
 		data = sock.recv(1024)
+		if data == 'CLRSCRN_FULL':
+			os.system('clear')
+			continue
 		if not data:
 			sys.exit(0)
 		print data
