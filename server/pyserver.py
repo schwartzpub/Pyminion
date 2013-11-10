@@ -1,6 +1,11 @@
 #!/usr/bin/env python
+
+#This is the Server component.  I will be slowly injecting the game component into this portion to run the game.
  
-import socket, struct, threading, cgi
+import socket, struct, threading, cgi, random
+from dominiondeck import *
+from dominioncards import *
+from dominionplayer import *
  
 def recv_data (client, length):
 	data = client.recv(length)
@@ -18,7 +23,7 @@ def handle (client, addr, name):
 		data = recv_data(client, 1024)
 		if not data: break
 		if data == '!quit': break
-		if data == '!start': start_game(client, addr, name)
+		if data == '!start': build_game(client, addr, name)
 		if data == '!help' : help_commands(client)
 		if data == '!list' : list_users(client)
 		if data == '!clear' : send_data(client, 'CLRSCRN_FULL')
@@ -47,7 +52,11 @@ def list_users(client):
 	send_data(client, "\033[1;31m** Currently connected clients are: ",)
 	for key in client_list.keys(): send_data(client,"\033[1;31m" + key + " \033[0m",)
 
-def start_game(client, addr, name):
+def start_handle(user_dict, user):
+        newGame = DomGame()
+        newGame.startGame(user_dict, user)
+
+def build_game(client, addr, name):
 	game = {}
 	user = name.lower()
 	send_data(client, '\033[1;32m** STARTING GAME:  Please enter the names of the users you want to start a game with, one per line. Enter !go when you are ready to begin.\033[0m')
@@ -60,6 +69,7 @@ def start_game(client, addr, name):
 				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m",) for c in clients]
 				for p in game:
 					del client_list[p]
+				threading.Thread(target = start_handle, args = (game, user)).start()
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m")
 				continue
@@ -75,9 +85,10 @@ def start_game(client, addr, name):
 		elif player == user:
 				send_data(client, "\033[1;31m** You do not need to add yourself to the game, please add other players!\033[0m")
 				continue
-		game[player] = client_list[player]
-		[send_data(client_list[player], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m")]
-		
+		else:
+			game[player] = client_list[player]
+			[send_data(client_list[player], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m")]
+
 def start_server ():
 	s = socket.socket()
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -99,6 +110,46 @@ def start_server ():
 		clients.append(conn)
 		client_list[client_name.lower()] = conn
 		threading.Thread(target = handle, args = (conn, addr, client_name)).start()
+
+class DomGame(object):
+        player1 = Player('hold')
+        player2 = Player('hold')
+        player3 = Player('hold')
+        player4 = Player('hold')
+        playerWait = [player1, player2, player3, player4]
+        playerRost = []
+        playerTurn = 0
+        def __init__(self):
+                pass
+
+        def startGame(self, user_dict, user):
+                for user, conn in user_dict.iteritems():
+                        self.playerWait[0].playerName = user
+                        self.playerWait[0].playerConn = conn
+                        self.playerRost.append(self.playerWait[0])
+                        del self.playerWait[0]
+
+                newDeck = DomDeck()
+                newDeck.buildDeck(len(self.playerRost))
+                for player in self.playerRost:
+                        player.deck = newDeck
+                        player.roster = self.playerRost
+                        player.drawToPlayer(0)
+                        player.drawHand()
+                        player.game = self
+                self.playLoop()
+
+        def playLoop(self):
+                players = len(self.playerRost)
+                while True:
+                        if self.playerTurn < players:
+                                self.playerRost[self.playerTurn].playTurn()
+                                self.playerTurn += 1
+                                continue
+                        elif self.playerTurn >= players:
+                                self.playerTurn = 0
+                                continue
+                        break
 
 clients = []
 client_list = {}
