@@ -24,6 +24,8 @@ class Player(object):
 		self.game = ''		
 		self.reactionImmunity = False
 		self.durationImmunity = False
+		self.totalVictory = 0
+
 	def drawToPlayer(self, hand):
 		if hand == 0:
 			for i in range(3):
@@ -304,8 +306,9 @@ class Player(object):
 			del self.playerHand[0]
 			y -= 1
 		self.drawHand()
+		self.checkWin()
 		self.passTurn()
-
+		
 	def passTurn(self):
 		self.game.playerTurn += 1
 		self.game.playLoop()
@@ -384,3 +387,34 @@ class Player(object):
 	def printTurnCount(self):
 		print "  Actions: " + str(self.playerTurnActions) + "    Buys ($" + str(self.playerTurnTreasure) + "): " + str(self.playerTurnBuys)
 
+	def checkWin(self):
+		self.zeroTally = 0
+		if len(self.deck.duchyCards) == 0: self.zeroTally += 1
+		if len(self.deck.estateCards) == 0: self.zeroTally += 1
+		if len(self.deck.curseCards) == 0: self.zeroTally += 1
+		if len(self.deck.goldCards) == 0: self.zeroTally += 1
+		if len(self.deck.silverCards) == 0: self.zeroTally += 1
+		if len(self.deck.copperCards) == 0: self.zeroTally += 1
+		for i in range(10):
+			if len(self.dict.kingdomCards['card' + str(i)]) == 0:
+				self.zeroTally += 1
+			else:
+				pass
+		if len(self.deck.provinceCards) == 0:
+			self.endGame()
+		elif self.zeroTally == 3:
+			self.endGame()
+		else:
+			pass
+
+	def endGame(self):
+		print "GAME OVER! The scores are: "
+		for each in self.roster:
+			each.playerDeckToDiscard()
+			for i in len(each.playerHand):
+				each.playerDiscard.append(each.playerHand[0])
+				del each.playerHand[0]
+			for i in each.playerDiscard:
+				if i.cardName == 'Gardens': each.totalVictory += (1 * (len(each.playerDiscard) // 10))
+				else: each.totalVictory += i.victoryPoints
+			print "  " + each.playerName + ": " + str(each.totalVictory)

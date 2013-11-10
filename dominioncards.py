@@ -13,6 +13,7 @@ class TreasureCard(object):
 	ruins = False
 	duration = False
 	looter = False
+	victoryPoints = 0
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
@@ -55,13 +56,14 @@ class VictoryCard(object):
 	duration = False
 	looter = False
 	treasure = False
+	victoryPonts = 0
 	def __init__(self, cardtype):
 		self.cardtype = cardtype
 
 class ProvinceCard(VictoryCard):
 	cardName = "Province"
 	cardColor = "\033[32m"
-	value = 6
+	victoryPoints = 6
 	cost = 8
 	def __init__(self):
 		pass
@@ -69,7 +71,7 @@ class ProvinceCard(VictoryCard):
 class DuchyCard(VictoryCard):
 	cardName = "Duchy"
 	cardColor = "\033[32m"
-	value = 3
+	victoryPoints = 3
 	cost = 5
 	def __init__(self):
 		pass
@@ -77,7 +79,7 @@ class DuchyCard(VictoryCard):
 class EstateCard(VictoryCard):
 	cardName = "Estate"
 	cardColor = "\033[32m"
-	value = 2
+	victoryPoints = 2
 	cost = 2
 	def __init__(self):
 		pass
@@ -98,6 +100,7 @@ class CurseCard(object):
 	bane = False
 	reaction = False
 	attack = False
+	victoryPoints = -1
 	def __init__(self):
 		pass
 
@@ -107,6 +110,7 @@ class KingdomCard(object):
 	quantity = 10
 	cost = 0
 	value = 0
+	victoryPoints = 0
 	reaction = False
 	action = True
 	attack = False
@@ -372,7 +376,7 @@ class GardensCard(KingdomCard):
 	cardColor = "\033[32m"
 	description = "Worth 1 Victory for every 10 cards in your deck (rounded down)."
 	cost = 4
-	value = 1
+	victoryPoints = 1
 	action = False
 	victory = True
 	def __init__(self):
@@ -461,8 +465,8 @@ class RemodelCard(KingdomCard):
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
-					card = raw_input("Please choose a card, that costs up to $" + str(value) + ", to gain: ")
 					self.player.gainCard(value, 1, 'discard', 'any')
+					break
 
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"
@@ -532,7 +536,11 @@ class ThiefCard(KingdomCard):
 		self.player.checkReactions('attack')
 		for each in self.roster:
 			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
-				print "  " + each.playerName + " reveals: [1]" + each.playerDeck[-1].cardName + " and [2]" + each.playerDeck[-2].cardName + "."
+				for i in range(2):
+					each.checkPlayerDeck()
+					self.trash.append(each.playerDeck[-1])
+					del each.playerDeck[-1]
+				print "  " + each.playerName + " reveals: [1]" + self.trash[0].cardName + " and [2]" + self.trash[1].cardName + "."
 				while True:
 					choice = raw_input("  Which card would you like to trash: ")
 					try:
@@ -543,12 +551,12 @@ class ThiefCard(KingdomCard):
 						continue
 					else:
 						if choice == 1:
-							self.trash.append(each.playerDeck[-1])
-							del each.playerDeck[-1]
+							each.playerDeck.append(self.trash[1])
+							del self.trash[1]
 							break
 						elif choice == 2:
-							self.trash.append(each.playerDeck[-2])
-							del each.playerDeck[-2]
+							each.playerDeck.append(self.trash[0])
+							del self.trash[0]
 							break
 				while True:
 					choice = raw_input(" Would you like to (k)eep or (t)rash: " + self.trash[0].cardName + "?")
