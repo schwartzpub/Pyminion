@@ -6,7 +6,47 @@ import socket, struct, threading, cgi, random
 from dominiondeck import *
 from dominioncards import *
 from dominionplayer import *
- 
+
+class Lobby_Client(threading.Thread):
+	def __init__(self, conn, addr, name, clients):
+		threading.Thread.__init__(self)
+		self.client = conn
+		self.addr = addr
+		self.name = name.lower()
+		self.clients = clients
+		self._paused = False
+		self.event = threading.Event()
+
+	def pause(self):
+		self._paused = True
+
+	def resume(self):
+		self._paused = False
+
+	def run(self):
+		lock = threading.Lock()
+	        while 1:
+	                data = recv_data(self.client, 1024)
+	                if not data: break
+	                if data == '!quit': break
+	                if data == '!start':
+	                        while 1:
+	                                build_game(self.client, self.addr, self.name)
+	                                break
+	                if data == '!help' : help_commands(self.client)
+	                if data == '!list' : list_users(self.client)
+	                if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL')
+	                lock.acquire()
+	                [send_data(c, "<" + self.name + "> " + data) for c in (u for u in self.clients if u != self.client)]
+	                lock.release()
+        	print 'Client closed:', self.addr
+	        [send_data(c, "\033[1;31m** QUIT: " + self.name + " has left the server!\033[0m") for c in (u for u in self.clients if u != self.client)]
+	        lock.acquire()
+	        self.clients.remove(self.client)
+	        del client_list[self.name]
+	        lock.release()
+	        self.client.close()
+
 def recv_data (client, length):
 	data = client.recv(length)
 	if not data: return data
@@ -16,28 +56,6 @@ def send_data (client, data):
 	message = str(data)
 	return client.send(message)
  
-def handle (client, addr, name):
-	lock = threading.Lock()
-	name = name.lower()
-	while 1:
-		data = recv_data(client, 1024)
-		if not data: break
-		if data == '!quit': break
-		if data == '!start': build_game(client, addr, name)
-		if data == '!help' : help_commands(client)
-		if data == '!list' : list_users(client)
-		if data == '!clear' : send_data(client, 'CLRSCRN_FULL')
-		lock.acquire()
-		[send_data(c, "<" + name + "> " + data) for c in (u for u in clients if u != client)]
-		lock.release()
-	print 'Client closed:', addr
-	[send_data(c, "\033[1;31m** QUIT: " + name + " has left the server!\033[0m") for c in (u for u in clients if u != client)]
-	lock.acquire()
-	clients.remove(client)
-	del client_list[name]
-	lock.release()
-	client.close()
-
 def help_commands(client):
 	send_data(client, "\033[1;31m** HELP: The commands for this server are: ")
 	send_data(client, "**   !help -- displays this message")
@@ -55,7 +73,7 @@ def list_users(client):
 def start_handle(user_dict, user):
         newGame = DomGame()
         newGame.startGame(user_dict, user)
-
+		
 def build_game(client, addr, name):
 	game = {}
 	user = name.lower()
@@ -68,8 +86,11 @@ def build_game(client, addr, name):
 			if player == '!go' and len(game.keys()) >= 2:
 				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m",) for c in clients]
 				for p in game:
+					client_list[p][1].event.set()
+					print "client " + p + " paused"
 					del client_list[p]
-				threading.Thread(target = start_handle, args = (game, user)).start()
+				start_handle(game, user)
+				break
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m")
 				continue
@@ -86,8 +107,8 @@ def build_game(client, addr, name):
 				send_data(client, "\033[1;31m** You do not need to add yourself to the game, please add other players!\033[0m")
 				continue
 		else:
-			game[player] = client_list[player]
-			[send_data(client_list[player], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m")]
+			game[player] = client_list[player][0]
+			[send_data(client_list[player][0], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m")]
 
 def start_server ():
 	s = socket.socket()
@@ -108,8 +129,11 @@ def start_server ():
 		for key in client_list.keys(): send_data(conn, key + " ",)
 		for client in clients: send_data(client, "** JOIN: " + client_name + " has joined the server!")
 		clients.append(conn)
-		client_list[client_name.lower()] = conn
-		threading.Thread(target = handle, args = (conn, addr, client_name)).start()
+		newClient = Lobby_Client(conn, addr, client_name, clients)
+		client_list[client_name.lower()] = []
+		client_list[client_name.lower()].append(conn)
+		client_list[client_name.lower()].append(newClient)
+		client_list[client_name.lower()][1].start()
 
 class DomGame(object):
         player1 = Player('hold')
@@ -128,7 +152,6 @@ class DomGame(object):
                         self.playerWait[0].playerConn = conn
                         self.playerRost.append(self.playerWait[0])
                         del self.playerWait[0]
-
                 newDeck = DomDeck()
                 newDeck.buildDeck(len(self.playerRost))
                 for player in self.playerRost:
