@@ -166,7 +166,7 @@ class Player(object):
 						while True:
 							choice = str(self.recv_data(self.playerConn, 1024))
 							if choice.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-								self.send_data(self.playerConn,"Invalid selection!\n"
+								self.send_data(self.playerConn,"Invalid selection!\n")
 							elif choice.lower() in ['o', 'l', 't']:
 									continue
 							elif choice.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
@@ -246,14 +246,14 @@ class Player(object):
 			self.cleanUpPhase()
 		else:
 			while True:
-				self.printPlayerHand()
-				self.send_data(self.playerConn("\nWhat would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead?\n"))
+				self.printPlayerHand(self.roster)
+				self.send_data(self.playerConn, "\nWhat would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead?\n")
 				choice = str(self.recv_data(self.playerConn, 1024))
 				if choice.lower() not in ['p', 'b', 'a', 'r']:
 					continue
 				elif choice.lower() == 'p':
 					while True:
-						self.send_data(self.playerConn("Which card would you like to play: (n)umber?\n")
+						self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
 						i = self.recv_data(self.playerConn, 2014)
 						try:
 							i = int(i)
@@ -262,14 +262,14 @@ class Player(object):
 						if i > len(self.playerHand):
 							continue
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
-							self.send_data(self.playerConn, " You are in the buy phase, please play a Treasure.\n"))
+							self.send_data(self.playerConn, "You are in the buy phase, please play a Treasure.\n")
 							continue
 						else:
 							self.playerPlay.append(self.playerHand[i - 1])
 							self.playerTurnTreasure += self.playerHand[i - 1].value
 							del self.playerHand[i - 1]
 							break
-				elif actionType.lower() == 'b':
+				elif choice.lower() == 'b':
 					while True:
 						self.send_data(self.playerConn, "Which card would you like to buy?\n")
 						i = self.recv_data(self.playerConn, 2014)
@@ -308,9 +308,9 @@ class Player(object):
 								break
 						break
 					break
-				elif actionType.lower() == 'a':
+				elif choice.lower() == 'a':
 					self.cleanUpPhase()
-				elif actionType.lower() == 'r':
+				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					self.deck.readCard(self.recv_data(self.playerConn, 1024))
 					break
@@ -337,9 +337,8 @@ class Player(object):
 			y -= 1
 		self.drawHand()
 		self.checkWin()
-		return
-#		self.passTurn()
-		
+		self.passTurn()
+
 	def passTurn(self):
 		self.game.playerTurn += 1
 		self.game.playLoop()
@@ -454,4 +453,4 @@ class Player(object):
 			for i in each.playerDiscard:
 				if i.cardName == 'Gardens': each.totalVictory += (1 * (len(each.playerDiscard) // 10))
 				else: each.totalVictory += i.victoryPoints
-			self.send_data(each.playerConn, "  " + each.playerName + ": " + str(each.totalVictory + "\n")
+			self.send_data(each.playerConn, "  " + each.playerName + ": " + str(each.totalVictory + "\n"))

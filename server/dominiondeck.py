@@ -160,11 +160,10 @@ class DomDeck(object):
 		self.send_data(conn, "\033[36m  Card Name: \033[0m" + self.kingdomCards[cardToRead][0].cardColor + self.kingdomCards[cardToRead][0].cardName + "\n")
 		self.send_data(conn, "\033[36m  Description: \033[0m" + self.kingdomCards[cardToRead][0].description + "\n")
 		self.send_data(conn, "\n\033[32m  Cost:\033[0m $" + str(self.kingdomCards[cardToRead][0].cost) + "\n")
-		self.send_data(conn, ("\n\n\033[1;31m  Press (y) when finished...\033[0m\n")
-		done = self.recv_data(conn, 1024)
+		self.send_data(conn, ("\n\n\033[1;31m  Press (y) when finished...\033[0m\n"))
 		while True:
-			done = self.recv_data(conn, 1024)
-			if done != 'y':
+			done_reading = self.recv_data(conn, 1024)
+			if done_reading != 'y':
 				self.send_data(conn, "\n\n\033[1;31m  Press (y) when finished...\033[0m\n")
 				continue
 			else:

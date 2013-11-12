@@ -230,7 +230,7 @@ class MoatCard(KingdomCard):
 		self.type = type
 		if self.type == 'attack':
 			while True:
-				self.send_data(self.player.playerConn, "Would you like to reveal your Moat? (y)es or (no)\n"
+				self.send_data(self.player.playerConn, "Would you like to reveal your Moat? (y)es or (no)\n")
 				choice = self.recv_data(self.player.playerConn, 1024)
 				if choice.lower() not in ['y', 'n']:
 					continue
