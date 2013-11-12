@@ -8,7 +8,7 @@ import signal
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
-server_address = ('192.168.0.111', 4898)
+server_address = ('sh.schwartzpubcom', 4898)
 print >>sys.stderr, 'connecting to %s port %s' % server_address
 sock.connect(server_address)
 
@@ -39,7 +39,6 @@ def recv():
 
 def senddata():
 	while True:
-		print '>>'
 		data = raw_input("")
 		if not data: 
 			continue
