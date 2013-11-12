@@ -8,7 +8,7 @@ import signal
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
-server_address = ('sh.schwartzpubcom', 4898)
+server_address = ('sh.schwartzpub.com', 4898)
 print >>sys.stderr, 'connecting to %s port %s' % server_address
 sock.connect(server_address)
 
