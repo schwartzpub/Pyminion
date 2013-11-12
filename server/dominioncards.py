@@ -134,6 +134,16 @@ class CellarCard(KingdomCard):
 	def __init__(self):
 		pass
 	
+	def recv_data (self, client, length):
+	        data = client.recv(length)
+	        if not data: return data
+	        return data
+
+	def send_data (self, client, data):
+	        message = str(data)
+	        return client.send(message)
+
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.player.playerTurnActions += 1
@@ -153,7 +163,7 @@ class CellarCard(KingdomCard):
 			else:
 				for i in range(int(discard)):
 					while True:
-						self.send_data(self.playerPlayerConn, "Choose a card to discard.\n")
+						self.send_data(self.player.playerConn, "Choose a card to discard.\n")
 						choice = self.recv_data(self.player.playerConn, 1024)
 						try:
 							choice = int(choice)
@@ -178,6 +188,15 @@ class ChapelCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -214,6 +233,15 @@ class MoatCard(KingdomCard):
 	def __init__(self):
 		pass
 	
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.draw = 2
@@ -225,6 +253,7 @@ class MoatCard(KingdomCard):
 			else:
 				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]		
+		return
 
 	def reactCard(self, player, roster, type):
 		self.type = type
@@ -253,6 +282,15 @@ class ChancellorCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -289,6 +327,7 @@ class VillageCard(KingdomCard):
 			self.player.playerHand.append(self.player.playerDeck[0])
 			del self.player.playerDeck[0]
 		self.player.playerTurnActions += 1
+		return
 
 class WoodcutterCard(KingdomCard):
 	cardEval = "WoodcutterCard"
@@ -300,10 +339,20 @@ class WoodcutterCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.player.playerTurnBuys += 1
 		self.player.playerTurnTreasure += 2
+		return
 
 class WorkshopCard(KingdomCard):
 	cardEval = "WorkshopCard"
@@ -315,10 +364,20 @@ class WorkshopCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
 		self.player.gainCard(4, 1, 'discard', 'any')		
+		return
 
 class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
@@ -330,6 +389,15 @@ class BureaucratCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.roster = roster
@@ -356,7 +424,7 @@ class BureaucratCard(KingdomCard):
 							except:
 								continue
 							if each.playerHand[int(choice) - 1].cardType != 'victory':
-								self_send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
+								self_self.send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
 								continue
 							else:
 								for player in self.roster:
@@ -370,6 +438,7 @@ class BureaucratCard(KingdomCard):
 					break
 		for each in self.roster:
 			each.reactionImmunity = False
+		return
 
 class FeastCard(KingdomCard):
 	cardEval = "FeastCard"
@@ -380,6 +449,15 @@ class FeastCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -393,6 +471,7 @@ class FeastCard(KingdomCard):
 					continue
 			break
 		self.player.gainCard(5, 1, 'discard', 'any')
+		return
 
 class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
@@ -417,6 +496,15 @@ class MilitiaCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.roster = roster
@@ -425,8 +513,6 @@ class MilitiaCard(KingdomCard):
 		while True:
 			for each in self.roster:
 				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
-#					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
-#					os.system('clear')
 					self.send_data(each.playerConn, "You must discard down to three cards in hand.\n")
 					each.printPlayerReveal()
 					while len(each.playerHand) > 3:
@@ -445,6 +531,7 @@ class MilitiaCard(KingdomCard):
 			break
 		for each in self.roster:
 			each.reactionImmunity = False
+		return
 						
 class MoneylenderCard(KingdomCard):
 	cardEval = "MoneylenderCard"
@@ -455,6 +542,15 @@ class MoneylenderCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -486,6 +582,15 @@ class RemodelCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
@@ -505,6 +610,7 @@ class RemodelCard(KingdomCard):
 					del self.player.playerHand[int(choice) - 1]
 					self.player.gainCard(value, 1, 'discard', 'any')
 					break
+		return
 
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"
@@ -516,10 +622,20 @@ class SmithyCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		for i in range(3):
 			self.player.drawOneCard()
+		return
 		
 class SpyCard(KingdomCard):
 	cardEval = "SpyCard"
@@ -531,6 +647,15 @@ class SpyCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -557,6 +682,7 @@ class SpyCard(KingdomCard):
 						break
 		for each in self.roster:
 			each.reactionImmunity = False
+		return
 
 class ThiefCard(KingdomCard):
 	cardEval = "ThiefCard"
@@ -568,6 +694,15 @@ class ThiefCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -625,6 +760,7 @@ class ThiefCard(KingdomCard):
 				pass
 		for each in self.roster:
 			each.reactionImmunity = False
+		return
 
 class ThroneRoomCard(KingdomCard):
 	cardEval = "ThroneRoomCard"
@@ -636,6 +772,15 @@ class ThroneRoomCard(KingdomCard):
 	def __init__(self):
 		pass
 	
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.roster = roster
@@ -645,7 +790,8 @@ class ThroneRoomCard(KingdomCard):
 		else:
 			self.player.printPlayerReveal()
 			while True:
-				i = raw_input("  " + self.description + ": ")
+				self.send_data(self.player.playerConn, self.description + "\n")
+				i = self.recv_data(self.player.playerConn, 1024)
 				try:
 					i = int(i)
 					i = i - 1
@@ -662,7 +808,7 @@ class ThroneRoomCard(KingdomCard):
 					playTwice.playCard(self.player, self.roster, self.deck)
 					playTwice.playCard(self.player, self.roster, self.deck)
 					break
-
+		return
 
 class CouncilRoomCard(KingdomCard):
 	cardEval = "CouncilRoomCard"
@@ -673,6 +819,15 @@ class CouncilRoomCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -685,7 +840,8 @@ class CouncilRoomCard(KingdomCard):
 				each.drawOneCard()
 			else:
 				return
-		
+		return
+
 class FestivalCard(KingdomCard):
 	cardEval = "FestivalCard"
 	cardName = "Festival"
@@ -696,11 +852,21 @@ class FestivalCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.player.playerTurnActions += 2
 		self.player.playerTurnBuys += 1
 		self.player.playerTurnTreasure += 2
+		return
 
 class LaboratoryCard(KingdomCard):
 	cardEval = "LaboratoryCard"
@@ -712,11 +878,21 @@ class LaboratoryCard(KingdomCard):
 	def __init__(self):
 		pass
 	
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		for i in range(2):
 			self.player.drawOneCard()
 		self.player.playerTurnActions += 1
+		return
 
 class LibraryCard(KingdomCard):
 	cardEval = "LibraryCard"
@@ -727,6 +903,15 @@ class LibraryCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -756,6 +941,7 @@ class LibraryCard(KingdomCard):
 		for i in range(self.setAsideNum):
 			self.player.playerDiscard.append(self.player.playerSetAside[-1])
 			del self.player.playerSetAside[-1]
+		return
 
 class MarketCard(KingdomCard):
 	cardEval = "MarketCard"
@@ -767,12 +953,22 @@ class MarketCard(KingdomCard):
 	def __init__(self):
 		pass
 
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
+
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.player.drawOneCard()
 		self.player.playerTurnActions += 1
 		self.player.playerTurnBuys += 1
 		self.player.playerTurnTreasure += 1
+		return
 
 class MineCard(KingdomCard):
 	cardEval = "MineCard"
@@ -783,6 +979,15 @@ class MineCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -800,6 +1005,7 @@ class MineCard(KingdomCard):
 				del self.player.playerHand[i - 1]
 				self.player.gainCard(value, 1, 'hand', 'treasure')
 				break
+		return
 
 class WitchCard(KingdomCard):
 	cardEval = "WitchCard"
@@ -811,6 +1017,15 @@ class WitchCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -827,6 +1042,7 @@ class WitchCard(KingdomCard):
 				pass
 		for each in self.roster:
 			each.reactionImmunity = False
+		return
 
 class AdventurerCard(KingdomCard):
 	cardEval = "AdventurerCard"
@@ -837,6 +1053,15 @@ class AdventurerCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+        def recv_data (self, client, length):
+                data = client.recv(length)
+                if not data: return data
+                return data
+
+        def send_data (self, client, data):
+                message = str(data)
+                return client.send(message)
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -860,3 +1085,4 @@ class AdventurerCard(KingdomCard):
 			else:
 				self.player.playerHand.append(self.player.playerSetAside[-1])
 				del self.player.playerSetAside[-1]
+		return

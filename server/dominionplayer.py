@@ -160,7 +160,7 @@ class Player(object):
 					elif response == 'p':
 						self.playCard()
 						actionPhaseCount += 1
-						continue
+						break
 					elif response == 'b':
 						self.send_data(self.playerConn, "Which card would you like to buy?\n")
 						while True:
@@ -207,6 +207,7 @@ class Player(object):
 						self.send_data(self.playerConn, " Which card would you like to read: (n)umber?\n")
 						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
 						continue
+				continue
 			return
 
 	def playCard(self):
@@ -236,7 +237,7 @@ class Player(object):
 					del self.playerHand[i - 1]
 					self.playerTurnActions -= 1
 					self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
-					break
+					return
 			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
 				self.send_data(self.playerConn, "Invalid choice, you cannot play this card.\n")
 		return

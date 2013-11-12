@@ -120,6 +120,10 @@ def build_game(client, addr, name):
 		else:
 			game[player] = client_list[player][0]
 			[send_data(client_list[player][0], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m\n")]
+			send_data(client, "\033[1;32m" + player + " has been added to the game. Current players: ",)
+			for key in game.keys():
+				send_data(client, str(key) + ",",)
+			send_data(client, "\033[0m\n")
 
 #starts the server up indefinitely
 def start_server ():
