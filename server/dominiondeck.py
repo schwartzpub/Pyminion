@@ -154,10 +154,18 @@ class DomDeck(object):
 			self.send_data(user.playerConn, "   [4]" + self.kingdomCards['card4'][0].cardColor +  self.kingdomCards['card4'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card4'][0].cardName))) + " (" + str(len(self.kingdomCards['card4'])).zfill(2) + "): $" + str(self.kingdomCards['card4'][0].cost))
 			self.send_data(user.playerConn, "   [9]" + self.kingdomCards['card9'][0].cardColor +  self.kingdomCards['card9'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card9'][0].cardName))) + " (" + str(len(self.kingdomCards['card9'])).zfill(2) + "): $" + str(self.kingdomCards['card9'][0].cost) + "\n")
 
-	def readCard(self, number):
+	def readCard(self, number, conn):
 		cardToRead = 'card' + str(int(number))
-		os.system('clear')
-		print "\033[36m  Card Name: \033[0m" + self.kingdomCards[cardToRead][0].cardColor + self.kingdomCards[cardToRead][0].cardName
-		print "\033[36m  Description: \033[0m" + self.kingdomCards[cardToRead][0].description
-		print "\n\033[32m  Cost:\033[0m $" + str(self.kingdomCards[cardToRead][0].cost)
-		raw_input("\n\n\033[1;31m  Press key...\033[0m")
+		self.send_data(conn, 'CLRSCRN_FULL\n')
+		self.send_data(conn, "\033[36m  Card Name: \033[0m" + self.kingdomCards[cardToRead][0].cardColor + self.kingdomCards[cardToRead][0].cardName + "\n")
+		self.send_data(conn, "\033[36m  Description: \033[0m" + self.kingdomCards[cardToRead][0].description + "\n")
+		self.send_data(conn, "\n\033[32m  Cost:\033[0m $" + str(self.kingdomCards[cardToRead][0].cost) + "\n")
+		self.send_data(conn, ("\n\n\033[1;31m  Press (y) when finished...\033[0m\n")
+		done = self.recv_data(conn, 1024)
+		while True:
+			done = self.recv_data(conn, 1024)
+			if done != 'y':
+				self.send_data(conn, "\n\n\033[1;31m  Press (y) when finished...\033[0m\n")
+				continue
+			else:
+				return
