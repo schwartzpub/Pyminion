@@ -571,6 +571,8 @@ class MoneylenderCard(KingdomCard):
 					break
 		else:
 			return				
+
+		return
 				
 class RemodelCard(KingdomCard):
 	cardEval = "RemodelCard"

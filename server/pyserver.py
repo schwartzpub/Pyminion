@@ -2,7 +2,7 @@
 
 #This is the Server component.  I will be slowly injecting the game component into this portion to run the game.
  
-import socket, struct, threading, cgi, random
+import socket, struct, threading, cgi, random, time
 from dominiondeck import *
 from dominioncards import *
 from dominionplayer import *
@@ -28,7 +28,6 @@ class Lobby_Client(threading.Thread):
 		lock = threading.Lock()
 	        while 1:
 			while self.game:
-				self.clients.remove(self.client)
 				continue
 	                data = recv_data(self.client, 1024)
 	                if not data: break
@@ -50,6 +49,32 @@ class Lobby_Client(threading.Thread):
 	        del client_list[self.name]
 	        lock.release()
 	        self.client.close()
+
+#dominion logo
+def display_logo(client):
+	send_data(client, "\033[36m        :                                                                       \n")	
+	send_data(client, "\033[36m   /:  X#                                                                       \n")	
+	send_data(client, "\033[36m  /##/ XX                                                                       \n")	
+	send_data(client, "\033[36m  /#########X                                                                   \n")	
+	send_data(client, "\033[36m    -#XX#X####                                           -                      \n")	
+	send_data(client, "\033[36m    X# /X  /##/                        ##               X#                      \n")	
+	send_data(client, "\033[36m   //X /X   X##                   -    X:-  --    -- - -:X            --    :---\n")	
+	send_data(client, "\033[36m   -XX-/X   -##:X######XX/X#X   X#/   :#X- -X##   -X#- -X#XXX#######X###X   -XX \n")	
+	send_data(client, "\033[36m    #///X  /X##--     -/X###X   ##/    #/   :/##   /X  /X#:-       -/X###X   X/ \n")	
+	send_data(client, "\033[36m    #/X/X ##X##           #### X:/#    #/   // X#  /X X#X#            /X###  // \n")	
+	send_data(client, "\033[36m    X://X ##X#X          :X##X # -#    #/   /X  X#-:X X##X            XX##/# // \n")	
+	send_data(client, "\033[36m    XX /X /###X:        -X##/##-  #/   #/   /X   /#X/  X##X/-       -:XXX  /#X/ \n")	
+	send_data(client, "\033[36m    #/ /X   #X############/  /X  -##  -#X-  XX-   -#/   X###########XX#X-   -#: \n")	
+	send_data(client, "\033[36m  :##/XX#/-#X           :---     :--- :--- ---:    -/  ----           ---    -: \n")	
+	send_data(client, "\033[36m ##########X                                                                    \n")	
+	send_data(client, "\033[36m #/:--:XX##                                                                     \n")	
+	send_data(client, "\033[36m -/    X:                                                                       \n")	
+	send_data(client, "\033[36m  -:   X-                                                                       \n")	
+	send_data(client, "\033[36m -:    X                                                                        \n")	
+	send_data(client, "\033[36m-      -                                                                        \n")		
+	send_data(client, "\033[0m\n")
+	time.sleep(2)
+	return
 
 #method to receive data, had a bit of decoding whch has been removed.
 def recv_data (client, length):
@@ -81,8 +106,8 @@ def list_users(client):
 
 #handles game starting
 def start_handle(user_dict, user):
-        newGame = DomGame()
-        newGame.startGame(user_dict, user)
+        newGame[user] = DomGame()
+        newGame[user].startGame(user_dict, user)
 
 #handles game building
 def build_game(client, addr, name):
@@ -122,7 +147,7 @@ def build_game(client, addr, name):
 			[send_data(client_list[player][0], "\033[1;32m** GAME: you have been added to a new game with " + name + "!\033[0m\n")]
 			send_data(client, "\033[1;32m" + player + " has been added to the game. Current players: ",)
 			for key in game.keys():
-				send_data(client, str(key) + ",",)
+				send_data(client, "( " + str(key) + " ) ",)
 			send_data(client, "\033[0m\n")
 
 #starts the server up indefinitely
@@ -134,6 +159,8 @@ def start_server ():
 	while 1:
 		conn, addr = s.accept()
 		print 'Connection from:', addr
+		display_logo(conn)
+		send_data(conn, 'CLRSCRN_FULL\n')
 		send_data(conn, "Welcome to the Pyminion server, please select a username:\n")
 		while True:
 			client_name = str(recv_data(conn, 1024))
@@ -193,7 +220,7 @@ class DomGame(object):
                                 self.playerTurn = 0
                                 continue
                         break
-
+newGame = {}
 clients = []
 client_list = {}
 room_list = {}
