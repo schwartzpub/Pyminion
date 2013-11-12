@@ -81,24 +81,31 @@ class Player(object):
 		while True:
 			for i in range(self.number):
 				if self.type == 'treasure':
-					choice = raw_input("    Please select a Treasure card that costs up to $" + str(self.cost) + ": ")
+					self.send_data(self.playerConn, "Please select a Treasure card that costs up to $" + str(self.cost) + ":\n")
+					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in ['l', 'g', 's', 'c']:
-						print "    Invalid selection, please choose a Treasure card!"
+						self.send_data(self.playerConn, "Invalid selection, please choose a Treasure card!\n")
+						continue
 				elif self.type == 'kingdom':
-					choice = raw_input("    Please select a Kingdom card that costs up to $" + str(self.cost) + ": ")
+					self.send_data(self.playerConn, "Please select a Kingdom card that costs up to $" + str(self.cost) + ":\n")
+					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-						print "    Invalid selection, please choose a Kingdom card!"
+						self.send_data(self.playerConn, "Invalid selection, please choose a Kingdom card!\n")
+						continue
 				elif self.type == 'victory':
-					choice = raw_input("    Please select a Victory card that costs up to $" + str(self.cost) + ": ")
+					self.send_data(self.playerConn, "Please select a Victory card that costs up to $" + str(self.cost) + ":\n")
+					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in ['o', 'p', 'd', 'e']:
-						print "    Invalid Selection, please choose a Victory card!"
+						self.send_data(self.playerConn, "Invalid Selection, please choose a Victory card!\n")
+						continue
 				elif self.type == 'any':
-					choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
+					self.send_data(self.playerConn, "Please select a card that costs up to $" + str(self.cost) + ":\n")
+					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in choices:
-						print "    Invalid selection, please choose another card!"
+						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
-						print "    Invalid selection, please choose another card!"
+						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 					else:
 						p = self.deck.provinceCards
 						d = self.deck.duchyCards
@@ -109,7 +116,7 @@ class Player(object):
 						u = self.deck.curseCards
 						choice = eval(choice.lower())
 						if choice[0].cost > self.cost:
-							print "    Invalid selection, please choose another card!"
+							self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 						else:
 							self.location.append(choice[0])
 							del choice[0]
@@ -117,7 +124,7 @@ class Player(object):
 				elif choice.lower() in kingdom:
 					x = 'card' + choice.lower()
 					if self.deck.kingdomCards[x][0].cost > cost:
-						print "    Invalid selection, please choose another card!"
+						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 					else:
 						self.location.append(self.deck.kingdomCards[x][0])
 						del self.deck.kingdomCards[x][0]
