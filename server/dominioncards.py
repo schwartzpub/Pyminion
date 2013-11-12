@@ -139,17 +139,31 @@ class CellarCard(KingdomCard):
 		self.player.playerTurnActions += 1
 		while True:
 			cards = len(self.player.playerHand)
-			discard = raw_input("    How many cards would you like to discard? ")
+			self.send_data(self.player.playerConn, "How many cards would you like to discard?\n")
+			discard = self.recv_data(self.player.playerConn, 1024)
+			try:
+				discard = int(discard)
+			except:
+				continue
 			if int(discard) == 0:
 				break
 			elif int(discard) > len(self.player.playerHand):
-				print "    That is not a valid number of cards!"
+				self.send_data(self.player.playerConn, "That is not a valid number of cards!\n")
 				continue
 			else:
 				for i in range(int(discard)):
-					choice = int(raw_input("      Choose a card to discard: "))
-					self.player.playerDiscard.append(self.player.playerHand[choice - 1])
-					del self.player.playerHand[choice - 1]
+					while True:
+						self.send_data(self.playerPlayerConn, "Choose a card to discard.\n")
+						choice = self.recv_data(self.player.playerConn, 1024)
+						try:
+							choice = int(choice)
+						except:
+							continue
+						if (choice - 1) not in range(len(self.player.playerHand)):
+							continue					
+						self.player.playerDiscard.append(self.player.playerHand[choice - 1])
+						del self.player.playerHand[choice - 1]
+						break
 				for i in range(int(discard)):
 					self.player.checkPlayerDeck()
 					self.player.drawOneCard()
@@ -173,9 +187,14 @@ class ChapelCard(KingdomCard):
 			trash = len(self.player.playerHand)
 		while True:
 			for i in range(trash):
-				choice = int(raw_input("    Choose a card to trash ([0] for none): "))
+				self.send_data(self.player.playerConn, "Choose a card to trash (0 for none):\n")
+				choice = self.recv_data(self.player.playerConn, 1024)
+				try:
+					choice = int(choice)
+				except:
+					continue
 				if (choice - 1) not in range(len(self.player.playerHand)):
-					print "    That is not a valid choice!"
+					self.send_data(self.player.playerConn, "That is not a valid choice!\n")
 					continue
 				elif (choice - 1 ) == -1:
 					break
@@ -207,15 +226,17 @@ class MoatCard(KingdomCard):
 				self.player.playerHand.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]		
 
-	def reactCard(self, player, type):
+	def reactCard(self, player, roster, type):
 		self.type = type
 		if self.type == 'attack':
 			while True:
-				choice = raw_input("  " + self.player.playerName + ": Would you like to reveal your Moat ((y)es or (n)o)? ")
+				self.send_data(self.player.playerConn, "Would you like to reveal your Moat? (y)es or (no)\n"
+				choice = self.recv_data(self.player.playerConn, 1024)
 				if choice.lower() not in ['y', 'n']:
 					continue
 				elif choice.lower() == 'y':
-					print "  " + self.player.playerName + " reveals a Moat!" 
+					for each in roster:
+						self.send_data(self.each.playerConn, self.player.playerName + " reveals a Moat!\n")
 					self.player.reactionImmunity = True
 					break
 				elif choice.lower() == 'n':
@@ -237,9 +258,11 @@ class ChancellorCard(KingdomCard):
 		self.player = player
 		self.player.playerTurnTreasure += 2
 		while True:
-			discard = raw_input("Would you like to place your deck into your discard pile (y/n)? ")
+			self.send_data(self.player.playerConn, "Would you like to place your deck into your discard pile? (y)es or (n)o\n")
+			discard = self.recv_data(self.player.playerConn, 1024)
 			if discard.lower() not in ['y', 'n']:
-				raw_input("That is not an available option, please choose (y)es or (n)o! ")
+				self.send_data(self.player.playerConn, "That is not an available option, please choose (y)es or (n)o!\n")
+				continue
 			elif discard.lower() == 'n':
 				break
 			elif discard.lower() == 'y':
@@ -322,28 +345,29 @@ class BureaucratCard(KingdomCard):
 		for each in self.roster:
 			while True:
 				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
-					raw_input("    " + each.playerName + "`s reaction... Press any key when ready.")
-					os.system('clear')
 					if any(i.cardType == 'victory' for i in each.playerHand):
 						while True:
 							print " ",
 							each.printPlayerReveal()
-							choice = raw_input("\n Which card would you like to reveal? ")
+							self.send_data(each.playerConn, "Which card would you like to reveal?\n")
+							choice = self.recv_data(each.playerConn, 1024)
+							try:
+								choice = int(choice)
+							except:
+								continue
 							if each.playerHand[int(choice) - 1].cardType != 'victory':
-								print "\n Invalid choice, please choose a Victory card."
+								self_send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
 								continue
 							else:
-								self.reveal.append("\n " + each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".")
+								for player in self.roster:
+									self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".\n")
 								break
 					else:
-						self.reveal.append("\n" + each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".")
-					break
+						for player in self.roster:
+							self.send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".\n")
+						break
 				else:
 					break
-		raw_input(" Press any key to return to " + self.player.playerName + "`s hand...")
-		os.system('clear')
-		print "\n " + ' '.join(self.reveal)
-		raw_input(" Press any key when done viewing reveal. ")
 		for each in self.roster:
 			each.reactionImmunity = False
 
@@ -401,14 +425,19 @@ class MilitiaCard(KingdomCard):
 		while True:
 			for each in self.roster:
 				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
-					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
-					os.system('clear')
-					print each.playerName + ": you must discard down to three cards in hand."
+#					raw_input(each.playerName + "`s reaction... Press any key when ready. ")
+#					os.system('clear')
+					self.send_data(each.playerConn, "You must discard down to three cards in hand.\n")
 					each.printPlayerReveal()
 					while len(each.playerHand) > 3:
-						choice = raw_input("   Please choose a card to discard: ")
+						self.send_data(each.playerConn, "Please choose a card to discard:\n")
+						choice = self.recv_data(each.playerConn, 1024)
+						try:
+							choice = int(choice)
+						except:
+							continue
 						if (int(choice) - 1) not in range(len(each.playerHand)):
-							raw_input("   Please choose an appropriate card! ")
+							self.send_data(each.playerConn, "Please choose an appropriate card!\n")
 						else:
 							each.playerDiscard.append(each.playerHand[int(choice) - 1])
 							del each.playerHand[int(choice) - 1]
@@ -431,15 +460,18 @@ class MoneylenderCard(KingdomCard):
 		self.player = player
 		if any(i.cardName == 'Copper' for i in self.player.playerHand):
 			while True:
-				choice = raw_input(" Would you like to trash a copper (y/n)? ")
-				if choice.lower() == 'y':
+				self.send_data(self.player.playerConn, "Would you like to trash a copper? (y)es or (n)o\n")
+				choice = self.recv_data(self.player.playerConn, 1024)
+				if choice.lower() not in ['y', 'n']:
+					continue
+				elif choice.lower() == 'y':
 					while True:
 						for card in self.player.playerHand:
 							if card.cardName == 'Copper':
 								self.player.playerHand.remove(card)
 								self.player.playerTurnTreasure += 3
 								break
-				else:
+				elif choice.lower() == 'n':
 					break
 		else:
 			return				
@@ -459,9 +491,15 @@ class RemodelCard(KingdomCard):
 		self.deck = deck
 		if len(self.player.playerHand) > 0:
 			while True:
-				choice = raw_input("\n Please choose a card to trash: ")
+				self.send_data(self.player.playerConn, "Please choose a card to trash:\n")
+				choice = self.recv_data(self.player.playerConn, 1024)
+				try:
+					choice = int(choice)
+				except:
+					continue
 				if (int(choice) - 1) not in range(len(self.player.playerHand)):
-					print "Please choose an appropriate card! "
+					self.send_data(self.player.playerConn, "Please choose an appropriate card!\n")
+					continue
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
 					del self.player.playerHand[int(choice) - 1]
@@ -503,13 +541,16 @@ class SpyCard(KingdomCard):
 		for each in self.roster:
 			if each.reactionImmunity == False and each.durationImmunity == False:
 				each.checkPlayerDeck()
-				print each.playerName + " reveals: " + each.playerDeck[0].cardName + "..."
+				for player in self.roster:
+					self.send_data(player.playerConn, each.playerName + " reveals: " + each.playerDeck[0].cardName + "...\n")
 				while True:
-					choice = raw_input("  Would you like this player to (k)eep or (d)iscard this card? ")
+					self.send_data(self.player.playerConn, "Would you like this player to (k)eep or (d)iscard this card?\n")
 					if choice.lower() not in ['d', 'k']:
 						continue
 					elif choice.lower() == 'd':
 						each.playerDiscard.append(each.playerDeck[0])
+						for player in self.roster:
+							self.send_data(player.playerConn, each.playerName + " discards: " +  each.playerDeck[0].cardName + ".\n")
 						del each.playerDeck[0]
 						break
 					elif choice.lower() == 'k':
@@ -540,9 +581,11 @@ class ThiefCard(KingdomCard):
 					each.checkPlayerDeck()
 					self.trash.append(each.playerDeck[-1])
 					del each.playerDeck[-1]
-				print "  " + each.playerName + " reveals: [1]" + self.trash[0].cardName + " and [2]" + self.trash[1].cardName + "."
+				for player in self.roster:
+					self.send_data(player.playerConn, each.playerName + " reveals: [1]" + self.trash[0].cardName + " and [2]" + self.trash[1].cardName + ".\n")
 				while True:
-					choice = raw_input("  Which card would you like to trash: ")
+					self.send_data(self.player.playerConn, "Which card would you like to trash?\n")
+					choice = self.recv_data(self.player.playerConn, 1024)
 					try:
 						choice = int(choice)
 					except:
@@ -552,21 +595,30 @@ class ThiefCard(KingdomCard):
 					else:
 						if choice == 1:
 							each.playerDeck.append(self.trash[1])
+							for player in self.roster:
+								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[0] + "\n")
 							del self.trash[1]
 							break
 						elif choice == 2:
 							each.playerDeck.append(self.trash[0])
+							for player in self.roster:
+								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[1] + "\n")
 							del self.trash[0]
 							break
 				while True:
-					choice = raw_input(" Would you like to (k)eep or (t)rash: " + self.trash[0].cardName + "?")
+					self.send_data(self.player.playerConn, "Would you like to (k)eep or (t)rash: " + self.trash[0].cardName + "?\n")
+					choice = self.recv_data(self.player.playerConn, 1024)
 					if choice.lower() not in ['k', 't']:
 						continue
 					elif choice.lower() == 'k':
 						self.player.playerDiscard.append(self.trash[0])
+						for player in self.roster:
+							self.send_data(player.playerConn, self.player.playerName + " keeps " + each.player.playerName + "`s " + self.treash[0] + ".\n")
 						del self.trash[0]
 						break
 					elif choice.lower() == 't':
+						for player in self.roster:
+							self.send_data(player.playerConn, self.player.playerName + " trashes " + each.player.playerName + "`s " + self.treash[0] + ".\n")
 						del self.trash[0]
 						break
 			else:
@@ -687,7 +739,8 @@ class LibraryCard(KingdomCard):
 				del i
 			else:
 				while True:
-					choice = raw_input("  Would you like to (k)eep or (s)et this card aside? ")
+					self.send_data(self.player.playerConn, "Would you like to (k)eep or (s)et this card aside?\n")
+					choice = self.recv_data(self.player.playerConn, 1024)
 					if choice.lower() not in ['k', 's']:
 						continue
 					elif choice.lower() == k:
@@ -734,7 +787,8 @@ class MineCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		while True:
-			i = raw_input("  Trash a treasure card from your hand: ")
+			self.send_data(self.player.playerConn, "Trash a treasure card from your hand.\n")
+			i = self.recv_data(self.player.playerConn, 1024)
 			try:
 				i = int(i)
 			except:
