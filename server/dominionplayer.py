@@ -157,12 +157,12 @@ class Player(object):
 					elif response == 'b':
 						self.send_data(self.playerConn, "Which card would you like to buy?\n")
 						while True:
-							i = raw_input("  Which card would you like to buy? ")
-							if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-								print "  Invalid selection!"
-							elif i.lower() in ['o', 'l', 't']:
+							choice = str(self.recv_data(self.playerConn, 1024))
+							if choice.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+								self.send_data(self.playerConn,"Invalid selection!\n"
+							elif choice.lower() in ['o', 'l', 't']:
 									continue
-							elif i.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
+							elif choice.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
 								p = self.deck.provinceCards
 								d = self.deck.duchyCards
 								e = self.deck.estateCards
@@ -172,7 +172,7 @@ class Player(object):
 								u = self.deck.curseCards
 								i = eval(i.lower())
 								if i[0].cost > self.playerTurnTreasure:
-									raw_input("  You do not have enough to buy this." )
+									self.send_data(self.playerConn, " You do not have enough to buy this.\n" )
 									continue
 								else:
 									self.playerPlay.append(i[0])
@@ -180,10 +180,10 @@ class Player(object):
 									del i[0]
 									self.playerTurnBuys -= 1
 									break
-							elif int(i) in range(10):
+							elif int(choice) in range(10):
 								x = 'card' + i
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
-									raw_input("  You do not have enough to buy this." )
+									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									continue
 							else:
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
@@ -194,16 +194,18 @@ class Player(object):
 							break
 						self.buyPhase()
 						break
-					elif actionType.lower() == 'a':
+					elif response.lower() == 'a':
 						self.cleanUpPhase()
-					elif actionType.lower() == 'r':
-						self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
+					elif response.lower() == 'r':
+						self.send_data(self.playerConn, " Which card would you like to read: (n)umber?\n")
+						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
 						continue
 			return
 
 	def playCard(self):
 		while True:
-			i = raw_input("  Which card would you like to play: (n)umber? ")
+			self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
+			i = str(self.recv_data(self.playerConn, 1024))
 			try:
 				i = int(i)
 			except:
@@ -220,7 +222,7 @@ class Player(object):
 				break
 			elif self.playerHand[i - 1].action == True:
 				if self.playerTurnActions <= 0:
-					raw_input("  You have no Actions left this turn, please (B)uy or (P)ass: ")
+					self.send_data(self.playerConn, "You have no Actions left this turn, please (b)uy or p(a)ss.\n")
 					self.buyPhase()
 				else:
 					self.playerPlay.append(self.playerHand[i - 1])
@@ -229,7 +231,7 @@ class Player(object):
 					self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
 					break
 			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
-				print "  Invalid choice, you cannot play a Victory card."
+				self.send_data(self.playerConn, "Invalid choice, you cannot play this card.\n")
 		return
 
 	def buyPhase(self):
@@ -238,12 +240,14 @@ class Player(object):
 		else:
 			while True:
 				self.printPlayerHand()
-				actionType = raw_input("\n\n What would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? ")
-				if actionType.lower() not in ['p', 'b', 'a', 'r']:
+				self.send_data(self.playerConn("\nWhat would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead?\n"))
+				choice = str(self.recv_data(self.playerConn, 1024))
+				if choice.lower() not in ['p', 'b', 'a', 'r']:
 					continue
-				elif actionType.lower() == 'p':
+				elif choice.lower() == 'p':
 					while True:
-						i = raw_input("  Which card would you like to play: (n)umber? ")
+						self.send_data(self.playerConn("Which card would you like to play: (n)umber?\n")
+						i = self.recv_data(self.playerConn, 2014)
 						try:
 							i = int(i)
 						except:
@@ -251,7 +255,7 @@ class Player(object):
 						if i > len(self.playerHand):
 							continue
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
-							raw_input("  You are in the buy phase, please play a Treasure. ")
+							self.send_data(self.playerConn, " You are in the buy phase, please play a Treasure.\n"))
 							continue
 						else:
 							self.playerPlay.append(self.playerHand[i - 1])
@@ -260,9 +264,10 @@ class Player(object):
 							break
 				elif actionType.lower() == 'b':
 					while True:
-						i = raw_input("  Which card would you like to buy? ")
+						self.send_data(self.playerConn, "Which card would you like to buy?\n")
+						i = self.recv_data(self.playerConn, 2014)
 						if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
-							print "  Invalid selection!"
+							self.send_data(self.playerConn,  " Invalid selection!\n")
 						elif i.lower() in ['o', 'l', 't']:
 							continue
 						elif i.lower() in ['p', 'd', 'e', 'u', 'l', 'g', 's', 'c', 'o']:
@@ -275,7 +280,7 @@ class Player(object):
 							u = self.deck.curseCards	
 							i = eval(i.lower())
 							if i[0].cost > self.playerTurnTreasure:
-								raw_input("  You do not have enough to buy this." )
+								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
 								self.playerPlay.append(i[0])
@@ -286,7 +291,7 @@ class Player(object):
 						elif int(i) in range(10):
 							x = 'card' + i
 							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
-								raw_input("  You do not have enough to buy this." )
+								self.send_data(self.playerconn, " You do not have enough to buy this.\n")
 								continue
 							else:
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
@@ -299,7 +304,8 @@ class Player(object):
 				elif actionType.lower() == 'a':
 					self.cleanUpPhase()
 				elif actionType.lower() == 'r':
-					self.deck.readCard(raw_input("  Which card would you like to read: (n)umber? "))
+					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
+					self.deck.readCard(self.recv_data(self.playerConn, 1024))
 					break
 			if self.playerTurnBuys < 1:
 				self.cleanUpPhase()
@@ -431,7 +437,8 @@ class Player(object):
 			pass
 
 	def endGame(self):
-		print "GAME OVER! The scores are: "
+		for each in self.roster:
+			self.send_data(each.playerConn, "GAME OVER! The scores are: ")
 		for each in self.roster:
 			each.playerDeckToDiscard()
 			for i in len(each.playerHand):
@@ -440,4 +447,4 @@ class Player(object):
 			for i in each.playerDiscard:
 				if i.cardName == 'Gardens': each.totalVictory += (1 * (len(each.playerDiscard) // 10))
 				else: each.totalVictory += i.victoryPoints
-			print "  " + each.playerName + ": " + str(each.totalVictory)
+			self.send_data(each.playerConn, "  " + each.playerName + ": " + str(each.totalVictory + "\n")
