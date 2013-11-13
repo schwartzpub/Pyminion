@@ -78,6 +78,7 @@ def display_logo(client):
 
 #method to receive data, had a bit of decoding whch has been removed.
 def recv_data (client, length):
+
 	data = client.recv(length)
 	if not data: return data
 	return data
@@ -210,6 +211,10 @@ class DomGame(object):
         def playLoop(self):
                 players = len(self.playerRost)
                 while True:
+			try:
+				players = int(players)
+			except:
+				continue
                         if self.playerTurn < players:
 				self.playerRost[self.playerTurn].playerTurn = True
                                 self.playerRost[self.playerTurn].playTurn()

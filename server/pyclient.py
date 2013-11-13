@@ -11,6 +11,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('sh.schwartzpub.com', 4898)
 print >>sys.stderr, 'connecting to %s port %s' % server_address
 sock.connect(server_address)
+sock.settimeout(10)
 
 def recv():
 	dat = ''
@@ -38,7 +39,7 @@ def recv():
 #		print data
 
 def senddata():
-	while True:
+	while True:		
 		data = raw_input("")
 		if not data: 
 			continue
@@ -47,6 +48,7 @@ def senddata():
 			break
 		else:
 			sock.sendall(data)
+			sock.settimeout(None)
 			continue
 
 def signal_handler(signal, frame):

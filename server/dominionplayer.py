@@ -34,9 +34,17 @@ class Player(object):
 		return client.send(message)
 
 	def recv_data (self, client, length):
-	        data = client.recv(length)
-        	if not data: return data
-        	return data
+		try:
+			self.playerConn.settimeout(600)
+		        data = client.recv(length)
+			self.playerConn.settimeout(None)
+	       	 	if not data: self.send_data(self.playerConn, "Please choose an option...\n")
+	       	 	return data
+
+		except socket.timeout:
+			for user in self.roster:
+				if user.playerConn != self.playerConn:
+					self.send_data(user.playerConn, self.playerName + " is taking a bit to respond...be patient.\n")
 
 	def drawToPlayer(self, hand):
 		if hand == 0:
@@ -429,8 +437,8 @@ class Player(object):
 			user.playerConn.send("\n")
 
 
-	def printPlayerReveal(self, roster):
-		for user in roster:
+	def printPlayerReveal(self):
+		for user in self.roster:
 			user.playerConn.send("\nCurrent hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
 				user.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
