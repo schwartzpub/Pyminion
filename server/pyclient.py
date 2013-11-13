@@ -16,7 +16,11 @@ sock.settimeout(10)
 def recv():
 	dat = ''
 	while True:
-        	data=sock.recv(1)
+		try:
+        		data=sock.recv(1)
+		except:
+			sock.close()
+			sys.exit(0)
        		if data == "\n":
 			if dat == 'CLRSCRN_FULL':
 				os.system('clear')
@@ -52,9 +56,12 @@ def senddata():
 			continue
 
 def signal_handler(signal, frame):
-	sock.sendall('!quit')
-	sock.close()
-	sys.exit(0)
+	try:
+		sock.sendall('!quit')
+		sock.close()
+		sys.exit(0)
+	except:
+		pass
 
 signal.signal(signal.SIGINT, signal_handler)
 
