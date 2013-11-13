@@ -1,5 +1,6 @@
 #Dominion card classes
 import os
+import time
 
 #Treasure Cards
 class TreasureCard(object):
@@ -207,6 +208,7 @@ class ChapelCard(KingdomCard):
 		while True:
 			for i in range(trash):
 				self.send_data(self.player.playerConn, "Choose a card to trash (0 for none):\n")
+				self.player.printHandUpdate()
 				choice = self.recv_data(self.player.playerConn, 1024)
 				try:
 					choice = int(choice)
@@ -245,7 +247,7 @@ class MoatCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.draw = 2
-		for i in draw:
+		for i in range(self.draw):
 			if len(self.player.playerDeck) == 0:
 				self.player.playerDiscardToDeck()
 				self.player.playerHand.append(self.player.playerDeck[0])
@@ -411,31 +413,30 @@ class BureaucratCard(KingdomCard):
 			self.player.playerDeck.insert(0, self.deck.silverCards[0])
 			del self.deck.silverCards[0]
 		for each in self.roster:
-			while True:
-				if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
-					if any(i.cardType == 'victory' for i in each.playerHand):
-						while True:
-							print " ",
-							each.printPlayerReveal()
-							self.send_data(each.playerConn, "Which card would you like to reveal?\n")
-							choice = self.recv_data(each.playerConn, 1024)
-							try:
-								choice = int(choice)
-							except:
-								continue
-							if each.playerHand[int(choice) - 1].cardType != 'victory':
-								self_self.send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
-								continue
-							else:
-								for player in self.roster:
-									self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".\n")
-								break
-					else:
-						for player in self.roster:
-							self.send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".\n")
-						break
+			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
+				if any(i.cardType == 'victory' for i in each.playerHand):
+					while True:
+						each.printPlayerReveal()
+						self.send_data(each.playerConn, "Which card would you like to reveal?\n")
+						choice = self.recv_data(each.playerConn, 1024)
+						try:
+							choice = int(choice)
+						except:
+							continue
+						if each.playerHand[int(choice) - 1].cardType != 'victory':
+							self_self.send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
+							continue
+						else:
+							for player in self.roster:
+								self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".\n")
+							break
 				else:
+					for player in self.roster:
+						self.send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".\n")
 					break
+			else:
+				pass
+		time.sleep(3)
 		for each in self.roster:
 			each.reactionImmunity = False
 		return
@@ -567,6 +568,8 @@ class MoneylenderCard(KingdomCard):
 								self.player.playerHand.remove(card)
 								self.player.playerTurnTreasure += 3
 								break
+						else:
+							pass
 				elif choice.lower() == 'n':
 					break
 		else:
@@ -599,6 +602,7 @@ class RemodelCard(KingdomCard):
 		if len(self.player.playerHand) > 0:
 			while True:
 				self.send_data(self.player.playerConn, "Please choose a card to trash:\n")
+				self.player.printHandUpdate()
 				choice = self.recv_data(self.player.playerConn, 1024)
 				try:
 					choice = int(choice)
@@ -672,6 +676,7 @@ class SpyCard(KingdomCard):
 					self.send_data(player.playerConn, each.playerName + " reveals: " + each.playerDeck[0].cardName + "...\n")
 				while True:
 					self.send_data(self.player.playerConn, "Would you like this player to (k)eep or (d)iscard this card?\n")
+					choice = self.recv_data(self.player.playerConn, 1024)
 					if choice.lower() not in ['d', 'k']:
 						continue
 					elif choice.lower() == 'd':
@@ -790,13 +795,12 @@ class ThroneRoomCard(KingdomCard):
 		if not any(i.action == True for i in self.player.playerHand):
 			return
 		else:
-			self.player.printPlayerReveal()
+			self.player.printHandUpdate()
 			while True:
 				self.send_data(self.player.playerConn, self.description + "\n")
 				i = self.recv_data(self.player.playerConn, 1024)
 				try:
 					i = int(i)
-					i = i - 1
 				except:
 					continue
 				if i not in range(len(self.player.playerHand)):
@@ -804,8 +808,8 @@ class ThroneRoomCard(KingdomCard):
 				elif self.player.playerHand[i - 1].action != True:
 					continue
 				else:
-					playTwice = self.player.playerHand[i - 1]
 					self.player.playerPlay.append(self.player.playerHand[i - 1])
+					playTwice = self.player.playerPlay[-1]
 					del self.player.playerHand[i - 1]
 					playTwice.playCard(self.player, self.roster, self.deck)
 					playTwice.playCard(self.player, self.roster, self.deck)
@@ -921,6 +925,7 @@ class LibraryCard(KingdomCard):
 		self.setAsideNum = 0
 		while len(self.player.playerHand) < 7:
 			i = self.player.playerDeck[0]
+			self.send_data(self.player.playerConn, "You have drawn: " + i.cardName + "\n")
 			if i.action != True:
 				self.player.playerHand.append(i)
 				del i
@@ -930,11 +935,11 @@ class LibraryCard(KingdomCard):
 					choice = self.recv_data(self.player.playerConn, 1024)
 					if choice.lower() not in ['k', 's']:
 						continue
-					elif choice.lower() == k:
+					elif choice.lower() == 'k':
 						self.player.playerHand.append(i)
 						del i
 						break
-					elif choice.lower() == s:
+					elif choice.lower() == 's':
 						self.setAside = True
 						self.setAsideNum += 1
 						self.player.playerSetAside.append(i)

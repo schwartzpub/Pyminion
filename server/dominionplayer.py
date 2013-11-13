@@ -204,7 +204,7 @@ class Player(object):
 									self.playerTurnBuys -= 1
 									break
 							elif int(choice) in range(10):
-								x = 'card' + i
+								x = 'card' + (int(choice) - 1)
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									continue
@@ -390,10 +390,11 @@ class Player(object):
 		if self.type == 'attack':
 			for each in self.roster:
 				if each != self:
-					if any(i.reaction == True for i in each.playerHand):
-						each.playerHand[i].reactCard('attack')
-					else:
-						pass
+					for card in each.playerHand:
+						if card.reaction == True:
+							card.reactCard('attack')
+						else:
+							pass
 		elif self.type == 'gain':
 			for each in self.roster:
 				if any(i.reaction == True for i in each.playerHand):
@@ -425,6 +426,12 @@ class Player(object):
 		self.rosterFake = []
 		self.rosterFake.append(self)
 		self.printRosterHand(self.rosterFake)
+
+	def printHandUpdate(self):
+#		self.playerConn.send("\nCurrent Hand (" + self.playerName + "):\n ")
+		for card in self.playerHand:
+			self.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
+		self.playerConn.send("\n")
 
 	def printRosterHand(self, roster):
 		self.deck.printDeckCards(roster)
@@ -490,3 +497,5 @@ class Player(object):
 				if i.cardName == 'Gardens': each.totalVictory += (1 * (len(each.playerDiscard) // 10))
 				else: each.totalVictory += i.victoryPoints
 			self.send_data(each.playerConn, "  " + each.playerName + ": " + str(each.totalVictory + "\n"))
+		time.sleep(10)
+		self.game.playerTurn = end
