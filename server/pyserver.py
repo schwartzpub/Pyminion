@@ -109,6 +109,9 @@ def list_users(client):
 def start_handle(user_dict, user):
         newGame[user] = DomGame()
         newGame[user].startGame(user_dict, user)
+	print "You shouldnt see this when a new game is started..."
+	del newGame[user]
+	return
 
 #handles game building
 def build_game(client, addr, name):
@@ -127,6 +130,11 @@ def build_game(client, addr, name):
 					client_list[p][1].ingame()
 					print "client " + p + " joined game"
 				start_handle(game, user)
+				for p in game:
+					send_data(client_list[p][0], 'CLRSCRN_FULL\n')
+					clients.append(client_list[p][0])
+					client_list[p][1].resume()
+					print "client " + p + " finished game"
 				break
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m\n")
@@ -207,24 +215,25 @@ class DomGame(object):
                         player.drawHand()
                         player.game = self
                 self.playLoop()
+		print "Game over 2"
+		return
 
         def playLoop(self):
                 players = len(self.playerRost)
                 while True:
 			try:
-				players = int(players)
+				self.playerTurn = int(self.playerTurn)
 			except:
-				continue
+				print "Game over"
+				break
                         if self.playerTurn < players:
-				self.playerRost[self.playerTurn].playerTurn = True
                                 self.playerRost[self.playerTurn].playTurn()
-				self.playerRost[self.playerTurn].playerTurn = False
-                                self.playerTurn += 1
                                 continue
                         elif self.playerTurn >= players:
                                 self.playerTurn = 0
                                 continue
                         break
+		return
 newGame = {}
 clients = []
 client_list = {}

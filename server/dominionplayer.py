@@ -150,12 +150,15 @@ class Player(object):
 		self.checkSetAside()
 		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
 			self.actionPhase()
+			return
 		else:
 			self.playerTurnActions = 1
 			self.playerTurnBuys = 1
 			self.playerTurnTreasure = 0
 			self.playerTreasurePlayed = False
 			self.actionPhase()
+			print "checkwin in playTurn"
+			return
 		return
 
 	def actionPhase(self):
@@ -164,6 +167,7 @@ class Player(object):
 		while True:
 			if self.playerTurnActions == 0 or self.playerTreasurePlayed == True:
 				self.buyPhase()
+				return
 			else:
 				self.printPlayerHand()
 				self.send_data(self.playerConn, "\nWhat would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead? \n")
@@ -202,7 +206,7 @@ class Player(object):
 										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardName + ".\n")
 									del i[0]
 									self.playerTurnBuys -= 1
-									break
+									return
 							elif int(choice) in range(10):
 								x = 'card' + (int(choice) - 1)
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
@@ -215,18 +219,20 @@ class Player(object):
 									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardName + ".\n")
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
-								break
+								return
 							break
 						self.buyPhase()
-						break
+						return
 					elif response.lower() == 'a':
 						self.cleanUpPhase()
+						return
 					elif response.lower() == 'r':
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
 						continue
-				continue
-			return
+				break
+		print "checkwin in action phase"
+		return
 
 	def playCard(self):
 		while True:
@@ -247,11 +253,12 @@ class Player(object):
 				self.playerTurnActions = 0
 				self.playerTreasurePlayed = True
 				self.buyPhase()
-				break
+				return
 			elif self.playerHand[i - 1].action == True:
 				if self.playerTurnActions <= 0:
 					self.send_data(self.playerConn, "You have no Actions left this turn, please (b)uy or p(a)ss.\n")
 					self.buyPhase()
+					return
 				else:
 					self.playerPlay.append(self.playerHand[i - 1])
 					for each in self.roster:
@@ -267,6 +274,7 @@ class Player(object):
 	def buyPhase(self):
 		if self.playerTurnBuys == 0:
 			self.cleanUpPhase()
+			return
 		else:
 			while True:
 				self.printPlayerHand()
@@ -325,7 +333,7 @@ class Player(object):
 						elif int(i) in range(10):
 							x = 'card' + i
 							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
-								self.send_data(self.playerconn, " You do not have enough to buy this.\n")
+								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
@@ -339,14 +347,17 @@ class Player(object):
 					break
 				elif choice.lower() == 'a':
 					self.cleanUpPhase()
+					return
 				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					self.deck.readCard(self.recv_data(self.playerConn, 1024))
 					break
 			if self.playerTurnBuys < 1:
 				self.cleanUpPhase()
+				return
 			else:
 				self.buyPhase()
+				return
 		return
 
 	def cleanUpPhase(self):
@@ -367,11 +378,12 @@ class Player(object):
 		time.sleep(1)
 		self.drawHand()
 		self.checkWin()
-		self.passTurn()
+		print "checkwin in cleanup"
+		return
 
 	def passTurn(self):
 		self.game.playerTurn += 1
-		self.game.playLoop()
+		return
 
 	def checkDurationEffects(self):
 		if self.playerHasDuration == True:
@@ -480,22 +492,29 @@ class Player(object):
 				pass
 		if len(self.deck.provinceCards) == 0:
 			self.endGame()
+			print "checkwin ended with provs"
+			return
 		elif self.zeroTally == 3:
 			self.endGame()
+			return
 		else:
-			pass
-
+			self.passTurn()
+			return
 	def endGame(self):
 		for each in self.roster:
 			self.send_data(each.playerConn, "GAME OVER! The scores are: ")
 		for each in self.roster:
 			each.playerDeckToDiscard()
-			for i in len(each.playerHand):
+			for i in range(len(each.playerHand)):
 				each.playerDiscard.append(each.playerHand[0])
 				del each.playerHand[0]
 			for i in each.playerDiscard:
 				if i.cardName == 'Gardens': each.totalVictory += (1 * (len(each.playerDiscard) // 10))
 				else: each.totalVictory += i.victoryPoints
-			self.send_data(each.playerConn, "  " + each.playerName + ": " + str(each.totalVictory + "\n"))
+			for player in self.roster:
+				self.send_data(player.playerConn, "  " + each.playerName + ": " + str(each.totalVictory) + " ",)
+		for player in self.roster:
+			self.send_data(player.playerConn, "\n")
 		time.sleep(10)
-		self.game.playerTurn = end
+		self.game.playerTurn = 'gameover'
+		return
