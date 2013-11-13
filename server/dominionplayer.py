@@ -15,7 +15,7 @@ class Player(object):
 		self.playerTurnActions = 0
 		self.playerTurnBuys = 0
 		self.playerTurnTreasure = 0
-		self.playerRoom = ''
+		self.playerActionsPlayed = 0
 		self.deck = ''
 		self.playerDiscard = []
 		self.roster = roster
@@ -150,6 +150,7 @@ class Player(object):
 		self.checkSetAside()
 		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
 			self.actionPhase()
+			self.cleanUpPhase()
 			return
 		else:
 			self.playerTurnActions = 1
@@ -157,7 +158,7 @@ class Player(object):
 			self.playerTurnTreasure = 0
 			self.playerTreasurePlayed = False
 			self.actionPhase()
-			print "checkwin in playTurn"
+			self.cleanUpPhase()
 			return
 		return
 
@@ -224,14 +225,14 @@ class Player(object):
 						self.buyPhase()
 						return
 					elif response.lower() == 'a':
-						self.cleanUpPhase()
+#						self.cleanUpPhase()
 						return
 					elif response.lower() == 'r':
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
 						continue
-				break
-		print "checkwin in action phase"
+				continue
+#		self.cleanUpPhase()
 		return
 
 	def playCard(self):
@@ -250,7 +251,6 @@ class Player(object):
 				for each in self.roster:
 					self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardName + ".\n")
 				del self.playerHand[i - 1]
-				self.playerTurnActions = 0
 				self.playerTreasurePlayed = True
 				self.buyPhase()
 				return
@@ -265,6 +265,7 @@ class Player(object):
 						self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardName + ".\n")
 					del self.playerHand[i - 1]
 					self.playerTurnActions -= 1
+					self.playerActionsPlayed += 1
 					self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
 					return
 			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
@@ -273,7 +274,7 @@ class Player(object):
 
 	def buyPhase(self):
 		if self.playerTurnBuys == 0:
-			self.cleanUpPhase()
+#			self.cleanUpPhase()
 			return
 		else:
 			while True:
@@ -329,7 +330,7 @@ class Player(object):
 									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardName + ".\n")
 								del i[0]
 								self.playerTurnBuys -= 1
-								break
+								return
 						elif int(i) in range(10):
 							x = 'card' + i
 							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
@@ -342,18 +343,18 @@ class Player(object):
 									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardName + ".\n")
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
-								break
+								return
 						break
 					break
 				elif choice.lower() == 'a':
-					self.cleanUpPhase()
+#					self.cleanUpPhase()
 					return
 				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					self.deck.readCard(self.recv_data(self.playerConn, 1024))
 					break
 			if self.playerTurnBuys < 1:
-				self.cleanUpPhase()
+#				self.cleanUpPhase()
 				return
 			else:
 				self.buyPhase()
@@ -361,6 +362,7 @@ class Player(object):
 		return
 
 	def cleanUpPhase(self):
+		self.playerActionsPlayed = 0
 		self.playerTurnActions = 1
 		self.playerTurnBuys = 1
 		self.playerTurnTreasure = 0
@@ -378,11 +380,10 @@ class Player(object):
 		time.sleep(1)
 		self.drawHand()
 		self.checkWin()
-		print "checkwin in cleanup"
 		return
 
 	def passTurn(self):
-		self.game.playerTurn += 1
+#		self.game.playerTurn += 1
 		return
 
 	def checkDurationEffects(self):
@@ -404,7 +405,7 @@ class Player(object):
 				if each != self:
 					for card in each.playerHand:
 						if card.reaction == True:
-							card.reactCard('attack')
+							card.reactCard(self.player, self.roster, 'attack')
 						else:
 							pass
 		elif self.type == 'gain':
@@ -492,7 +493,6 @@ class Player(object):
 				pass
 		if len(self.deck.provinceCards) == 0:
 			self.endGame()
-			print "checkwin ended with provs"
 			return
 		elif self.zeroTally == 3:
 			self.endGame()

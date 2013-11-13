@@ -228,6 +228,10 @@ class DomGame(object):
 				break
                         if self.playerTurn < players:
                                 self.playerRost[self.playerTurn].playTurn()
+				if self.playerTurn == 'gameover':
+					break
+				self.playerTurn += 1
+				print "play loop looping"
                                 continue
                         elif self.playerTurn >= players:
                                 self.playerTurn = 0

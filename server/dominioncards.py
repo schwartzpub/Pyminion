@@ -165,6 +165,7 @@ class CellarCard(KingdomCard):
 				for i in range(int(discard)):
 					while True:
 						self.send_data(self.player.playerConn, "Choose a card to discard.\n")
+						self.player.printHandUpdate()
 						choice = self.recv_data(self.player.playerConn, 1024)
 						try:
 							choice = int(choice)
@@ -562,16 +563,15 @@ class MoneylenderCard(KingdomCard):
 				if choice.lower() not in ['y', 'n']:
 					continue
 				elif choice.lower() == 'y':
-					while True:
-						for card in self.player.playerHand:
-							if card.cardName == 'Copper':
-								self.player.playerHand.remove(card)
-								self.player.playerTurnTreasure += 3
-								break
+					for card in self.player.playerHand:
+						if card.cardName == 'Copper':
+							self.player.playerHand.remove(card)
+							self.player.playerTurnTreasure += 3
+							return
 						else:
 							pass
 				elif choice.lower() == 'n':
-					break
+					return
 		else:
 			return				
 
@@ -686,9 +686,12 @@ class SpyCard(KingdomCard):
 						del each.playerDeck[0]
 						break
 					elif choice.lower() == 'k':
+						for player in self.roster:
+							self.send_data(player.playerConn, each.playerName + " keeps: " +  each.playerDeck[0].cardName + ".\n")
 						break
 		for each in self.roster:
 			each.reactionImmunity = False
+		time.sleep(3)
 		return
 
 class ThiefCard(KingdomCard):
@@ -738,13 +741,13 @@ class ThiefCard(KingdomCard):
 						if choice == 1:
 							each.playerDeck.append(self.trash[1])
 							for player in self.roster:
-								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[0] + "\n")
+								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[0].cardName + "\n")
 							del self.trash[1]
 							break
 						elif choice == 2:
 							each.playerDeck.append(self.trash[0])
 							for player in self.roster:
-								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[1] + "\n")
+								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[1].cardName + "\n")
 							del self.trash[0]
 							break
 				while True:
@@ -755,12 +758,12 @@ class ThiefCard(KingdomCard):
 					elif choice.lower() == 'k':
 						self.player.playerDiscard.append(self.trash[0])
 						for player in self.roster:
-							self.send_data(player.playerConn, self.player.playerName + " keeps " + each.player.playerName + "`s " + self.treash[0] + ".\n")
+							self.send_data(player.playerConn, self.player.playerName + " keeps " + each.player.playerName + "`s " + self.trash[0].cardName + ".\n")
 						del self.trash[0]
 						break
 					elif choice.lower() == 't':
 						for player in self.roster:
-							self.send_data(player.playerConn, self.player.playerName + " trashes " + each.player.playerName + "`s " + self.treash[0] + ".\n")
+							self.send_data(player.playerConn, self.player.playerName + " trashes " + each.player.playerName + "`s " + self.trash[0].cardName + ".\n")
 						del self.trash[0]
 						break
 			else:
@@ -1000,6 +1003,7 @@ class MineCard(KingdomCard):
 		self.player = player
 		while True:
 			self.send_data(self.player.playerConn, "Trash a treasure card from your hand.\n")
+			self.player.printHandUpdate()
 			i = self.recv_data(self.player.playerConn, 1024)
 			try:
 				i = int(i)
