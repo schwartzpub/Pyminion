@@ -17,11 +17,11 @@ def recv():
 	dat = ''
 	while True:
 		try:
-        		data=sock.recv(1)
+			data=sock.recv(1)
 		except:
 			sock.close()
 			sys.exit(0)
-       		if data == "\n":
+		if data == "\n":
 			if dat == 'CLRSCRN_FULL':
 				os.system('clear')
 				dat = ''
