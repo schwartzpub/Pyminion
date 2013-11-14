@@ -23,7 +23,7 @@ def recv():
 			sys.exit(0)
 		if data == "\n":
 			if dat == 'CLRSCRN_FULL':
-				os.system('clear')
+				os.system('cls' if os.name=='nt' else 'clear')
 				dat = ''
 				continue
 			else:

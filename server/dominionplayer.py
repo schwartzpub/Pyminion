@@ -289,7 +289,7 @@ class Player(object):
 							i = int(i)
 						except:
 							continue
-						if i > len(self.playerHand):
+						if i > len(self.playerHand) or i <= 0:
 							continue
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
 							self.send_data(self.playerConn, "You are in the buy phase, please play a Treasure.\n")
