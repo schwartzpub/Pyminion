@@ -209,7 +209,7 @@ class Player(object):
 									self.playerTurnBuys -= 1
 									return
 							elif int(choice) in range(10):
-								x = 'card' + (int(choice) - 1)
+								x = 'card' + str(int(choice) - 1)
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									continue
@@ -225,14 +225,12 @@ class Player(object):
 						self.buyPhase()
 						return
 					elif response.lower() == 'a':
-#						self.cleanUpPhase()
 						return
 					elif response.lower() == 'r':
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
 						continue
 				continue
-#		self.cleanUpPhase()
 		return
 
 	def playCard(self):
@@ -274,7 +272,6 @@ class Player(object):
 
 	def buyPhase(self):
 		if self.playerTurnBuys == 0:
-#			self.cleanUpPhase()
 			return
 		else:
 			while True:
@@ -295,7 +292,7 @@ class Player(object):
 							continue
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
 							self.send_data(self.playerConn, "You are in the buy phase, please play a Treasure.\n")
-							continue
+							break
 						else:
 							self.playerPlay.append(self.playerHand[i - 1])
 							self.playerTurnTreasure += self.playerHand[i - 1].value
@@ -347,14 +344,12 @@ class Player(object):
 						break
 					break
 				elif choice.lower() == 'a':
-#					self.cleanUpPhase()
 					return
 				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					self.deck.readCard(self.recv_data(self.playerConn, 1024))
 					break
 			if self.playerTurnBuys < 1:
-#				self.cleanUpPhase()
 				return
 			else:
 				self.buyPhase()
@@ -383,7 +378,6 @@ class Player(object):
 		return
 
 	def passTurn(self):
-#		self.game.playerTurn += 1
 		return
 
 	def checkDurationEffects(self):
@@ -405,7 +399,7 @@ class Player(object):
 				if each != self:
 					for card in each.playerHand:
 						if card.reaction == True:
-							card.reactCard(self.player, self.roster, 'attack')
+							card.reactCard(each, self.roster, 'attack')
 						else:
 							pass
 		elif self.type == 'gain':
@@ -441,7 +435,6 @@ class Player(object):
 		self.printRosterHand(self.rosterFake)
 
 	def printHandUpdate(self):
-#		self.playerConn.send("\nCurrent Hand (" + self.playerName + "):\n ")
 		for card in self.playerHand:
 			self.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
 		self.playerConn.send("\n")

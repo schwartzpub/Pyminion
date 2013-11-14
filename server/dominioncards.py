@@ -258,23 +258,26 @@ class MoatCard(KingdomCard):
 				del self.player.playerDeck[0]		
 		return
 
-	def reactCard(self, player, roster, type):
+	def reactCard(self, reactor, roster, type):
 		self.type = type
+		self.reactor = reactor
+		self.roster = roster
 		if self.type == 'attack':
 			while True:
-				self.send_data(self.player.playerConn, "Would you like to reveal your Moat? (y)es or (no)\n")
-				choice = self.recv_data(self.player.playerConn, 1024)
+				self.send_data(self.reactor.playerConn, "Would you like to reveal your Moat? (y)es or (no)\n")
+				choice = self.recv_data(self.reactor.playerConn, 1024)
 				if choice.lower() not in ['y', 'n']:
 					continue
 				elif choice.lower() == 'y':
-					for each in roster:
-						self.send_data(self.each.playerConn, self.player.playerName + " reveals a Moat!\n")
-					self.player.reactionImmunity = True
+					for each in self.roster:
+						self.send_data(each.playerConn, self.player.playerName + " reveals a Moat!\n")
+					self.reactor.reactionImmunity = True
 					break
 				elif choice.lower() == 'n':
 					break
 		else:
 			return
+		return
 
 class ChancellorCard(KingdomCard):
 	cardEval = "ChancellorCard"
@@ -1078,8 +1081,13 @@ class AdventurerCard(KingdomCard):
 		self.player = player
 		self.treasureCount = 0
 		self.revealCount = 0
+		self.roster = roster
 		while self.treasureCount < 2:
-			print self.player.playerName + " reveals a: " + self.player.playerDeck[0].cardName + "."
+			if len(self.player.playerDeck) > 0:
+				for each in self.roster:
+					self.send_data(each.playerConn, self.player.playerName + " reveals a: " + self.player.playerDeck[0].cardName + ".\n")
+			if len(self.player.playerDeck) == 0:
+				self.player.playerDiscardToDeck()
 			if self.player.playerDeck[0].treasure != True:
 				self.player.playerSetAside.append(self.player.playerDeck[0])
 				del self.player.playerDeck[0]
@@ -1089,8 +1097,8 @@ class AdventurerCard(KingdomCard):
 				del self.player.playerDeck[0]
 				self.revealCount += 1
 				self.treasureCount += 1
-		for i in self.revealCount:
-			if self.player.setAside[-1].treasure != true:
+		for i in range(self.revealCount):
+			if self.player.playerSetAside[-1].treasure != True:
 				self.player.playerDiscard.append(self.player.playerSetAside[-1])
 				del self.player.playerSetAside[-1]
 			else:
