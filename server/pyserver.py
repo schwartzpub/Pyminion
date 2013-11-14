@@ -78,7 +78,6 @@ def display_logo(client):
 
 #method to receive data, had a bit of decoding whch has been removed.
 def recv_data (client, length):
-
 	data = client.recv(length)
 	if not data: return data
 	return data
@@ -101,15 +100,14 @@ def help_commands(client):
 
 #method that prints a user list to the client in the lobby
 def list_users(client):
-	send_data(client, "\033[1;31m** Currently connected clients are:\n")
-	for key in client_list.keys(): send_data(client,"\033[1;31m" + key + " \033[0m",)
+	send_data(client, "\033[1;31m** Currently connected clients are:",)
+	for key in client_list.keys(): send_data(client,"\033[1;31m [ " + key + " ]\033[0m",)
 	send_data(client, "\n")
 
 #handles game starting
 def start_handle(user_dict, user):
         newGame[user] = DomGame()
         newGame[user].startGame(user_dict, user)
-	print "You shouldnt see this when a new game is started..."
 	del newGame[user]
 	return
 
@@ -170,17 +168,17 @@ def start_server ():
 		print 'Connection from:', addr
 		display_logo(conn)
 		send_data(conn, 'CLRSCRN_FULL\n')
-		send_data(conn, "Welcome to the Pyminion server, please select a username:\n")
+		send_data(conn, "\033[36mWelcome to the Pyminion server, please select a username:\033[0m\n")
 		while True:
 			client_name = str(recv_data(conn, 1024))
 			if client_name.lower() in client_list:
-				send_data(conn, "** Sorry, that name is in use, please choose another name.\n")
+				send_data(conn, "\033[1;31m** Sorry, that name is in use, please choose another name.\033[0m\n")
 			else:
 				break
-		send_data(conn, "Welcome to Dominion, " + client_name + "! Currently connected clients are:\n")
+		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[36m! Currently connected clients are: ",)
 		for key in client_list.keys(): send_data(conn, key + " ",)
-		send_data(conn, "\n")
-		for client in clients: send_data(client, "** JOIN: " + client_name + " has joined the server!\n")
+		send_data(conn, "\033[0m\n")
+		for client in clients: send_data(client, "\033[32m** JOIN: " + client_name + " has joined the server!\033[0m\n")
 		clients.append(conn)
 		newClient = Lobby_Client(conn, addr, client_name, clients)
 		client_list[client_name.lower()] = []
@@ -215,7 +213,6 @@ class DomGame(object):
                         player.drawHand()
                         player.game = self
                 self.playLoop()
-		print "Game over 2"
 		return
 
         def playLoop(self):
@@ -224,14 +221,12 @@ class DomGame(object):
 			try:
 				self.playerTurn = int(self.playerTurn)
 			except:
-				print "Game over"
 				break
                         if self.playerTurn < players:
                                 self.playerRost[self.playerTurn].playTurn()
 				if self.playerTurn == 'gameover':
 					break
 				self.playerTurn += 1
-				print "play loop looping"
                                 continue
                         elif self.playerTurn >= players:
                                 self.playerTurn = 0

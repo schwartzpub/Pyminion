@@ -228,7 +228,8 @@ class Player(object):
 						return
 					elif response.lower() == 'r':
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
-						self.deck.readCard(str(self.recv_data(self.playerConn, 1024)))
+						cardToRead = str(self.recv_data(self.playerConn, 1024))
+						self.deck.readCard(cardToRead, self.playerConn)
 						continue
 				continue
 		return
@@ -347,7 +348,7 @@ class Player(object):
 					return
 				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
-					self.deck.readCard(self.recv_data(self.playerConn, 1024))
+					self.deck.readCard(str(self.recv_data(self.playerConn, 1024)), self.playerConn)
 					break
 			if self.playerTurnBuys < 1:
 				return
