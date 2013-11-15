@@ -222,7 +222,7 @@ class ChapelCard(KingdomCard):
 					break
 				else:
 					del self.player.playerHand[choice - 1] 				
-					break
+					continue
 			break
 
 class MoatCard(KingdomCard):
