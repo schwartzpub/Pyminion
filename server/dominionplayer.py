@@ -217,9 +217,10 @@ class Player(object):
 						actionPhaseCount += 1
 						break
 					elif response == 'b':
-						self.send_data(self.playerConn, "Which card would you like to buy?\n")
+						self.send_data(self.playerConn, "Which card would you like to buy ((x) to cancel)?\n")
+						choice = str(self.recv_data(self.playerConn, 1024))
+						if choice.lower() == 'x': break
 						while True:
-							choice = str(self.recv_data(self.playerConn, 1024))
 							if choice.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
 								self.send_data(self.playerConn,"Invalid selection!\n")
 							elif choice.lower() in ['o', 'l', 't']:
@@ -245,7 +246,7 @@ class Player(object):
 									self.playerTurnBuys -= 1
 									return
 							elif int(choice) in range(10):
-								x = 'card' + str(int(choice) - 1)
+								x = 'card' + str(choice)
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									continue
@@ -331,6 +332,7 @@ class Player(object):
 							continue
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
 							self.send_data(self.playerConn, "You are in the buy phase, please play a Treasure.\n")
+							time.sleep(2)
 							break
 						else:
 							self.playerPlay.append(self.playerHand[i - 1])
@@ -341,8 +343,9 @@ class Player(object):
 							break
 				elif choice.lower() == 'b':
 					while True:
-						self.send_data(self.playerConn, "Which card would you like to buy?\n")
+						self.send_data(self.playerConn, "Which card would you like to buy ((x) to cancel)?\n")
 						i = self.recv_data(self.playerConn, 2014)
+						if i.lower() == 'x': continue
 						if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
 							self.send_data(self.playerConn,  " Invalid selection!\n")
 						elif i.lower() in ['o', 'l', 't']:
@@ -476,8 +479,10 @@ class Player(object):
 		self.printRosterHand(self.rosterFake)
 
 	def printHandUpdate(self):
+		i = 1
 		for card in self.playerHand:
-			self.send_data(self.playerConn, card.cardColor + card.cardName + "  \033[0m",)
+			self.send_data(self.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+			i += 1
 		self.send_data(self.playerConn, "\n")
 
 	def printRosterHand(self, roster):
@@ -486,7 +491,7 @@ class Player(object):
 		self.printTurnCount(roster)
 		for user in roster:
 			i = 1
-			self.send_data(user.playerConn, "\nCurrent Hand (" + user.playerName + "):\n ")
+			self.send_data(user.playerConn, "\nCurrent Hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
 				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
 				i += 1

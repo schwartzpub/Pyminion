@@ -149,6 +149,11 @@ class DomDeck(object):
 	def printDeckCards(self, roster):
 		for user in roster:
 			self.send_data(user.playerConn, "CLRSCRN_FULL\n")
+			for each in roster:
+				if each.playerTurn == True:
+					self.send_data(user.playerConn, "\033[42m" + each.playerName + "\033[0m ",)
+				else:
+					self.send_data(user.playerConn, "\033[37m" + each.playerName + "\033[0m ",)
 			self.send_data(user.playerConn, "\n")
 			self.send_data(user.playerConn, "[P]" + ProvinceCard.cardColor + ProvinceCard.cardName + "\033[0m  (" + str(len(self.provinceCards)) + "): $" + str(ProvinceCard.cost) + "   [G]" + GoldCard.cardColor + GoldCard.cardName + "\033[0m    (" + str(len(self.goldCards)) + "): $" + str(GoldCard.cost))
 			self.send_data(user.playerConn, "   [0]" + self.kingdomCards['card0'][0].cardColor +  self.kingdomCards['card0'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card0'][0].cardName))) + " (" + str(len(self.kingdomCards['card0'])).zfill(2) + "): $" + str(self.kingdomCards['card0'][0].cost))
