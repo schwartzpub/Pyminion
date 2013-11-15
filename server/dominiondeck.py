@@ -133,10 +133,16 @@ class DomDeck(object):
 
 	def send_data(self, client, data):
         	message = str(data)
-	        return client.sendall(message)
+		try:
+	        	return client.sendall(message)
+		except:
+			pass
 
 	def recv_data(self, client, length):
-	        data = client.recv(length)
+		try:
+	        	data = client.recv(length)
+		except:
+			pass
 	        if not data: return data
 	        return data
 

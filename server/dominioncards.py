@@ -128,7 +128,7 @@ class KingdomCard(object):
 class CellarCard(KingdomCard):
 	cardEval = "CellarCard"
 	cardName = "Cellar"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+1 Action.  Discard any number of cards.  +1 Card per card discarded."
 	cost = 2
 	action = True
@@ -184,7 +184,7 @@ class CellarCard(KingdomCard):
 class ChapelCard(KingdomCard):
 	cardEval = "ChapelCard"
 	cardName = "Chapel"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Trash up to 4 cards from your hand."
 	cost = 2
 	action = True
@@ -282,7 +282,7 @@ class MoatCard(KingdomCard):
 class ChancellorCard(KingdomCard):
 	cardEval = "ChancellorCard"
 	cardName = "Chancellor"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+$2.  You may immediately put your deck into your discard pile."
 	cost = 3
 	action = True
@@ -316,7 +316,7 @@ class ChancellorCard(KingdomCard):
 class VillageCard(KingdomCard):
 	cardEval = "VillageCard"
 	cardName = "Village"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+1 Card. +2 Actions."
 	cost = 3
 	action = True
@@ -338,7 +338,7 @@ class VillageCard(KingdomCard):
 class WoodcutterCard(KingdomCard):
 	cardEval = "WoodcutterCard"
 	cardName = "Woodcutter"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+1 Buy. +$2."
 	cost = 3	
 	action = True
@@ -363,7 +363,7 @@ class WoodcutterCard(KingdomCard):
 class WorkshopCard(KingdomCard):
 	cardEval = "WorkshopCard"
 	cardName = "Workshop"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Gain a card costing up to $4."
 	cost = 3
 	action = True
@@ -448,7 +448,7 @@ class BureaucratCard(KingdomCard):
 class FeastCard(KingdomCard):
 	cardEval = "FeastCard"
 	cardName = "Feast"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Trash this card. Gain a card costing up to $5."
 	cost = 4
 	action = True
@@ -541,7 +541,7 @@ class MilitiaCard(KingdomCard):
 class MoneylenderCard(KingdomCard):
 	cardEval = "MoneylenderCard"
 	cardName = "Moneylender"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Trash a Copper from your hand. If you do, +$3."
 	cost = 4
 	action = True
@@ -583,7 +583,7 @@ class MoneylenderCard(KingdomCard):
 class RemodelCard(KingdomCard):
 	cardEval = "RemodelCard"
 	cardName = "Remodel"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Trash a card from your hand. Gain a card costing up to $2 more than the trashed card."
 	cost = 4
 	action = True
@@ -624,7 +624,7 @@ class RemodelCard(KingdomCard):
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"
 	cardName = "Smithy"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+3 Cards."
 	cost = 4
 	action = True
@@ -778,7 +778,7 @@ class ThiefCard(KingdomCard):
 class ThroneRoomCard(KingdomCard):
 	cardEval = "ThroneRoomCard"
 	cardName = "Throne Room"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Choose an Action card in your hand. Play it twice."
 	cost = 4
 	action = True
@@ -825,7 +825,7 @@ class ThroneRoomCard(KingdomCard):
 class CouncilRoomCard(KingdomCard):
 	cardEval = "CouncilRoomCard"
 	cardName = "Council Room"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+4 Cards; +1 Buy.  Each other player draws a card."
 	cost = 5
 	action = True
@@ -857,7 +857,7 @@ class CouncilRoomCard(KingdomCard):
 class FestivalCard(KingdomCard):
 	cardEval = "FestivalCard"
 	cardName = "Festival"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+2 Actions; +1 Buy; +$2"
 	cost = 5
 	action = True
@@ -883,7 +883,7 @@ class FestivalCard(KingdomCard):
 class LaboratoryCard(KingdomCard):
 	cardEval = "LaboratoryCard"
 	cardName = "Laboratory"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+2 Cards; +1 Action"
 	cost = 5
 	action = True
@@ -909,7 +909,7 @@ class LaboratoryCard(KingdomCard):
 class LibraryCard(KingdomCard):
 	cardEval = "LibraryCard"
 	cardName = "Library"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Draw until you have 7 cards in hand. You may set aside any Action cards drawn this way, as you draw them; discard the set aside cards after you finish drawing."
 	cost = 5
 	action = True
@@ -959,7 +959,7 @@ class LibraryCard(KingdomCard):
 class MarketCard(KingdomCard):
 	cardEval = "MarketCard"
 	cardName = "Market"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "+1 Card; +1 Action; +1 Buy, +$1"
 	cost = 5
 	action = True
@@ -986,7 +986,7 @@ class MarketCard(KingdomCard):
 class MineCard(KingdomCard):
 	cardEval = "MineCard"
 	cardName = "Mine"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Trash a tresure card from your hand. gain a Treasure card costing up to $3 more; put it into your hand."
 	cost = 5
 	action = True
@@ -1061,7 +1061,7 @@ class WitchCard(KingdomCard):
 class AdventurerCard(KingdomCard):
 	cardEval = "AdventurerCard"
 	cardName = "Adventurer"
-	cardColor = "\033[0m"
+	cardColor = "\033[37m"
 	description = "Reveal cards from your deck until you reveal 2 Treasure cards. Put those Treasure cards in your hand and discard the other revealed cards."
 	cost = 6
 	action = True

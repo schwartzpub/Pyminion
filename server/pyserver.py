@@ -2,7 +2,7 @@
 
 #This is the Server component.  I will be slowly injecting the game component into this portion to run the game.
  
-import socket, struct, threading, cgi, random, time
+import socket, struct, threading, cgi, random, time, errno
 from dominiondeck import *
 from dominioncards import *
 from dominionplayer import *
@@ -83,14 +83,20 @@ def recv_data (client, length):
 
 	except socket.error, e:
 		if e.errno == errno.EPIPE:
-			clients.remove(client)		
+			try:
+				clients.remove(client)		
+			except:
+				pass
 			for key in client_list.keys():
 				if client == client_list[key][0]:
 					print key + " has quit. (Broken Pipe)"
 					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Broken Pipe)\033[0m\n")					
 					del client_list[key]
 		else:
-			clients.remove(client)
+			try:
+				clients.remove(client)
+			except:
+				pass
 			for key in client_list.keys():
 				if client == client_list[key][0]:
 					print key + " has quit. (Connection Reset By peer)"
@@ -107,14 +113,20 @@ def send_data (client, data):
 
 	except socket.error, e:
 		if e.errno == errno.EPIPE:
-			clients.remove(client)
+			try:
+				clients.remove(client)
+			except:
+				pass
 			for key in client_list.keys():
 				if client == client_list[key][0]:
 					print key + " has quit. (Broken Pipe)"
 					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Broken Pipe)\033[0m\n")
 					del client_list[key]
 		else:
-			clients.remove(client)
+			try:
+				clients.remove(client)
+			except:
+				pass
 			for key in client_list.keys():
 				if client == client_list[key][0]:
 					print key + " has quit. (Connection Reset By peer)"
@@ -135,8 +147,12 @@ def help_commands(client):
 #method that prints a user list to the client in the lobby
 def list_users(client):
 	send_data(client, "\033[1;31m** Currently connected clients are:",)
-	for key in client_list.keys(): send_data(client,"\033[1;31m [ " + key + " ]\033[0m",)
-	send_data(client, "\n")
+	for key in client_list.keys():
+		if client_list[key][1].game:
+			send_data(client,"\033[34m [ " + key + " (in game) ]",)
+		else:
+			send_data(client,"\033[1;31m [ " + key + " ]",)
+	send_data(client, "\033[0m\n")
 
 #handles game starting
 def start_handle(user_dict, user):
@@ -156,19 +172,20 @@ def build_game(client, addr, name):
 		player = player.lower()
 		if player not in client_list:
 			if player == '!go' and len(game.keys()) >= 2:
-				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m",) for c in clients]
+				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m\n") for c in clients]
 				for p in game:
 					clients.remove(client_list[p][0])
 					client_list[p][1].ingame()
-					[send_data(c, "[ " + player + " ] ",) for c in clients]
 					print "client " + p + " joined game"
-				[send_data(c, "\n",) for c in clients]
 				start_handle(game, user)
 				for p in game:
-					send_data(client_list[p][0], 'CLRSCRN_FULL\n')
-					clients.append(client_list[p][0])
-					client_list[p][1].resume()
-					print "client " + p + " finished game"
+					try:
+						send_data(client_list[p][0], 'CLRSCRN_FULL\n')
+						clients.append(client_list[p][0])
+						client_list[p][1].resume()
+						print "client " + p + " finished game"
+					except:
+						pass
 				break
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m\n")
@@ -184,6 +201,9 @@ def build_game(client, addr, name):
 				continue
 		elif player == user:
 				send_data(client, "\033[1;31m** You do not need to add yourself to the game, please add other players!\033[0m\n")
+				continue
+		elif client_list[player][1].game == True:
+				send_data(client, "\033[1;31m** Sorry, that user is already in a game.\033[0m\n")
 				continue
 		else:
 			game[player] = client_list[player][0]
@@ -212,9 +232,7 @@ def start_server ():
 				send_data(conn, "\033[1;31m** Sorry, that name is in use, please choose another name.\033[0m\n")
 			else:
 				break
-		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[36m! Currently connected clients are: ",)
-		for key in client_list.keys(): send_data(conn, key + " ",)
-		send_data(conn, "\033[0m\n")
+		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[0m\n")
 		for client in clients: send_data(client, "\033[32m** JOIN: " + client_name + " has joined the server!\033[0m\n")
 		clients.append(conn)
 		newClient = Lobby_Client(conn, addr, client_name, clients)
@@ -255,16 +273,21 @@ class DomGame(threading.Thread):
 		return
 
 	def playLoop(self):
-		players = len(self.playerRost)
 		while True:
+			players = len(self.playerRost)
+			if len(self.playerRost) == 1:
+				break
 			try:
 				self.playerTurn = int(self.playerTurn)
 			except:
 				break
 			if self.playerTurn < players:
+				print "next player"
+				self.playerRost[self.playerTurn].playerTurn = True
 				self.playerRost[self.playerTurn].playTurn()
 				if self.playerTurn == 'gameover':
 					break
+				self.playerRost[self.playerTurn].playerTurn = False
 				self.playerTurn += 1
 				continue
 			elif self.playerTurn >= players:

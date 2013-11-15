@@ -1,8 +1,7 @@
 # Dominion player class to create and manage player objects
 from dominioncards import *
 from dominiondeck import *
-import types
-import time
+import types, time, errno
 
 class Player(object):
 
@@ -31,12 +30,30 @@ class Player(object):
 
 	def send_data (self, client, data):
 		message = str(data)
-		return client.send(message)
+		try:
+			return client.send(message)
+
+		except socket.error, e:
+			if e.errno == errno.EPIPE:
+				for player in self.roster:
+					if player.playerConn == client:
+						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Broken Pipe)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
+						print player.playerName + " has quit mid-game. (Broken Pipe)"
+						self.roster.remove(player)
+						time.sleep(2)
+			else:
+				clients.remove(client)
+				for player in self.roster:
+					if player.playerConn == client:
+						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Connection Reset by Peer)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
+						print player.playerName + " has quit. (Connection Reset By peer)"
+						self.roster.remove(player)
+						time.sleep(2)
 
 	def recv_data (self, client, length):
 		try:
 			self.playerConn.settimeout(600)
-		        data = client.recv(length)
+			data = client.recv(length)
 			self.playerConn.settimeout(None)
 	       	 	if not data: self.send_data(self.playerConn, "Please choose an option...\n")
 	       	 	return data
@@ -45,6 +62,24 @@ class Player(object):
 			for user in self.roster:
 				if user.playerConn != self.playerConn:
 					self.send_data(user.playerConn, self.playerName + " is taking a bit to respond...be patient.\n")
+		except socket.error, e:
+			if e.errno == errno.EPIPE:
+                                for player in self.roster:
+                                        if player.playerConn == client:
+						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Broken Pipe)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
+                                                print player.playerName + " has quit mid-game. (Broken Pipe)"
+                                                self.roster.remove(player)
+						self.game.playerRost.remove(player)
+						time.sleep(2)
+			else:
+                                clients.remove(client)
+                                for player in self.roster:
+                                        if player.playerConn == client:
+						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Connection Reset by Peer)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
+                                                print player.playerName + " has quit. (Connection Reset By peer)"
+                                                self.roster.remove(player)
+						self.game.playerRost.remove(player)
+						time.sleep(2)
 
 	def drawToPlayer(self, hand):
 		if hand == 0:
@@ -145,6 +180,7 @@ class Player(object):
 			break
 
 	def playTurn(self):
+		if len(self.game.playerRost) == 1: return
 		self.checkPlayerDeck()
 		self.checkDurationEffects()
 		self.checkSetAside()
@@ -441,8 +477,8 @@ class Player(object):
 
 	def printHandUpdate(self):
 		for card in self.playerHand:
-			self.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
-		self.playerConn.send("\n")
+			self.send_data(self.playerConn, card.cardColor + card.cardName + "  \033[0m",)
+		self.send_data(self.playerConn, "\n")
 
 	def printRosterHand(self, roster):
 		self.deck.printDeckCards(roster)
@@ -450,35 +486,35 @@ class Player(object):
 		self.printTurnCount(roster)
 		for user in roster:
 			i = 1
-			user.playerConn.send("\nCurrent Hand (" + user.playerName + "):\n ")
+			self.send_data(user.playerConn, "\nCurrent Hand (" + user.playerName + "):\n ")
 			for card in user.playerHand:
-				user.playerConn.send("[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
 				i += 1
-			user.playerConn.send("\n")
+			self.send_data(user.playerConn, "\n")
 
 
 	def printPlayerReveal(self):
 		for user in self.roster:
 			i = 1
-			user.playerConn.send("\nCurrent hand (" + user.playerName + "):\n")
+			self.send_data(user.playerConn, "\nCurrent hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
-				user.playerConn.send("[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
 				i += 1
-			user.playerConn.send("\n")
+			self.send_data(user.playerConn, "\n")
 
 	def printPlayerCount(self, roster):
 		for user in roster:
-			user.playerConn.send("\n\nDeck [",)
+			self.send_data(user.playerConn, "\n\nDeck [",)
 			for i in range(len(user.playerDeck)):
-				user.playerConn.send("|",)
-			user.playerConn.send("] -- Discard [",)
+				self.send_data(user.playerConn, "|",)
+			self.send_data(user.playerConn, "] -- Discard [",)
 			for i in range(len(user.playerDiscard)):
-				user.playerConn.send("|",)
-			user.playerConn.send("]\n\n")
+				self.send_data(user.playerConn, "|",)
+			self.send_data(user.playerConn, "]\n\n")
 
 	def printTurnCount(self, roster):
 		for user in roster:
-			user.playerConn.send("Actions: " + str(user.playerTurnActions) + "    Buys ($" + str(user.playerTurnTreasure) + "): " + str(user.playerTurnBuys) + "\n")
+			self.send_data(user.playerConn, "Actions: " + str(user.playerTurnActions) + "    Buys ($" + str(user.playerTurnTreasure) + "): " + str(user.playerTurnBuys) + "\n")
 
 	def checkWin(self):
 		self.zeroTally = 0
