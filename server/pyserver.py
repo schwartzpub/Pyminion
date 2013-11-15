@@ -26,66 +26,100 @@ class Lobby_Client(threading.Thread):
 
 	def run(self):
 		lock = threading.Lock()
-	        while 1:
+		while 1:
 			while self.game:
 				continue
-	                data = recv_data(self.client, 1024)
-	                if not data: break
-	                if data == '!quit': break
-	                if data == '!start':
-	                        while 1:
-	                                build_game(self.client, self.addr, self.name)
-	                                break
-	                if data == '!help' : help_commands(self.client)
-	                if data == '!list' : list_users(self.client)
-	                if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL\n')
-	                lock.acquire()
-	                [send_data(c, "<" + self.name + "> " + data + "\n") for c in (u for u in self.clients if u != self.client)]
-	                lock.release()
-        	print 'Client closed:', self.addr
-	        [send_data(c, "\033[1;31m** QUIT: " + self.name + " has left the server!\033[0m\n") for c in (u for u in self.clients if u != self.client)]
-	        lock.acquire()
-	        self.clients.remove(self.client)
-	        del client_list[self.name]
-	        lock.release()
-	        self.client.close()
+			data = recv_data(self.client, 1024)
+			if not data: break
+			if data == '!quit': break
+			if data == '!start':
+				while 1:
+					build_game(self.client, self.addr, self.name)
+					break
+			if data == '!help' : help_commands(self.client)
+			if data == '!list' : list_users(self.client)
+			if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL\n')
+			lock.acquire()
+			[send_data(c, "<" + self.name + "> " + data + "\n") for c in (u for u in self.clients if u != self.client)]
+			lock.release()
+		print 'Client closed:', self.addr
+		[send_data(c, "\033[1;31m** QUIT: " + self.name + " has left the server!\033[0m\n") for c in (u for u in self.clients if u != self.client)]
+		lock.acquire()
+		self.clients.remove(self.client)
+		del client_list[self.name]
+		lock.release()
+		self.client.close()
 
 #dominion logo
 def display_logo(client):
-	send_data(client, "\033[36m        :                                                                       \n")	
-	send_data(client, "\033[36m   /:  X#                                                                       \n")	
-	send_data(client, "\033[36m  /##/ XX                                                                       \n")	
-	send_data(client, "\033[36m  /#########X                                                                   \n")	
-	send_data(client, "\033[36m    -#XX#X####                                           -                      \n")	
-	send_data(client, "\033[36m    X# /X  /##/                        ##               X#                      \n")	
-	send_data(client, "\033[36m   //X /X   X##                   -    X:-  --    -- - -:X            --    :---\n")	
-	send_data(client, "\033[36m   -XX-/X   -##:X######XX/X#X   X#/   :#X- -X##   -X#- -X#XXX#######X###X   -XX \n")	
-	send_data(client, "\033[36m    #///X  /X##--     -/X###X   ##/    #/   :/##   /X  /X#:-       -/X###X   X/ \n")	
-	send_data(client, "\033[36m    #/X/X ##X##           #### X:/#    #/   // X#  /X X#X#            /X###  // \n")	
-	send_data(client, "\033[36m    X://X ##X#X          :X##X # -#    #/   /X  X#-:X X##X            XX##/# // \n")	
-	send_data(client, "\033[36m    XX /X /###X:        -X##/##-  #/   #/   /X   /#X/  X##X/-       -:XXX  /#X/ \n")	
-	send_data(client, "\033[36m    #/ /X   #X############/  /X  -##  -#X-  XX-   -#/   X###########XX#X-   -#: \n")	
-	send_data(client, "\033[36m  :##/XX#/-#X           :---     :--- :--- ---:    -/  ----           ---    -: \n")	
-	send_data(client, "\033[36m ##########X                                                                    \n")	
-	send_data(client, "\033[36m #/:--:XX##                                                                     \n")	
-	send_data(client, "\033[36m -/    X:                                                                       \n")	
-	send_data(client, "\033[36m  -:   X-                                                                       \n")	
-	send_data(client, "\033[36m -:    X                                                                        \n")	
-	send_data(client, "\033[36m-      -                                                                        \n")		
-	send_data(client, "\033[0m\n")
-	time.sleep(2)
-	return
+        send_data(client, "\033[36m        :                                                                       \n")        
+        send_data(client, "\033[36m   /:  X#                                                                       \n")        
+        send_data(client, "\033[36m  /##/ XX                                                                       \n")        
+        send_data(client, "\033[36m  /#########X                                                                   \n")        
+        send_data(client, "\033[36m    -#XX#X####                                           -                      \n")        
+        send_data(client, "\033[36m    X# /X  /##/                        ##               X#                      \n")        
+        send_data(client, "\033[36m   //X /X   X##                   -    X:-  --    -- - -:X            --    :---\n")        
+        send_data(client, "\033[36m   -XX-/X   -##:X######XX/X#X   X#/   :#X- -X##   -X#- -X#XXX#######X###X   -XX \n")        
+        send_data(client, "\033[36m    #///X  /X##--     -/X###X   ##/    #/   :/##   /X  /X#:-       -/X###X   X/ \n")        
+        send_data(client, "\033[36m    #/X/X ##X##           #### X:/#    #/   // X#  /X X#X#            /X###  // \n")        
+        send_data(client, "\033[36m    X://X ##X#X          :X##X # -#    #/   /X  X#-:X X##X            XX##/# // \n")        
+        send_data(client, "\033[36m    XX /X /###X:        -X##/##-  #/   #/   /X   /#X/  X##X/-       -:XXX  /#X/ \n")        
+        send_data(client, "\033[36m    #/ /X   #X############/  /X  -##  -#X-  XX-   -#/   X###########XX#X-   -#: \n")        
+        send_data(client, "\033[36m  :##/XX#/-#X           :---     :--- :--- ---:    -/  ----           ---    -: \n")        
+        send_data(client, "\033[36m ##########X                                                                    \n")        
+        send_data(client, "\033[36m #/:--:XX##                                                                     \n")        
+        send_data(client, "\033[36m -/    X:                                                                       \n")        
+        send_data(client, "\033[36m  -:   X-                                                                       \n")        
+        send_data(client, "\033[36m -:    X                                                                        \n")        
+        send_data(client, "\033[36m-      -                                                                        \n")                
+        send_data(client, "\033[0m\n")
+        time.sleep(2)
+        return
 
 #method to receive data, had a bit of decoding whch has been removed.
 def recv_data (client, length):
-	data = client.recv(length)
+	try:
+		data = client.recv(length)
+
+	except socket.error, e:
+		if e.errno == errno.EPIPE:
+			clients.remove(client)		
+			for key in client_list.keys():
+				if client == client_list[key][0]:
+					print key + " has quit. (Broken Pipe)"
+					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Broken Pipe)\033[0m\n")					
+					del client_list[key]
+		else:
+			clients.remove(client)
+			for key in client_list.keys():
+				if client == client_list[key][0]:
+					print key + " has quit. (Connection Reset By peer)"
+					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Connection Reset By Peer)\033[0m\n")
+					del client_list[key]
 	if not data: return data
 	return data
 
 #method to send data, had a bit of encoding which has been removed. 
 def send_data (client, data):
 	message = str(data)
-	return client.send(message)
+	try:
+		return client.send(message)
+
+	except socket.error, e:
+		if e.errno == errno.EPIPE:
+			clients.remove(client)
+			for key in client_list.keys():
+				if client == client_list[key][0]:
+					print key + " has quit. (Broken Pipe)"
+					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Broken Pipe)\033[0m\n")
+					del client_list[key]
+		else:
+			clients.remove(client)
+			for key in client_list.keys():
+				if client == client_list[key][0]:
+					print key + " has quit. (Connection Reset By peer)"
+					for client in clients: send_data(client, "\033[32m** QUIT: " + key + " has been disconnected! (Connection Reset By Peer)\033[0m\n")
+					del client_list[key]
 
 #method that prints the commands to the user in the lobby
 def help_commands(client):
@@ -106,8 +140,8 @@ def list_users(client):
 
 #handles game starting
 def start_handle(user_dict, user):
-        newGame[user] = DomGame()
-        newGame[user].startGame(user_dict, user)
+	newGame[user] = DomGame()
+	newGame[user].startGame(user_dict, user)
 	del newGame[user]
 	return
 
@@ -122,11 +156,13 @@ def build_game(client, addr, name):
 		player = player.lower()
 		if player not in client_list:
 			if player == '!go' and len(game.keys()) >= 2:
-				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m\n") for c in clients]
+				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m",) for c in clients]
 				for p in game:
 					clients.remove(client_list[p][0])
 					client_list[p][1].ingame()
+					[send_data(c, "[ " + player + " ] ",) for c in clients]
 					print "client " + p + " joined game"
+				[send_data(c, "\n",) for c in clients]
 				start_handle(game, user)
 				for p in game:
 					send_data(client_list[p][0], 'CLRSCRN_FULL\n')
@@ -190,7 +226,7 @@ def start_server ():
 #game class, this is used to group players and start a new game
 class DomGame(threading.Thread):
 
-        def __init__(self):
+	def __init__(self):
 		threading.Thread.__init__(self)
 		self.player1 = Player('hold')
 		self.player2 = Player('hold')
@@ -199,42 +235,42 @@ class DomGame(threading.Thread):
 		self.playerWait = [self.player1, self.player2, self.player3, self.player4]
 		self.playerRost = []
 		self.playerTurn = 0
-                pass
+		pass
 
-        def startGame(self, user_dict, user):
-                for user, conn in user_dict.iteritems():
-                        self.playerWait[0].playerName = user
-                        self.playerWait[0].playerConn = conn
-                        self.playerRost.append(self.playerWait[0])
-                        del self.playerWait[0]
-                newDeck = DomDeck()
-                newDeck.buildDeck(len(self.playerRost))
-                for player in self.playerRost:
-                        player.deck = newDeck
-                        player.roster = self.playerRost
-                        player.drawToPlayer(0)
-                        player.drawHand()
-                        player.game = self
-                self.playLoop()
+	def startGame(self, user_dict, user):
+		for user, conn in user_dict.iteritems():
+			self.playerWait[0].playerName = user
+			self.playerWait[0].playerConn = conn
+			self.playerRost.append(self.playerWait[0])
+			del self.playerWait[0]
+		newDeck = DomDeck()
+		newDeck.buildDeck(len(self.playerRost))
+		for player in self.playerRost:
+			player.deck = newDeck
+			player.roster = self.playerRost
+			player.drawToPlayer(0)
+			player.drawHand()
+			player.game = self
+		self.playLoop()
 		return
 
-        def playLoop(self):
-                players = len(self.playerRost)
-                while True:
+	def playLoop(self):
+		players = len(self.playerRost)
+		while True:
 			try:
 				self.playerTurn = int(self.playerTurn)
 			except:
 				break
-                        if self.playerTurn < players:
-                                self.playerRost[self.playerTurn].playTurn()
+			if self.playerTurn < players:
+				self.playerRost[self.playerTurn].playTurn()
 				if self.playerTurn == 'gameover':
 					break
 				self.playerTurn += 1
-                                continue
-                        elif self.playerTurn >= players:
-                                self.playerTurn = 0
-                                continue
-                        break
+				continue
+			elif self.playerTurn >= players:
+				self.playerTurn = 0
+				continue
+			break
 		return
 newGame = {}
 clients = []
