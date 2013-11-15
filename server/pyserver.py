@@ -156,6 +156,7 @@ def build_game(client, addr, name):
 			for key in game.keys():
 				send_data(client, "( " + str(key) + " ) ",)
 			send_data(client, "\033[0m\n")
+	return
 
 #starts the server up indefinitely
 def start_server ():
@@ -187,15 +188,17 @@ def start_server ():
 		client_list[client_name.lower()][1].start()
 
 #game class, this is used to group players and start a new game
-class DomGame(object):
-        player1 = Player('hold')
-        player2 = Player('hold')
-        player3 = Player('hold')
-        player4 = Player('hold')
-        playerWait = [player1, player2, player3, player4]
-        playerRost = []
-        playerTurn = 0
+class DomGame(threading.Thread):
+
         def __init__(self):
+		threading.Thread.__init__(self)
+		self.player1 = Player('hold')
+		self.player2 = Player('hold')
+		self.player3 = Player('hold')
+		self.player4 = Player('hold')
+		self.playerWait = [self.player1, self.player2, self.player3, self.player4]
+		self.playerRost = []
+		self.playerTurn = 0
                 pass
 
         def startGame(self, user_dict, user):

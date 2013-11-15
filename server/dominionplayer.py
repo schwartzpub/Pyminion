@@ -230,11 +230,13 @@ class Player(object):
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						cardToRead = str(self.recv_data(self.playerConn, 1024))
 						self.deck.readCard(cardToRead, self.playerConn)
+						self.printPlayerHand()
 						continue
 				continue
 		return
 
 	def playCard(self):
+		if len(self.playerHand) == 0: return
 		while True:
 			self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
 			i = str(self.recv_data(self.playerConn, 1024))
@@ -348,7 +350,9 @@ class Player(object):
 					return
 				elif choice.lower() == 'r':
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
-					self.deck.readCard(str(self.recv_data(self.playerConn, 1024)), self.playerConn)
+					cardToRead = str(self.recv_data(self.playerConn, 1024))
+					self.deck.readCard(cardToRead, self.playerConn)
+					self.printPlayerHand()
 					break
 			if self.playerTurnBuys < 1:
 				return
@@ -445,17 +449,21 @@ class Player(object):
 		self.printPlayerCount(roster)
 		self.printTurnCount(roster)
 		for user in roster:
+			i = 1
 			user.playerConn.send("\nCurrent Hand (" + user.playerName + "):\n ")
 			for card in user.playerHand:
-				user.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
+				user.playerConn.send("[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				i += 1
 			user.playerConn.send("\n")
 
 
 	def printPlayerReveal(self):
 		for user in self.roster:
+			i = 1
 			user.playerConn.send("\nCurrent hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
-				user.playerConn.send(card.cardColor + card.cardName + "  \033[0m",)
+				user.playerConn.send("[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				i += 1
 			user.playerConn.send("\n")
 
 	def printPlayerCount(self, roster):

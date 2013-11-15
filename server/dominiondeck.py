@@ -10,86 +10,85 @@ from dominioncards import *
 
 #Main Deck Class
 class DomDeck(object):
-	cellarCard = CellarCard()
-	chapelCard = ChapelCard()
-	moatCard = MoatCard()
-	chancellorCard = ChancellorCard()
-	villageCard = VillageCard()
-	woodcutterCard = WoodcutterCard()
-	workshopCard = WorkshopCard()
-	bureaucratCard = BureaucratCard()
-	feastCard = FeastCard()
-	gardensCard = GardensCard()
-	militiaCard = MilitiaCard()
-	moneylenderCard = MoneylenderCard()
-	remodelCard = RemodelCard()
-	smithyCard = SmithyCard()
-	spyCard = SpyCard()
-	thiefCard = ThiefCard()
-	throneRoomCard = ThroneRoomCard()
-	councilRoomCard = CouncilRoomCard()
-	festivalCard = FestivalCard()
-	laboratoryCard = LaboratoryCard()
-	libraryCard = LibraryCard()
-	marketCard = MarketCard()
-	mineCard = MineCard()
-	witchCard = WitchCard()
-	adventurerCard = AdventurerCard()
-		
-	#Treasure Cards --- [Cost, Value]
-	goldCard = GoldCard()
-	silverCard = SilverCard()
-	copperCard = CopperCard()
-	goldCards = []
-	silverCards = []
-	copperCards = []
-
-	#Victory Cards --- [Cost, Value]
-	provinceCard = ProvinceCard()
-	duchyCard = DuchyCard()
-	estateCard = EstateCard()
-	provinceCards = []
-	duchyCards = []
-	estateCards = []
-
-	#Curse Cards --- [Cost, Value]
-	curseCard = CurseCard()
-	curseCards = []
-
-	#kingdom Cards --- [Description, Cost, Value]
-	dominionCards = [
-		cellarCard,
-		moatCard,
-		chancellorCard,
-		chapelCard,
-		villageCard,
-		woodcutterCard,
-		workshopCard,
-		bureaucratCard,
-		feastCard,
-		gardensCard,
-		militiaCard,
-		moneylenderCard,
-		remodelCard,
-		spyCard,
-		smithyCard,
-		thiefCard,
-		throneRoomCard,
-		councilRoomCard,
-		festivalCard,
-		laboratoryCard,
-		libraryCard,
-		marketCard,
-		mineCard,
-		adventurerCard]
-		
-	intrigueCards = []
-
-	kingdomCardPicks = []
-	kingdomCards = {}
 
 	def __init__(self):
-		pass
+		self.cellarCard = CellarCard()
+		self.chapelCard = ChapelCard()
+		self.moatCard = MoatCard()
+		self.chancellorCard = ChancellorCard()
+		self.villageCard = VillageCard()
+		self.woodcutterCard = WoodcutterCard()
+		self.workshopCard = WorkshopCard()
+		self.bureaucratCard = BureaucratCard()
+		self.feastCard = FeastCard()
+		self.gardensCard = GardensCard()
+		self.militiaCard = MilitiaCard()
+		self.moneylenderCard = MoneylenderCard()
+		self.remodelCard = RemodelCard()
+		self.smithyCard = SmithyCard()
+		self.spyCard = SpyCard()
+		self.thiefCard = ThiefCard()
+		self.throneRoomCard = ThroneRoomCard()
+		self.councilRoomCard = CouncilRoomCard()
+		self.festivalCard = FestivalCard()
+		self.laboratoryCard = LaboratoryCard()
+		self.libraryCard = LibraryCard()
+		self.marketCard = MarketCard()
+		self.mineCard = MineCard()
+		self.witchCard = WitchCard()
+		self.adventurerCard = AdventurerCard()
+			
+		#Treasure Cards --- [Cost, Value]
+		self.goldCard = GoldCard()
+		self.silverCard = SilverCard()
+		self.copperCard = CopperCard()
+		self.goldCards = []
+		self.silverCards = []
+		self.copperCards = []		
+	
+		#Victory Cards --- [Cost, Value]
+		self.provinceCard = ProvinceCard()
+		self.duchyCard = DuchyCard()
+		self.estateCard = EstateCard()
+		self.provinceCards = []
+		self.duchyCards = []
+		self.estateCards = []	
+
+		#Curse Cards --- [Cost, Value]
+		self.curseCard = CurseCard()
+		self.curseCards = []
+
+		#kingdom Cards --- [Description, Cost, Value]
+		self.dominionCards = [
+			self.cellarCard,
+			self.moatCard,
+			self.chancellorCard,
+			self.chapelCard,
+			self.villageCard,
+			self.woodcutterCard,
+			self.workshopCard,
+			self.bureaucratCard,
+			self.feastCard,
+			self.gardensCard,
+			self.militiaCard,
+			self.moneylenderCard,
+			self.remodelCard,
+			self.spyCard,
+			self.smithyCard,
+			self.thiefCard,
+			self.throneRoomCard,
+			self.councilRoomCard,
+			self.festivalCard,
+			self.laboratoryCard,
+			self.libraryCard,
+			self.marketCard,
+			self.mineCard,
+			self.adventurerCard]
+		
+		self.intrigueCards = []
+
+		self.kingdomCardPicks = []
+		self.kingdomCards = {}
 
 # Method to build the starting deck, inculding treasure, victory, and kingdom cards
 # Makes a "pile" for each card type, saved as lists and dictionaries
@@ -136,7 +135,7 @@ class DomDeck(object):
         	message = str(data)
 	        return client.sendall(message)
 
-	def recv_data (client, length):
+	def recv_data(self, client, length):
 	        data = client.recv(length)
 	        if not data: return data
 	        return data
