@@ -215,13 +215,16 @@ class ChapelCard(KingdomCard):
 					choice = int(choice)
 				except:
 					continue
-				if (choice - 1) not in range(len(self.player.playerHand)):
+				if choice == 0: break
+				elif (choice - 1) not in range(len(self.player.playerHand)):
 					self.send_data(self.player.playerConn, "That is not a valid choice!\n")
 					continue
 				elif (choice - 1 ) == -1:
 					break
 				else:
 					del self.player.playerHand[choice - 1] 				
+					for user in roster:
+						self.send_data(user.playerConn, self.player.playerName + " has trashed a card.\n")
 					continue
 			break
 
@@ -569,6 +572,8 @@ class MoneylenderCard(KingdomCard):
 					for card in self.player.playerHand:
 						if card.cardName == 'Copper':
 							self.player.playerHand.remove(card)
+							for user in roster:
+								self.send_data(user.playerConn, self.player.playername + " has trashed a Copper.\n")
 							self.player.playerTurnTreasure += 3
 							return
 						else:
@@ -616,6 +621,8 @@ class RemodelCard(KingdomCard):
 					continue
 				else:
 					value = 2 + self.player.playerHand[int(choice) - 1].cost
+					for user in roster:
+						self.send_data(user.playerConn, self.player.playerName + " has trashed a card.\n")
 					del self.player.playerHand[int(choice) - 1]
 					self.player.gainCard(value, 1, 'discard', 'any')
 					break
@@ -851,7 +858,7 @@ class CouncilRoomCard(KingdomCard):
 			if each != self.player:
 				each.drawOneCard()
 			else:
-				return
+				pass
 		return
 
 class FestivalCard(KingdomCard):
@@ -1016,6 +1023,8 @@ class MineCard(KingdomCard):
 				continue
 			else:
 				value = self.player.playerHand[i - 1].cost + 3
+				for user in roster:
+					self.send_data(user.playerConn, self.player.playerName + " has trashed a card.\n")
 				del self.player.playerHand[i - 1]
 				self.player.gainCard(value, 1, 'hand', 'treasure')
 				break

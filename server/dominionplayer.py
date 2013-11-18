@@ -102,11 +102,9 @@ class Player(object):
 				del self.playerDeck[0]
 
 	def drawOneCard(self):
-		if len(self.playerDeck) == 0:
-			self.playerDiscardToDeck()
-		else:
-			self.playerHand.append(self.playerDeck[0])
-			del self.playerDeck[0]
+		self.playerDiscardToDeck()
+		self.playerHand.append(self.playerDeck[0])
+		del self.playerDeck[0]
 
 	def gainCard(self, cost, number, location, type):
 		self.cost = cost
@@ -147,6 +145,13 @@ class Player(object):
 					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in choices:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
+				elif self.type not in ['treasure', 'kingdom', 'victory', 'any']:
+					if len(eval(self.type)) == 0:
+						break
+					else:
+						self.player.playerDiscard.append(eval(self.type)[0])
+						del eval(self.type)[0]
+						break
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
@@ -345,7 +350,7 @@ class Player(object):
 					while True:
 						self.send_data(self.playerConn, "Which card would you like to buy ((x) to cancel)?\n")
 						i = self.recv_data(self.playerConn, 2014)
-						if i.lower() == 'x': continue
+						if i.lower() == 'x': break
 						if i.lower() not in ['o', 'p', 'd', 'e', 'u', 'g', 's', 'c', 't', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
 							self.send_data(self.playerConn,  " Invalid selection!\n")
 						elif i.lower() in ['o', 'l', 't']:
@@ -382,9 +387,9 @@ class Player(object):
 									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardName + ".\n")
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
-								return
+								break
 						break
-					break
+					continue
 				elif choice.lower() == 'a':
 					return
 				elif choice.lower() == 'r':
@@ -459,13 +464,15 @@ class Player(object):
 			return
 
 	def playerDiscardToDeck(self):
-		x = len(self.playerDiscard)
-		while x == len(self.playerDiscard) and x > 0:
-			self.playerDeck.append(self.playerDiscard[0])
-			del self.playerDiscard[0]
-			x -= 1
-		random.shuffle(self.playerDeck)
+		if len(self.playerDeck) == 0:
+			x = len(self.playerDiscard)
+			while x == len(self.playerDiscard) and x > 0:
+				self.playerDeck.append(self.playerDiscard[0])
+				del self.playerDiscard[0]
+				x -= 1
+			random.shuffle(self.playerDeck)
 
+		else: return
 	def playerDeckToDiscard(self):
 		x = len(self.playerDeck)
 		while x == len(self.playerDeck) and x > 0:
@@ -486,6 +493,7 @@ class Player(object):
 		self.send_data(self.playerConn, "\n")
 
 	def printRosterHand(self, roster):
+		self.printPlayerTurn(roster)
 		self.deck.printDeckCards(roster)
 		self.printPlayerCount(roster)
 		self.printTurnCount(roster)
@@ -497,6 +505,16 @@ class Player(object):
 				i += 1
 			self.send_data(user.playerConn, "\n")
 
+	def printPlayerTurn(self, roster):
+		self.temproster = roster
+		for user in self.temproster:
+			self.send_data(user.playerConn, "CLRSCRN_FULL\n")
+			for each in self.roster:
+				if each.playerTurn == True:
+					self.send_data(user.playerConn, "\033[32m" + each.playerName + "\033[0m ",)
+				else:
+					self.send_data(user.playerConn, "\033[37m" + each.playerName + "\033[0m ",)
+			self.send_data(user.playerConn, "\n")
 
 	def printPlayerReveal(self):
 		for user in self.roster:

@@ -16,6 +16,7 @@ class Lobby_Client(threading.Thread):
 		self.name = name.lower()
 		self.clients = clients
 		self.game = False
+		self.away = False
 		self.event = threading.Event()
 
 	def ingame(self):
@@ -39,6 +40,18 @@ class Lobby_Client(threading.Thread):
 			if data == '!help' : help_commands(self.client)
 			if data == '!list' : list_users(self.client)
 			if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL\n')
+			if data == '!away' :
+				if self.away == True:
+					send_data(self.client, "\033[1;31m** You are already set to away, please type !back to return from being away.\033[0m\n")
+				elif self.away == False:
+					self.away = True
+					send_data(self.client, "\033[1;31m** You have been set as away, you cannot join a game until you set yourself back.\033[0m\n")
+			if data == '!back' :
+				if self.away == False:
+					send_data(self.client, "\033[1;31m** You are not currently away.\033[0m\n")
+				elif self.away == True:
+					self.away = False
+					send_data(self.client, "\033[1;31m** You have been set back from away.\033[0m\n")
 			lock.acquire()
 			[send_data(c, "<" + self.name + "> " + data + "\n") for c in (u for u in self.clients if u != self.client)]
 			lock.release()
@@ -140,6 +153,8 @@ def help_commands(client):
 	send_data(client, "**   !start -- starts a new game.  You will add users until you have 2-4 players\n")
 	send_data(client, "**      !cancel -- cancels game creation once you have entered the !start command.\n")
 	send_data(client, "**      !go -- begins the game once you have run !start and added your players.\n")
+	send_data(client, "**   !away -- sets your client to away, you will not be able to join a game if you are away.\n")
+	send_data(client, "**   !back -- sets your client back from away.\n")
 	send_data(client, "**   !quit -- quits the server.  You will not be asked to confirm.  This works from the lobby\n")
 	send_data(client, "**   !clear -- clears the screen.  This works in the lobby\n")
 	send_data(client, "**   !list -- lists the users currently in the lobby.\033[0m\n")
@@ -150,6 +165,8 @@ def list_users(client):
 	for key in client_list.keys():
 		if client_list[key][1].game:
 			send_data(client,"\033[34m [ " + key + " (in game) ]",)
+		elif client_list[key][1].away:
+			send_data(client,"\033[35m [ " + key + " (away) ]",)
 		else:
 			send_data(client,"\033[1;31m [ " + key + " ]",)
 	send_data(client, "\033[0m\n")
@@ -202,8 +219,8 @@ def build_game(client, addr, name):
 		elif player == user:
 				send_data(client, "\033[1;31m** You do not need to add yourself to the game, please add other players!\033[0m\n")
 				continue
-		elif client_list[player][1].game == True:
-				send_data(client, "\033[1;31m** Sorry, that user is already in a game.\033[0m\n")
+		elif client_list[player][1].game == True or client_list[player][1].away == True:
+				send_data(client, "\033[1;31m** Sorry, that user is already in a game, or is set to away.\033[0m\n")
 				continue
 		else:
 			game[player] = client_list[player][0]
@@ -232,7 +249,15 @@ def start_server ():
 				send_data(conn, "\033[1;31m** Sorry, that name is in use, please choose another name.\033[0m\n")
 			else:
 				break
-		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[0m\n")
+		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[36m!  Currently connected clients are: ",)
+	        for key in client_list.keys():
+	                if client_list[key][1].game:
+        	                send_data(conn,"\033[34m [ " + key + " (in game) ]",)
+			elif client_list[key][1].away:
+				send_data(conn,"\033[35m [ " + key + " (away) ]",)
+                	else:
+                        	send_data(conn,"\033[37m [ " + key + " ]",)
+		send_data(conn, "\033[0m\n")
 		for client in clients: send_data(client, "\033[32m** JOIN: " + client_name + " has joined the server!\033[0m\n")
 		clients.append(conn)
 		newClient = Lobby_Client(conn, addr, client_name, clients)
