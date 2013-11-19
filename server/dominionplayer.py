@@ -11,6 +11,7 @@ class Player(object):
 		self.playerName = ''
 		self.playerDeck = []
 		self.playerPlay = []
+		self.playerDuration = []
 		self.playerTurnActions = 0
 		self.playerTurnBuys = 0
 		self.playerTurnTreasure = 0
@@ -194,9 +195,9 @@ class Player(object):
 	def playTurn(self):
 		if len(self.game.playerRost) == 1: return
 		self.checkPlayerDeck()
-		self.checkDurationEffects()
 		self.checkSetAside()
 		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
+			self.checkDurationEffects()
 			self.actionPhase()
 			self.buyPhase()
 			self.cleanUpPhase()
@@ -206,6 +207,7 @@ class Player(object):
 			self.playerTurnBuys = 1
 			self.playerTurnTreasure = 0
 			self.playerTreasurePlayed = False
+			self.checkDurationEffects()
 			self.actionPhase()
 			self.buyPhase()
 			self.cleanUpPhase()
@@ -217,7 +219,6 @@ class Player(object):
 		self.printRosterHand(self.roster)
 		while True:
 			if self.playerTurnActions == 0 or self.playerTreasurePlayed == True:
-#				self.buyPhase()
 				return
 			else:
 				self.printPlayerHand()
@@ -281,7 +282,6 @@ class Player(object):
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						cardToRead = str(self.recv_data(self.playerConn, 1024))
 						self.deck.readCard(cardToRead, self.playerConn)
-#						self.printPlayerHand()
 						break
 				continue
 		return
@@ -304,7 +304,6 @@ class Player(object):
 					self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
 				del self.playerHand[i - 1]
 				self.playerTreasurePlayed = True
-#				self.buyPhase()
 				return
 			elif self.playerHand[i - 1].action == True:
 				if self.playerTurnActions <= 0:
@@ -312,14 +311,24 @@ class Player(object):
 					self.buyPhase()
 					return
 				else:
-					self.playerPlay.append(self.playerHand[i - 1])
-					for each in self.roster:
-						self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
-					del self.playerHand[i - 1]
-					self.playerTurnActions -= 1
-					self.playerActionsPlayed += 1
-					self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
-					return
+					if self.playerHand[i - 1].duration:
+                                                self.playerDuration.append(self.playerHand[i - 1])
+                                                for each in self.roster:
+                                                        self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
+                                                del self.playerHand[i - 1]
+                                                self.playerTurnActions -= 1
+                                                self.playerActionsPlayed += 1
+                                                self.playerDuration[-1].playCard(self.player, self.roster, self.deck)
+                                                return
+					else:
+						self.playerPlay.append(self.playerHand[i - 1])
+						for each in self.roster:
+							self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
+						del self.playerHand[i - 1]
+						self.playerTurnActions -= 1
+						self.playerActionsPlayed += 1
+						self.playerPlay[-1].playCard(self.player, self.roster, self.deck)
+						return
 			elif self.playerHand[i - 1].victory == True and self.playerHand[i - 1].action == False:
 				self.send_data(self.playerConn, "Invalid choice, you cannot play this card.\n")
 		return
@@ -406,13 +415,7 @@ class Player(object):
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					cardToRead = str(self.recv_data(self.playerConn, 1024))
 					self.deck.readCard(cardToRead, self.playerConn)
-#					self.printPlayerHand()
 					break
-#			if self.playerTurnBuys < 1:
-#				return
-#			else:
-#				self.buyPhase()
-#				return
 		return
 
 	def cleanUpPhase(self):
@@ -440,8 +443,13 @@ class Player(object):
 		return
 
 	def checkDurationEffects(self):
-		if self.playerHasDuration == True:
-			pass
+		if self.playerHasDuration:
+			while len(self.playerDuration) > 0:
+				self.playerDuration[0].playDuration(self.player, self.roster, self.deck)
+				self.playerDiscard.append(self.playerDuration[0])
+				del self.playerDuration[0]
+			self.playerHasDuration = False
+			return				
 		else:
 			return
 
@@ -461,6 +469,11 @@ class Player(object):
 							card.reactCard(each, self.roster, 'attack')
 						else:
 							pass
+					for card in each.playerDuration:
+                                                if card.reaction == True:
+                                                        card.reactCard(each, self.roster, 'attack')
+                                                else:
+                                                        pass
 		elif self.type == 'gain':
 			for each in self.roster:
 				if any(i.reaction == True for i in each.playerHand):
