@@ -11,6 +11,24 @@ class AmbassadorCard(KingdomCard):
         def __init__(self):
                 pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		send_data(self.player.playerConn, "Reveal a card from your hand.\n")
+		self.player.printRevealHand()
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			try:
+				choice = int(choice) - 1
+			except:
+				continue
+			if choice not in range(len(self.player.playerhand)): continue
+			else:
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " reveals: " + self.player.playerHand[choice].cardPrint + ".\n")
+				
+
 class BazaarCard(KingdomCard):
 	cardEval = "BazaarCard"
 	cardName = "Bazaar"
@@ -20,6 +38,12 @@ class BazaarCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 2
+		self.player.playerTurnTreasure += 1
 
 class CaravanCard(KingdomCard):
 	cardEval = "CaravanCard"
@@ -32,6 +56,16 @@ class CaravanCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		self.player.playerHasDuration = True
+
+	def playDuration(self, player, roster, deck):
+		self.player = player
+		self.player.drawOneCard()
+
 class CutpurseCard(KingdomCard):
 	cardEval = "CutpurseCard"
 	cardName = "Cutpurse"
@@ -42,6 +76,21 @@ class CutpurseCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnTreasure += 2
+		for each in self.roster:
+			if any(i.cardName == 'Copper' for i in each.playerhand):
+				each.playerDiscard.append(each.playerHand[i])
+				del each.playerHand[i]
+				for player in self.roster:
+					send_data(player.playerConn, each.playerName + " discards a Copper.\n")
+			else:
+				for player in self.roster:
+					send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardPrint for i in each.playerHand) + ".\n")
+		return
 
 class EmbargoCard(KingdomCard):
 	cardEval = "EmbargoCard"
@@ -63,6 +112,31 @@ class ExplorerCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		if any(i.cardName == 'Province' for i in self.player.playerhand):
+			send_data(self.player.playerConn, "Would you like to reveal a Province (y/n)?\n")
+			while True:
+				choice = recv_data(self.player.playerConn, 1024)
+				if choice.lower() not in ['y', 'n']:
+					continue
+				elif choice.lower() == 'y':
+					for each in self.roster:
+						send_data(each.playerConn, self.player.playerName + " reveals a Province.\n")
+					if len(self.deck.goldCards) > 0:
+						self.player.gainCard(0, 0, 'hand', goldCard)
+						for each in self.roster:
+							send_data(each.playerConn, self.player.playername + " gains a Gold.\n")	
+					else: return
+				elif choice.lower() == 'n':
+					if len(self.deck.silverCards) > 0:
+						self.player.gainCard(0, 0, 'hand', silverCard)
+						for each in self.roster:
+							send_data(each.playerConn, self.player.playername + " gains a Silver.\n")
+					else: return
+
 class FishingVillageCard(KingdomCard):
 	cardEval = "FishingVillageCard"
 	cardName = "Fishing Village"
@@ -74,6 +148,16 @@ class FishingVillageCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnActions += 2
+		self.player.playerTurnTreasure += 1
+
+	def playDuration(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnActions += 1
+		self.player.playerTurnTreasure += 1
+
 class GhostShipCard(KingdomCard):
 	cardEval = "GhostChipCard"
 	cardName = "Ghost Ship"
@@ -83,6 +167,29 @@ class GhostShipCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.drawOneCard()
+		self.player.drawOneCard()
+		for each in self.roster:
+			if len(each.playerHand) >= 4 or each != self.player or each.reactionImmunity == False or each.durationImmunity == False:
+				send_data(each.playerConn, "Please discard cards until you have 3 cards in your hand.")
+				while len(each.playerHand) > 3:
+					each.printPlayerReveal()
+					choice = (each.playerConn, 1024)
+					try:
+						choice = int(choice) - 1
+					except:
+						continue
+					if choice not in range(len(each.playerHand)): continue
+					else:
+						each.playerDiscard.append(each.playerHand[choice])
+						del each.playerHand[choice]
+						for player in self.roster:
+							send_data(player.playerConn, each.playerName + " discards a card.\n")
+		
 
 class HavenCard(KingdomCard):
 	cardEval = "HavenCard"
@@ -95,6 +202,35 @@ class HavenCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		self.player.playerHasDuration = True
+		send_data(self.player.playerConn, "Please choose a card to set aside:\n")
+		while True:
+			self.player.printPlayerReveal()
+			choice = (self.player.playerConn, 1024)
+			try:
+				choice = int(choice) - 1
+			except: continue
+			if choice not in range(len(self.player.playerHand)): continue
+			else:
+				self.player.playerSetAside.append(self.player.playerHand[choice])
+				del self.player.playerHand[choice]
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " has set aside a card.\n")
+				break
+
+	def playDuration(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerHand.append(self.player.playerSetAside[0])
+		del self.player.playerSetAside[0]
+		for each in self.roster:
+			send_data(each.playerConn, self.player.playerName + " has picked up set aside card.\n")
+
 class IslandCard(KingdomCard):
 	cardEval = "IslandCard"
 	cardName = "Island"
@@ -103,6 +239,28 @@ class IslandCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		send_data(self.player.playerConn, "Please choose a card to set aside.\n")
+		while True:
+			self.player.printPlayerReveal()
+			choice = recv_data(self.player.playerConn, 1024)
+			try:
+				choice = int(choice) - 1
+			except: continue
+			if choice not in range(len(self.player.playerHand)): continue
+			else:
+				self.player.islandMat.append(self.player.playerHand[choice])
+				del self.player.playerHand[choice]
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " has placed a card on his Island mat.\n")
+				if any(i.cardName == 'Island' for i in self.player.playerHand):
+					self.player.islandMat.append(i)
+					self.player.playerHand.remove(i)
+					break
 
 class LighthouseCard(KingdomCard):
 	cardEval = "LighthouseCard"
@@ -114,6 +272,20 @@ class LighthouseCard(KingdomCard):
 	reaction = True
 	def __init__(self):
 		pass
+	
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnActions += 1
+		self.player.playerTurnTreasure += 1
+		self.player.durationImmunity = True
+		self.player.playerHasDuration = True
+
+	def playDuration(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnTreasure += 1
+		self.player.durationImmunity = False
 
 class LookoutCard(KingdomCard):
 	cardEval = "LookoutCard"
@@ -123,6 +295,44 @@ class LookoutCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.current = []
+		i = 1
+		while i <= 3:
+			self.current.append(self.player.playerHand[0])
+			del self.player.playerHand[0]
+			i += 1
+		send_data(self.player.playerConn, "Choose a card to trash:\n")
+		while True:
+			for each in self.current:
+				send_data(self.player.playerConn, each.cardPrint + ,)
+			send_data(self.player.playerConn, "\n")
+			choice = recv_data(self.player.playerConn, 1024)
+			try:
+				choice = int(choice) - 1
+			except: continue
+			if choice not in range(len(self.current)): continue
+			else:
+				del self.current[choice]
+				break
+		send_data(self.player.playerConn, "Choose a card to discard:\n")
+                while True:
+                        for each in self.current:
+                                send_data(self.player.playerConn, each.cardPrint + ,)
+                        send_data(self.player.playerConn, "\n")
+                        choice = recv_data(self.player.playerConn, 1024)
+                        try:
+                                choice = int(choice) - 1
+                        except: continue
+                        if choice not in range(len(self.current)): continue
+                        else:
+				self.player.playerDiscard.append(self.current[choice])
+				del self.current[choice]
+				break
+		self.player.playerDeck.insert(self.current[0])
 
 class MerchantShipCard(KingdomCard):
 	cardEval = "MerchantShipCard"
@@ -134,6 +344,14 @@ class MerchantShipCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.player.playerTurnTreasure += 2
+		self.player.playerHasDuration = True
+
+	def playDuration(self, player, roster, deck):
+		self.player.playerTurnTreasure += 2
+
 class NativeVillageCard(KingdomCard):
 	cardEval = "NativeVillageCard"
 	cardName = "Native Village"
@@ -142,6 +360,30 @@ class NativeVillageCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnActions += 2
+		send_data(self.player.playerConn, "Choose one: [1]Set aside the top card of your deck face down on Native Village mat. [2]Place contents of Native Village mat into hand.\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			if choice not in ['1', '2']: continue
+			elif choice == '1':
+				self.player.playerDiscardToDeck()
+				send_data(self.player.playerConn, "Placing " + self.player.playerDeck[0].cardPrint + " on your Native Village mat.\n")
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " places a card on the Native Village mat.\n")
+				self.player.nativeVillageMat.append(self.player.playerDeck[0])
+				del self.player.playerDeck[0]
+				break
+			elif choice == '2':
+				while len(self.player.nativeVillageMat) > 0:
+					self.player.playerHand.append(self.player.nativeVillageMat[0])
+					del self.player.nativeVillageMat[0]
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " has placed the contents of his Native Village Mat into his hand.\n")
+				break
 
 class NavigatorCard(KingdomCard):
 	cardEval = "NavigatorCard"

@@ -27,6 +27,9 @@ class Player(object):
 		self.totalVictory = 0
 		self.playerConn = ''
 		self.playerTurn = False
+		self.islandMat = []
+		self.pirateMat = []
+		self.nativeMat = []
 
 	def send_data (self, client, data):
 		message = str(data)

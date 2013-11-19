@@ -12,32 +12,39 @@ from dominioncards import *
 class DomDeck(object):
 
 	def __init__(self):
-		self.cellarCard = CellarCard()
-		self.chapelCard = ChapelCard()
-		self.moatCard = MoatCard()
-		self.chancellorCard = ChancellorCard()
-		self.villageCard = VillageCard()
-		self.woodcutterCard = WoodcutterCard()
-		self.workshopCard = WorkshopCard()
-		self.bureaucratCard = BureaucratCard()
-		self.feastCard = FeastCard()
-		self.gardensCard = GardensCard()
-		self.militiaCard = MilitiaCard()
-		self.moneylenderCard = MoneylenderCard()
-		self.remodelCard = RemodelCard()
-		self.smithyCard = SmithyCard()
-		self.spyCard = SpyCard()
-		self.thiefCard = ThiefCard()
-		self.throneRoomCard = ThroneRoomCard()
-		self.councilRoomCard = CouncilRoomCard()
-		self.festivalCard = FestivalCard()
-		self.laboratoryCard = LaboratoryCard()
-		self.libraryCard = LibraryCard()
-		self.marketCard = MarketCard()
-		self.mineCard = MineCard()
-		self.witchCard = WitchCard()
-		self.adventurerCard = AdventurerCard()
+		self.expansion = 'dominion'
+		if self.expansion == 'dominion':
+			self.cellarCard = CellarCard()
+			self.chapelCard = ChapelCard()
+			self.moatCard = MoatCard()
+			self.chancellorCard = ChancellorCard()
+			self.villageCard = VillageCard()
+			self.woodcutterCard = WoodcutterCard()
+			self.workshopCard = WorkshopCard()
+			self.bureaucratCard = BureaucratCard()
+			self.feastCard = FeastCard()
+			self.gardensCard = GardensCard()
+			self.militiaCard = MilitiaCard()
+			self.moneylenderCard = MoneylenderCard()
+			self.remodelCard = RemodelCard()
+			self.smithyCard = SmithyCard()
+			self.spyCard = SpyCard()
+			self.thiefCard = ThiefCard()
+			self.throneRoomCard = ThroneRoomCard()
+			self.councilRoomCard = CouncilRoomCard()
+			self.festivalCard = FestivalCard()
+			self.laboratoryCard = LaboratoryCard()
+			self.libraryCard = LibraryCard()
+			self.marketCard = MarketCard()
+			self.mineCard = MineCard()
+			self.witchCard = WitchCard()
+			self.adventurerCard = AdventurerCard()
 			
+		elif self.expansion == 'intrigue':
+			pass
+
+		elif self.expansion == 'seaside':
+			pass
 		#Treasure Cards --- [Cost, Value]
 		self.goldCard = GoldCard()
 		self.silverCard = SilverCard()
