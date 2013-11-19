@@ -184,3 +184,6 @@ class DomDeck(object):
 				return
 			else:
 				return
+
+	def intrigueCards(self):
+		pass

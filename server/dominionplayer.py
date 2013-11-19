@@ -186,6 +186,7 @@ class Player(object):
 						del self.deck.kingdomCards[x][0]
 						break
 			break
+		return self.location[-1]
 
 	def playTurn(self):
 		if len(self.game.playerRost) == 1: return

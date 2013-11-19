@@ -4,8 +4,8 @@ class BaronCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "BaronCard"
 	cardName = "Baron"
-	cardColor = "\033[0m"
-	description = "You may discard an estate card. If you do, +4 Coin. Otherwise, gain an estate card."
+	cardPrint = "\033[37mBaron\033[0m"
+	description = "You may discard an Estate card. If you do, +$4. Otherwise, gain an Estate card."
 	cost = 4
 	action = True
 	def __init__(self):
@@ -15,7 +15,6 @@ class BaronCard(KingdomCard):
 		self.player = player
 		if any(i.cardName == 'Estate' for i in self.player.playerHand):
 			while True:
-				#choice = raw_input(" Would you like to discard an Estate (y/n)? ")
 				self.send_data(self.player.playerConn, "Would you like to discard an Estate? (y/n)\n")
 				choice = self.recv_data(self.player.playerConn, 1024)
 				if choice.lower() not in ['y', 'n']:
@@ -31,14 +30,14 @@ class BaronCard(KingdomCard):
 				elif choice.lower() == 'n':
 					break
 		else:
-			self.player.playerDiscard.append(self.deck.estateCards[0])
+			self.player.gainCard(0, 0, 'discard', 'self.deck.estateCards')
 			return				
 
 class Courtyard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "CourtyardCard"
 	cardName = "Courtyard"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mCourtyard\033[0m"
 	description = "Put a card from your hand on top of your deck."
 	cost = 2
 	action = True
@@ -47,19 +46,8 @@ class Courtyard(KingdomCard):
 
 	def playCard(self, player, roster, deck):
 		self.player = player
-		self.hasActions = False
-		self.draw = 3
-		for i in draw:
-			if len(self.player.playerDeck) == 0:
-				self.player.playerDiscardToDeck()
-				self.player.playerHand.append(self.player.playerDeck[0])
-				del self.player.playerDeck[0]
-			else:
-				self.player.playerHand.append(self.player.playerDeck[0])
-				del self.player.playerDeck[0]		
-		
-		#choice = int(raw_input("      Choose a card to put on top of your deck: "))
 		self.send_data(self.player.playerConn, "Choose a card to put on top of your deck:\n")
+		self.player.printHandUpdate()
 		choice = self.recv_data(self.player.playerConn, 1024)
 		self.player.playerDeck.insert(0, self.player.playerHand[choice - 1])
 		del self.player.playerHand[choice - 1]
@@ -70,7 +58,7 @@ class DukeCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "DukeCard"
 	cardName = "Duke"
-	cardColor = "\033[32m"
+	cardPrint = "\033[32mDuke\033[0m"
 	description = "Worth 1 VP for each Duchy you have."
 	cost = 5
 	victoryPoints = 1 * self.
@@ -83,8 +71,8 @@ class GreatHallCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "GreatHallCard"
 	cardName = "Great Hall"
-	cardColor = "\033[32m"
-	#cardColor = "\033[0m"
+	cardPrint = "\033[32mG\033[37mr\033[32me\033[37ma\033[32mt \033[32mH\033[37ma\033[32ml\033[37ml\033[0m"
+	description = "+1 Card; +1 Action"
 	victoryPoints = 1	
 	cost = 3
 	victory = True
@@ -96,21 +84,15 @@ class GreatHallCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
+		self.player.drawOneCard()
 		self.player.playerTurnActions += 1
-		if len(self.player.playerDeck) == 0:
-			self.player.playerDiscardToDeck()
-			self.player.playerHand.append(self.player.playerDeck[0])
-			del self.player.playerDeck[0]
-		else:
-			self.player.playerHand.append(self.player.playerDeck[0])
-			del self.player.playerDeck[0]		
 
 class HaremCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "HaremCard"
 	cardName = "Harem"
-	cardColor = "\033[32m"
-	#cardColor = "\033[0m"
+	cardPrint = "\033[32mH\033[33ma\033[32mr\033[33me\033[32mm"
+	description = "Worth $2 and 2VP."
 	victoryPoints = 2	
 	cost = 6
 	value = 2
@@ -124,7 +106,7 @@ class IronWorksCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "IronWorksCard"
 	cardName = "Iron Works"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mIron Works\033[0m"
 	description = "Gain a card costing up to 4 Coins. If it is an... Action card, +1 Action. Treasure card, +1 Coin. Victory card, +1 Card."
 	cost = 4
 	action = True
@@ -137,66 +119,20 @@ class IronWorksCard(KingdomCard):
 		self.number = 1
 		self.location = self.playerDiscard
 		self.type = type
-		choices = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-		nonkingdom = ['o', 'p', 'd', 'e', 'u', 'l', 'g', 's', 'c']
-		kingdom = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-		while True:
-			for i in range(self.number):
-				choice = raw_input("    Please select a card that costs up to $" + str(self.cost) + ": ")
-				if choice.lower() not in choices:
-				print "    Invalid selection, please choose another card!"
+		self.gain = self.gainCard(4, 1, 'discard', 'any')
+		if self.gain.action:
+			self.player.playerTurnActions += 1
+		if self.gain.treasure:
+			self.player.playerTurnTreasure += 1
+		if self.gain.victory:
+			self.palyer.drawOneCard()
+		return
 
-				if choice.lower() in nonkingdom:
-					if choice.lower() == 'o' or choice.lower == 'l':
-						print "    Invalid selection, please choose another card!"
-					else:
-						p = self.deck.provinceCards
-						d = self.deck.duchyCards
-						e = self.deck.estateCards
-						g = self.deck.goldCards
-						s = self.deck.silverCards
-						c = self.deck.copperCards
-						u = self.deck.curseCards
-						choice = eval(choice.lower())
-						if choice[0].cost > self.cost:
-							print "    Invalid selection, please choose another card!"
-						else:
-							self.location.append(choice[0])
-							del choice[0]
-							break
-				elif choice.lower() in kingdom:
-					x = 'card' + choice.lower()
-					if self.deck.kingdomCards[x][0].cost > cost:
-						print "    Invalid selection, please choose another card!"
-					else:
-						self.location.append(self.deck.kingdomCards[x][0])
-						del self.deck.kingdomCards[x][0]
-						break
-				
-				self.location.append(choice[0])		
-				if choice.cardType == "action":
-					self.player.playerTurnActions += 1
-					break
-				elif choice.cardType == "treasure":
-					self.player.playerTurnTreasure += 4
-					break
-				elif choice.cardType == "victory":
-					if len(self.player.playerDeck) == 0:
-						self.player.playerDiscardToDeck()
-						self.player.playerHand.append(self.player.playerDeck[0])
-						del self.player.playerDeck[0]
-					else:
-						self.player.playerHand.append(self.player.playerDeck[0])
-						del self.player.playerDeck[0]
-					break
-			break
-			return
-			
 class MiningVillageCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "MiningVillageCard"
 	cardName = "Mining Village"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mMining Village\033[0m"
 	description = "You may trash this card immediately, If you do, +2 Coins."
 	cost = 4
 	action = True
@@ -205,33 +141,28 @@ class MiningVillageCard(KingdomCard):
 
 	def playCard(self, player, roster, deck):
 		self.player = player
-		if len(self.player.playerDeck) == 0:
-			self.player.playerDiscardToDeck()
-			self.player.playerHand.append(self.player.playerDeck[0])
-			del self.player.playerDeck[0]
-		else:
-			self.player.playerHand.append(self.player.playerDeck[0])
-			del self.player.playerDeck[0]
-		self.player.playerTurnActions += 2
-
-		choice = raw_input(" Would you like to trash Mining Village (y/n)? ")
-		if choice.lower() == 'y':
-			while True:
-				for card in self.player.playerHand:
-				if card.cardName == 'Mining Village':
-					self.player.playerHand.remove(card)
-					self.player.playerTurnTreasure += 2
-					break
-				else:
-					continue
-		else:
-			break
-			return
+		send_data(self,player.playerConn, "Would you like to trash " + self.cardPrint + " (y/n)?\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			if choice.lower not in ['y', 'n']:
+				continue
+			elif choice.lower() == 'y':
+				while True:
+					for card in self.player.playerHand:
+						if card.cardName == 'Mining Village':
+							self.player.playerHand.remove(card)
+							self.player.playerTurnTreasure += 2
+							break
+					else:
+						continue
+			else:
+				break
+		return
 
 class MinionCard(KingdomCard):
 	cardEval = "MinionCard"
 	cardName = "Minion"
-	cardColor = "\033[1;31m"
+	cardPrint = "\033[1;31mMinion\033[0m"
 	description = "Choose one: +2 Coins, or discard your hand, +4 cards, and each other player with at least 5 cards in hand discards his hand and draws 4 cards."
 	cost = 5
 	action = True
@@ -292,8 +223,7 @@ class NoblesCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "NoblesCard"
 	cardName = "Nobles"
-	cardColor = "\033[32m"
-	#cardColor = "\033[0m"
+	cardPrint = "\033[32mN\033[37mo\033[32mb\033[37ml\033[32me\033[37ms\033[0m"
 	description = "Choose one: +3 Cards, or +2 Actions,   2 VP"
 	victoryPoints = 2
 	cost = 6
@@ -330,7 +260,7 @@ class PawnCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "PawnCard"
 	cardName = "Pawn"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mPawn\033[0m"
 	description = "Choose two: +1 Card, +1 Action, +1 Buy, +1 Coin. (The choices must be different)"
 	cost = 2
 	action = True
@@ -413,7 +343,7 @@ class ShantyTownCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "ShantyTownCard"
 	cardName = "Shanty Town"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mShanty Town\033[0m"
 	description = "Reveal your hand. If you have no actions cards in hand, +2 Cards."
 	cost = 3
 	action = True
@@ -451,7 +381,7 @@ class StewardCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "StewardCard"
 	cardName = "Steward"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mSteward\033[0m"
 	description = "Choose one: +2 cards, or +2 Coins, or trash 2 cards from your hand."
 	cost = 3
 	action = True
@@ -501,7 +431,7 @@ class TradingPost(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "TradingPostCard"
 	cardName = "Trading Post"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mTrading Post\033[0m"
 	description = "Trash 2 cards from your hand. If you do, gain a Silver card, put it into your hand."
 	cost = 5
 	action = True
@@ -545,7 +475,7 @@ class UpgradeCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "UpgradeCard"
 	cardName = "Upgrade"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mUpgrade\033[0m"
 	description = "Trash a card form your hand. Gain a card costing exactly 1 Coin more than it."
 	cost = 5
 	action = True
@@ -579,7 +509,7 @@ class WishingWellCard(KingdomCard):
 	#cardSet = "Intrigue"
 	cardEval = "WishingWellCard"
 	cardName = "Wishing Well"
-	cardColor = "\033[0m"
+	cardPrint = "\033[37mWishing Well\033[0m"
 	description = "Name a card. Reveal the top card of your deck. If it’s the named card, put it into your hand."
 	cost = 3
 	action = True
