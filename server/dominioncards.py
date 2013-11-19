@@ -1,6 +1,7 @@
 #Dominion card classes
 import os
 import time
+import dominionsock
 
 #Treasure Cards
 class TreasureCard(object):
@@ -20,7 +21,7 @@ class TreasureCard(object):
 
 class GoldCard(TreasureCard):
 	cardName = "Gold"
-	cardColor = "\033[33m"
+	cardPrint = "\033[33mGold\033[0m"
 	quantity = 30
 	value = 3
 	cost = 6
@@ -29,7 +30,7 @@ class GoldCard(TreasureCard):
 
 class SilverCard(TreasureCard):
 	cardName = "Silver"
-	cardColor = "\033[33m"
+	cardPrint = "\033[33mSilver\033[0m"
 	quantity = 40
 	value = 2
 	cost = 3
@@ -38,7 +39,7 @@ class SilverCard(TreasureCard):
 
 class CopperCard(TreasureCard):
 	cardName = "Copper"
-	cardColor = "\033[33m"
+	cardPrint = "\033[33mCopper\033[0m"
 	quantity = 60
 	value = 1
 	cost = 0
@@ -63,7 +64,7 @@ class VictoryCard(object):
 
 class ProvinceCard(VictoryCard):
 	cardName = "Province"
-	cardColor = "\033[32m"
+	cardPrint = "\033[32mProvince\033[0m"
 	victoryPoints = 6
 	cost = 8
 	def __init__(self):
@@ -71,7 +72,7 @@ class ProvinceCard(VictoryCard):
 
 class DuchyCard(VictoryCard):
 	cardName = "Duchy"
-	cardColor = "\033[32m"
+	cardPrint = "\033[32mDuchy\033[0m"
 	victoryPoints = 3
 	cost = 5
 	def __init__(self):
@@ -79,7 +80,7 @@ class DuchyCard(VictoryCard):
 
 class EstateCard(VictoryCard):
 	cardName = "Estate"
-	cardColor = "\033[32m"
+	cardPrint = "\033[32mEstate\033[0m"
 	victoryPoints = 2
 	cost = 2
 	def __init__(self):
@@ -88,7 +89,7 @@ class EstateCard(VictoryCard):
 #Curse Cards
 class CurseCard(object):
 	cardName = "Curse"
-	cardColor = "\033[35m"
+	cardPrint = "\033[35mCurse\033[0m"
 	cardType = 'curse'
 	value = -1
 	cost = 0
@@ -128,7 +129,7 @@ class KingdomCard(object):
 class CellarCard(KingdomCard):
 	cardEval = "CellarCard"
 	cardName = "Cellar"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mCellar\033[0m"
 	description = "+1 Action.  Discard any number of cards.  +1 Card per card discarded."
 	cost = 2
 	action = True
@@ -184,7 +185,7 @@ class CellarCard(KingdomCard):
 class ChapelCard(KingdomCard):
 	cardEval = "ChapelCard"
 	cardName = "Chapel"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mChapel\033[0m"
 	description = "Trash up to 4 cards from your hand."
 	cost = 2
 	action = True
@@ -231,7 +232,7 @@ class ChapelCard(KingdomCard):
 class MoatCard(KingdomCard):
 	cardEval = "MoatCard"
 	cardName = "Moat"
-	cardColor = "\033[36m"
+	cardPrint = "\033[36mMoat\033[0m"
 	description = "+2 Cards.  When another player plays an Attack card, you may reveal this from your hand. if you do you are unaffected by that Attack."
 	cost = 2
 	action = True
@@ -273,7 +274,7 @@ class MoatCard(KingdomCard):
 					continue
 				elif choice.lower() == 'y':
 					for each in self.roster:
-						self.send_data(each.playerConn, self.player.playerName + " reveals a Moat!\n")
+						self.send_data(each.playerConn, self.reactor.playerName + " reveals a Moat!\n")
 					self.reactor.reactionImmunity = True
 					break
 				elif choice.lower() == 'n':
@@ -285,7 +286,7 @@ class MoatCard(KingdomCard):
 class ChancellorCard(KingdomCard):
 	cardEval = "ChancellorCard"
 	cardName = "Chancellor"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mChancellor\033[0m"
 	description = "+$2.  You may immediately put your deck into your discard pile."
 	cost = 3
 	action = True
@@ -319,7 +320,7 @@ class ChancellorCard(KingdomCard):
 class VillageCard(KingdomCard):
 	cardEval = "VillageCard"
 	cardName = "Village"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mVilalge\033[0m"
 	description = "+1 Card. +2 Actions."
 	cost = 3
 	action = True
@@ -335,13 +336,13 @@ class VillageCard(KingdomCard):
 		else:
 			self.player.playerHand.append(self.player.playerDeck[0])
 			del self.player.playerDeck[0]
-		self.player.playerTurnActions += 1
+		self.player.playerTurnActions += 2
 		return
 
 class WoodcutterCard(KingdomCard):
 	cardEval = "WoodcutterCard"
 	cardName = "Woodcutter"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mWoodcutter\033[0m"
 	description = "+1 Buy. +$2."
 	cost = 3	
 	action = True
@@ -366,7 +367,7 @@ class WoodcutterCard(KingdomCard):
 class WorkshopCard(KingdomCard):
 	cardEval = "WorkshopCard"
 	cardName = "Workshop"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mWorkshop\033[0m"
 	description = "Gain a card costing up to $4."
 	cost = 3
 	action = True
@@ -391,7 +392,7 @@ class WorkshopCard(KingdomCard):
 class BureaucratCard(KingdomCard):
 	cardEval = "BureaucratCard"
 	cardName = "Bureaucrat"
-	cardColor = "\033[1;31m"
+	cardPrint = "\033[1;31mBureaucrat\033[0m"
 	description = "Gain a silver card; put it on top of your deck. Each other player reveals a Victory card from his hand and puts it on his deck (or reveals a hand with no Victory cards)."
 	cost = 4
 	action = True
@@ -435,11 +436,11 @@ class BureaucratCard(KingdomCard):
 							continue
 						else:
 							for player in self.roster:
-								self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardName + ".\n")
+								self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardPrint + ".\n")
 							break
 				else:
 					for player in self.roster:
-						self.send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardName for i in each.playerHand) + ".\n")
+						self.send_data(player.playerConn, each.playerName + " reveals " + ' '.join(i.cardPrint for i in each.playerHand) + ".\n")
 					break
 			else:
 				pass
@@ -451,7 +452,7 @@ class BureaucratCard(KingdomCard):
 class FeastCard(KingdomCard):
 	cardEval = "FeastCard"
 	cardName = "Feast"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mFeast\033[0m"
 	description = "Trash this card. Gain a card costing up to $5."
 	cost = 4
 	action = True
@@ -484,7 +485,7 @@ class FeastCard(KingdomCard):
 class GardensCard(KingdomCard):
 	cardEval = "GardensCard"
 	cardName = "Gardens"
-	cardColor = "\033[32m"
+	cardPrint = "\033[32mGardens\033[0m"
 	description = "Worth 1 Victory for every 10 cards in your deck (rounded down)."
 	cost = 4
 	victoryPoints = 1
@@ -496,7 +497,7 @@ class GardensCard(KingdomCard):
 class MilitiaCard(KingdomCard):
 	cardEval = "MilitiaCard"
 	cardName = "Militia"
-	cardColor = "\033[1;31m"
+	cardPrint = "\033[1;31mMilitia\033[0m"
 	description = "+$2.  Each other player discards down to 3 cards in his hand."
 	cost = 4
 	action = True
@@ -544,7 +545,7 @@ class MilitiaCard(KingdomCard):
 class MoneylenderCard(KingdomCard):
 	cardEval = "MoneylenderCard"
 	cardName = "Moneylender"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mMoneylender\033[0m"
 	description = "Trash a Copper from your hand. If you do, +$3."
 	cost = 4
 	action = True
@@ -573,7 +574,7 @@ class MoneylenderCard(KingdomCard):
 						if card.cardName == 'Copper':
 							self.player.playerHand.remove(card)
 							for user in roster:
-								self.send_data(user.playerConn, self.player.playername + " has trashed a Copper.\n")
+								self.send_data(user.playerConn, self.player.playerName + " has trashed a Copper.\n")
 							self.player.playerTurnTreasure += 3
 							return
 						else:
@@ -588,7 +589,7 @@ class MoneylenderCard(KingdomCard):
 class RemodelCard(KingdomCard):
 	cardEval = "RemodelCard"
 	cardName = "Remodel"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mRemodel\033[0m"
 	description = "Trash a card from your hand. Gain a card costing up to $2 more than the trashed card."
 	cost = 4
 	action = True
@@ -631,7 +632,7 @@ class RemodelCard(KingdomCard):
 class SmithyCard(KingdomCard):
 	cardEval = "SmithyCard"
 	cardName = "Smithy"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mSmithy\033[0m"
 	description = "+3 Cards."
 	cost = 4
 	action = True
@@ -656,7 +657,7 @@ class SmithyCard(KingdomCard):
 class SpyCard(KingdomCard):
 	cardEval = "SpyCard"
 	cardName = "Spy"
-	cardColor = "\033[1;31m"
+	cardPrint = "\033[1;31mSpy\033[0m"
 	description = "+1 Card; +1 Action.  Each player (including you) reveals the top card of his deck and either discards it or puts it back, your choice."
 	cost = 4
 	action = True
@@ -683,7 +684,7 @@ class SpyCard(KingdomCard):
 			if each.reactionImmunity == False and each.durationImmunity == False:
 				each.checkPlayerDeck()
 				for player in self.roster:
-					self.send_data(player.playerConn, each.playerName + " reveals: " + each.playerDeck[0].cardName + "...\n")
+					self.send_data(player.playerConn, each.playerName + " reveals: " + each.playerDeck[0].cardPrint + "...\n")
 				while True:
 					self.send_data(self.player.playerConn, "Would you like this player to (k)eep or (d)iscard this card?\n")
 					choice = self.recv_data(self.player.playerConn, 1024)
@@ -692,12 +693,12 @@ class SpyCard(KingdomCard):
 					elif choice.lower() == 'd':
 						each.playerDiscard.append(each.playerDeck[0])
 						for player in self.roster:
-							self.send_data(player.playerConn, each.playerName + " discards: " +  each.playerDeck[0].cardName + ".\n")
+							self.send_data(player.playerConn, each.playerName + " discards: " +  each.playerDeck[0].cardPrint + ".\n")
 						del each.playerDeck[0]
 						break
 					elif choice.lower() == 'k':
 						for player in self.roster:
-							self.send_data(player.playerConn, each.playerName + " keeps: " +  each.playerDeck[0].cardName + ".\n")
+							self.send_data(player.playerConn, each.playerName + " keeps: " +  each.playerDeck[0].cardPrint + ".\n")
 						break
 		for each in self.roster:
 			each.reactionImmunity = False
@@ -707,7 +708,7 @@ class SpyCard(KingdomCard):
 class ThiefCard(KingdomCard):
 	cardEval = "ThiefCard"
 	cardName = "Thief"
-	cardColor = "\033[1;31m"
+	cardPrint = "\033[1;31mThief\033[0m"
 	description = "Each other player reveals the top 2 cards of his deck. if they revealed any Treasure cards, they trash one of them that you choose. You may gain any or all of these trashed cards. They discard the other revealed cards."
 	cost = 4
 	action = True
@@ -737,45 +738,52 @@ class ThiefCard(KingdomCard):
 					self.trash.append(each.playerDeck[-1])
 					del each.playerDeck[-1]
 				for player in self.roster:
-					self.send_data(player.playerConn, each.playerName + " reveals: [1]" + self.trash[0].cardName + " and [2]" + self.trash[1].cardName + ".\n")
-				while True:
-					self.send_data(self.player.playerConn, "Which card would you like to trash?\n")
-					choice = self.recv_data(self.player.playerConn, 1024)
-					try:
-						choice = int(choice)
-					except:
-						continue
-					if choice not in [1, 2]:
-						continue
-					else:
-						if choice == 1:
-							each.playerDeck.append(self.trash[1])
+					self.send_data(player.playerConn, each.playerName + " reveals: [1]" + self.trash[0].cardPrint + " and [2]" + self.trash[1].cardPrint + ".\n")
+				if any(i.treasure == True for i in self.trash):
+					while True:
+						self.send_data(self.player.playerConn, "Which card would you like to trash?\n")
+						choice = self.recv_data(self.player.playerConn, 1024)
+						try:
+							choice = int(choice)
+						except:
+							continue
+						if choice not in [1, 2]:
+							continue
+						else:
+							if choice == 1:
+								if self.trash[0].treasure == True:
+									each.playerDeck.append(self.trash[1])
+									for player in self.roster:
+										self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[0].cardPrint + "\n")
+									del self.trash[1]
+									break
+								else:
+									self.send_data(self.player.playerConn, "You may only trash a treasure card.\n")
+									continue
+							elif choice == 2:
+								if self.trash[1].treasure == True:
+									each.playerDeck.append(self.trash[0])
+									for player in self.roster:
+										self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[1].cardPrint + "\n")
+									del self.trash[0]
+									break
+								else: self.send_data(self.player.playerConn, "You may only trash a treasure card.\n")
+					while True:
+						self.send_data(self.player.playerConn, "Would you like to (k)eep or (t)rash: " + self.trash[0].cardPrint + "?\n")	
+						choice = self.recv_data(self.player.playerConn, 1024)
+						if choice.lower() not in ['k', 't']:
+							continue
+						elif choice.lower() == 'k':
+							self.player.playerDiscard.append(self.trash[0])
 							for player in self.roster:
-								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[0].cardName + "\n")
-							del self.trash[1]
-							break
-						elif choice == 2:
-							each.playerDeck.append(self.trash[0])
-							for player in self.roster:
-								self.send_data(player.playerConn, each.playerName + " trashes: " + self.trash[1].cardName + "\n")
+								self.send_data(player.playerConn, self.player.playerName + " keeps " + each.player.playerName + "`s " + self.trash[0].cardPrint + ".\n")
 							del self.trash[0]
 							break
-				while True:
-					self.send_data(self.player.playerConn, "Would you like to (k)eep or (t)rash: " + self.trash[0].cardName + "?\n")
-					choice = self.recv_data(self.player.playerConn, 1024)
-					if choice.lower() not in ['k', 't']:
-						continue
-					elif choice.lower() == 'k':
-						self.player.playerDiscard.append(self.trash[0])
-						for player in self.roster:
-							self.send_data(player.playerConn, self.player.playerName + " keeps " + each.player.playerName + "`s " + self.trash[0].cardName + ".\n")
-						del self.trash[0]
-						break
-					elif choice.lower() == 't':
-						for player in self.roster:
-							self.send_data(player.playerConn, self.player.playerName + " trashes " + each.player.playerName + "`s " + self.trash[0].cardName + ".\n")
-						del self.trash[0]
-						break
+						elif choice.lower() == 't':
+							for player in self.roster:
+								self.send_data(player.playerConn, self.player.playerName + " trashes " + each.player.playerName + "`s " + self.trash[0].cardPrint + ".\n")
+							del self.trash[0]
+							break
 			else:
 				pass
 		for each in self.roster:
@@ -785,7 +793,7 @@ class ThiefCard(KingdomCard):
 class ThroneRoomCard(KingdomCard):
 	cardEval = "ThroneRoomCard"
 	cardName = "Throne Room"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mThrone Room\033[0m"
 	description = "Choose an Action card in your hand. Play it twice."
 	cost = 4
 	action = True
@@ -813,7 +821,7 @@ class ThroneRoomCard(KingdomCard):
 				self.send_data(self.player.playerConn, self.description + "\n")
 				i = self.recv_data(self.player.playerConn, 1024)
 				try:
-					i = int(i)
+					i = int(i) - 1
 				except:
 					continue
 				if i not in range(len(self.player.playerHand)):
@@ -832,7 +840,7 @@ class ThroneRoomCard(KingdomCard):
 class CouncilRoomCard(KingdomCard):
 	cardEval = "CouncilRoomCard"
 	cardName = "Council Room"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mCouncil Room \033[0m"
 	description = "+4 Cards; +1 Buy.  Each other player draws a card."
 	cost = 5
 	action = True
@@ -864,7 +872,7 @@ class CouncilRoomCard(KingdomCard):
 class FestivalCard(KingdomCard):
 	cardEval = "FestivalCard"
 	cardName = "Festival"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mFestival\033[0m"
 	description = "+2 Actions; +1 Buy; +$2"
 	cost = 5
 	action = True
@@ -890,7 +898,7 @@ class FestivalCard(KingdomCard):
 class LaboratoryCard(KingdomCard):
 	cardEval = "LaboratoryCard"
 	cardName = "Laboratory"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mLaboratory\033[0m"
 	description = "+2 Cards; +1 Action"
 	cost = 5
 	action = True
@@ -916,7 +924,7 @@ class LaboratoryCard(KingdomCard):
 class LibraryCard(KingdomCard):
 	cardEval = "LibraryCard"
 	cardName = "Library"
-	cardColor = "\033[37m"
+	cardPrint = "\033[37mLibrary\033[0m"
 	description = "Draw until you have 7 cards in hand. You may set aside any Action cards drawn this way, as you draw them; discard the set aside cards after you finish drawing."
 	cost = 5
 	action = True
@@ -938,7 +946,7 @@ class LibraryCard(KingdomCard):
 		self.setAsideNum = 0
 		while len(self.player.playerHand) < 7:
 			i = self.player.playerDeck[0]
-			self.send_data(self.player.playerConn, "You have drawn: " + i.cardName + "\n")
+			self.send_data(self.player.playerConn, "You have drawn: " + i.cardPrint + "\n")
 			if i.action != True:
 				self.player.playerHand.append(i)
 				del i
@@ -966,7 +974,7 @@ class LibraryCard(KingdomCard):
 class MarketCard(KingdomCard):
 	cardEval = "MarketCard"
 	cardName = "Market"
-	cardColor = "\033[37m"
+	cardColor = "\033[37mMarket\033[0m"
 	description = "+1 Card; +1 Action; +1 Buy, +$1"
 	cost = 5
 	action = True
@@ -993,7 +1001,7 @@ class MarketCard(KingdomCard):
 class MineCard(KingdomCard):
 	cardEval = "MineCard"
 	cardName = "Mine"
-	cardColor = "\033[37m"
+	cardColor = "\033[37mMine\033[0m"
 	description = "Trash a tresure card from your hand. gain a Treasure card costing up to $3 more; put it into your hand."
 	cost = 5
 	action = True
@@ -1033,7 +1041,7 @@ class MineCard(KingdomCard):
 class WitchCard(KingdomCard):
 	cardEval = "WitchCard"
 	cardName = "Witch"
-	cardColor = "\033[1;31m"
+	cardColor = "\033[1;31mWitch\033[0m"
 	description = "+2 Cards.  Each other player gains a Curse card."
 	cost = 5
 	action = True
@@ -1070,7 +1078,7 @@ class WitchCard(KingdomCard):
 class AdventurerCard(KingdomCard):
 	cardEval = "AdventurerCard"
 	cardName = "Adventurer"
-	cardColor = "\033[37m"
+	cardColor = "\033[37mAdventurer\033[0m"
 	description = "Reveal cards from your deck until you reveal 2 Treasure cards. Put those Treasure cards in your hand and discard the other revealed cards."
 	cost = 6
 	action = True
@@ -1094,7 +1102,7 @@ class AdventurerCard(KingdomCard):
 		while self.treasureCount < 2:
 			if len(self.player.playerDeck) > 0:
 				for each in self.roster:
-					self.send_data(each.playerConn, self.player.playerName + " reveals a: " + self.player.playerDeck[0].cardName + ".\n")
+					self.send_data(each.playerConn, self.player.playerName + " reveals a: " + self.player.playerDeck[0].cardPrint + ".\n")
 			if len(self.player.playerDeck) == 0:
 				self.player.playerDiscardToDeck()
 			if self.player.playerDeck[0].treasure != True:

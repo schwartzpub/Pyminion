@@ -83,6 +83,7 @@ class DomDeck(object):
 			self.libraryCard,
 			self.marketCard,
 			self.mineCard,
+			self.witchCard,
 			self.adventurerCard]
 		
 		self.intrigueCards = []
@@ -148,28 +149,23 @@ class DomDeck(object):
 
 	def printDeckCards(self, roster):
 		for user in roster:
-			self.send_data(user.playerConn, "CLRSCRN_FULL\n")
-			for each in roster:
-				if each.playerTurn == True:
-					self.send_data(user.playerConn, "\033[42m" + each.playerName + "\033[0m ",)
-				else:
-					self.send_data(user.playerConn, "\033[37m" + each.playerName + "\033[0m ",)
+#			self.send_data(user.playerConn, "CLRSCRN_FULL\n")
 			self.send_data(user.playerConn, "\n")
-			self.send_data(user.playerConn, "[P]" + ProvinceCard.cardColor + ProvinceCard.cardName + "\033[0m  (" + str(len(self.provinceCards)) + "): $" + str(ProvinceCard.cost) + "   [G]" + GoldCard.cardColor + GoldCard.cardName + "\033[0m    (" + str(len(self.goldCards)) + "): $" + str(GoldCard.cost))
-			self.send_data(user.playerConn, "   [0]" + self.kingdomCards['card0'][0].cardColor +  self.kingdomCards['card0'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card0'][0].cardName))) + " (" + str(len(self.kingdomCards['card0'])).zfill(2) + "): $" + str(self.kingdomCards['card0'][0].cost))
-			self.send_data(user.playerConn, "   [5]" + self.kingdomCards['card5'][0].cardColor +  self.kingdomCards['card5'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card5'][0].cardName))) + " (" + str(len(self.kingdomCards['card5'])).zfill(2) + "): $" + str(self.kingdomCards['card5'][0].cost) + "\n")
-			self.send_data(user.playerConn, "[D]" + DuchyCard.cardColor + DuchyCard.cardName + "\033[0m     (" + str(len(self.duchyCards)) + "): $" + str(DuchyCard.cost) + "   [S]" + SilverCard.cardColor + SilverCard.cardName + "\033[0m  (" + str(len(self.silverCards)) + "): $" + str(SilverCard.cost))
-			self.send_data(user.playerConn, "   [1]" + self.kingdomCards['card1'][0].cardColor +  self.kingdomCards['card1'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card1'][0].cardName))) + " (" + str(len(self.kingdomCards['card1'])).zfill(2) + "): $" + str(self.kingdomCards['card1'][0].cost))
-			self.send_data(user.playerConn, "   [6]" + self.kingdomCards['card6'][0].cardColor +  self.kingdomCards['card6'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card6'][0].cardName))) + " (" + str(len(self.kingdomCards['card6'])).zfill(2) + "): $" + str(self.kingdomCards['card6'][0].cost) + "\n")
-			self.send_data(user.playerConn, "[E]" + EstateCard.cardColor + EstateCard.cardName + "\033[0m    (" + str(len(self.estateCards)) + "): $" + str(EstateCard.cost) + "   [C]" + CopperCard.cardColor + CopperCard.cardName + "\033[0m  (" + str(len(self.copperCards)) + "): $" + str(CopperCard.cost))
-			self.send_data(user.playerConn, "   [2]" + self.kingdomCards['card2'][0].cardColor +  self.kingdomCards['card2'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card2'][0].cardName))) + " (" + str(len(self.kingdomCards['card2'])).zfill(2) + "): $" + str(self.kingdomCards['card2'][0].cost))
-			self.send_data(user.playerConn, "   [7]" + self.kingdomCards['card7'][0].cardColor +  self.kingdomCards['card7'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card7'][0].cardName))) + " (" + str(len(self.kingdomCards['card7'])).zfill(2) + "): $" + str(self.kingdomCards['card7'][0].cost) + "\n")
+			self.send_data(user.playerConn, "[P]" + ProvinceCard.cardPrint + "\033[0m  (" + str(len(self.provinceCards)) + "): $" + str(ProvinceCard.cost) + "   [G]" + GoldCard.cardColor + GoldCard.cardPrint + "\033[0m    (" + str(len(self.goldCards)) + "): $" + str(GoldCard.cost))
+			self.send_data(user.playerConn, "   [0]" + self.kingdomCards['card0'][0].cardColor +  self.kingdomCards['card0'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card0'][0].cardName))) + " (" + str(len(self.kingdomCards['card0'])).zfill(2) + "): $" + str(self.kingdomCards['card0'][0].cost))
+			self.send_data(user.playerConn, "   [5]" + self.kingdomCards['card5'][0].cardColor +  self.kingdomCards['card5'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card5'][0].cardName))) + " (" + str(len(self.kingdomCards['card5'])).zfill(2) + "): $" + str(self.kingdomCards['card5'][0].cost) + "\n")
+			self.send_data(user.playerConn, "[D]" + DuchyCard.cardColor + DuchyCard.cardPrint + "\033[0m     (" + str(len(self.duchyCards)) + "): $" + str(DuchyCard.cost) + "   [S]" + SilverCard.cardColor + SilverCard.cardPrint + "\033[0m  (" + str(len(self.silverCards)) + "): $" + str(SilverCard.cost))
+			self.send_data(user.playerConn, "   [1]" + self.kingdomCards['card1'][0].cardColor +  self.kingdomCards['card1'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card1'][0].cardName))) + " (" + str(len(self.kingdomCards['card1'])).zfill(2) + "): $" + str(self.kingdomCards['card1'][0].cost))
+			self.send_data(user.playerConn, "   [6]" + self.kingdomCards['card6'][0].cardColor +  self.kingdomCards['card6'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card6'][0].cardName))) + " (" + str(len(self.kingdomCards['card6'])).zfill(2) + "): $" + str(self.kingdomCards['card6'][0].cost) + "\n")
+			self.send_data(user.playerConn, "[E]" + EstateCard.cardColor + EstateCard.cardPrint + "\033[0m    (" + str(len(self.estateCards)) + "): $" + str(EstateCard.cost) + "   [C]" + CopperCard.cardColor + CopperCard.cardPrint + "\033[0m  (" + str(len(self.copperCards)) + "): $" + str(CopperCard.cost))
+			self.send_data(user.playerConn, "   [2]" + self.kingdomCards['card2'][0].cardColor +  self.kingdomCards['card2'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card2'][0].cardName))) + " (" + str(len(self.kingdomCards['card2'])).zfill(2) + "): $" + str(self.kingdomCards['card2'][0].cost))
+			self.send_data(user.playerConn, "   [7]" + self.kingdomCards['card7'][0].cardColor +  self.kingdomCards['card7'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card7'][0].cardName))) + " (" + str(len(self.kingdomCards['card7'])).zfill(2) + "): $" + str(self.kingdomCards['card7'][0].cost) + "\n")
 			self.send_data(user.playerConn, "					  ")
-			self.send_data(user.playerConn, "   [3]" + self.kingdomCards['card3'][0].cardColor +  self.kingdomCards['card3'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card3'][0].cardName))) + " (" + str(len(self.kingdomCards['card3'])).zfill(2) + "): $" + str(self.kingdomCards['card3'][0].cost))
-			self.send_data(user.playerConn, "   [8]" + self.kingdomCards['card8'][0].cardColor +  self.kingdomCards['card8'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card8'][0].cardName))) + " (" + str(len(self.kingdomCards['card8'])).zfill(2) + "): $" + str(self.kingdomCards['card8'][0].cost) + "\n")
-			self.send_data(user.playerConn, "[U]" + CurseCard.cardColor + CurseCard.cardName + "\033[0m    (" + str(len(self.curseCards)).zfill(2) + "): $" + str(CurseCard.cost) + "                      ")
-			self.send_data(user.playerConn, "   [4]" + self.kingdomCards['card4'][0].cardColor +  self.kingdomCards['card4'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card4'][0].cardName))) + " (" + str(len(self.kingdomCards['card4'])).zfill(2) + "): $" + str(self.kingdomCards['card4'][0].cost))
-			self.send_data(user.playerConn, "   [9]" + self.kingdomCards['card9'][0].cardColor +  self.kingdomCards['card9'][0].cardName + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card9'][0].cardName))) + " (" + str(len(self.kingdomCards['card9'])).zfill(2) + "): $" + str(self.kingdomCards['card9'][0].cost) + "\n")
+			self.send_data(user.playerConn, "   [3]" + self.kingdomCards['card3'][0].cardColor +  self.kingdomCards['card3'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card3'][0].cardName))) + " (" + str(len(self.kingdomCards['card3'])).zfill(2) + "): $" + str(self.kingdomCards['card3'][0].cost))
+			self.send_data(user.playerConn, "   [8]" + self.kingdomCards['card8'][0].cardColor +  self.kingdomCards['card8'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card8'][0].cardName))) + " (" + str(len(self.kingdomCards['card8'])).zfill(2) + "): $" + str(self.kingdomCards['card8'][0].cost) + "\n")
+			self.send_data(user.playerConn, "[U]" + CurseCard.cardColor + CurseCard.cardPrint + "\033[0m    (" + str(len(self.curseCards)).zfill(2) + "): $" + str(CurseCard.cost) + "                      ")
+			self.send_data(user.playerConn, "   [4]" + self.kingdomCards['card4'][0].cardColor +  self.kingdomCards['card4'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card4'][0].cardName))) + " (" + str(len(self.kingdomCards['card4'])).zfill(2) + "): $" + str(self.kingdomCards['card4'][0].cost))
+			self.send_data(user.playerConn, "   [9]" + self.kingdomCards['card9'][0].cardColor +  self.kingdomCards['card9'][0].cardPrint + "\033[0m  " + (" " * (12 - len(self.kingdomCards['card9'][0].cardName))) + " (" + str(len(self.kingdomCards['card9'])).zfill(2) + "): $" + str(self.kingdomCards['card9'][0].cost) + "\n")
 
 	def readCard(self, number, conn):
 		try:
@@ -177,7 +173,7 @@ class DomDeck(object):
 		except:
 			return
 		self.send_data(conn, 'CLRSCRN_FULL\n')
-		self.send_data(conn, "\033[36m  Card Name: \033[0m" + self.kingdomCards[cardToRead][0].cardColor + self.kingdomCards[cardToRead][0].cardName + "\n")
+		self.send_data(conn, "\033[36m  Card Name: \033[0m" + self.kingdomCards[cardToRead][0].cardPrint + "\n")
 		self.send_data(conn, "\033[36m  Description: \033[0m" + self.kingdomCards[cardToRead][0].description + "\n")
 		self.send_data(conn, "\n\033[32m  Cost:\033[0m $" + str(self.kingdomCards[cardToRead][0].cost) + "\n")
 		self.send_data(conn, ("\n\n\033[1;31m  Press (y) when finished...\033[0m\n"))

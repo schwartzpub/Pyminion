@@ -155,6 +155,7 @@ class Player(object):
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
+						continue
 					else:
 						p = self.deck.provinceCards
 						d = self.deck.duchyCards
@@ -166,20 +167,22 @@ class Player(object):
 						choice = eval(choice.lower())
 						if choice[0].cost > self.cost:
 							self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
+							continue
 						else:
 							self.location.append(choice[0])
 							for each in self.roster:
-								self.send_data(each.playerConn, self.playerName + " has gained a " + choice[0].cardName + ".\n")
+								self.send_data(each.playerConn, self.playerName + " has gained a " + choice[0].cardPrint + ".\n")
 							del choice[0]
 							break
 				elif choice.lower() in kingdom:
 					x = 'card' + choice.lower()
 					if self.deck.kingdomCards[x][0].cost > cost:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
+						continue
 					else:
 						self.location.append(self.deck.kingdomCards[x][0])
 						for each in self.roster:
-								self.send_data(each.playerConn, self.playerName + " has gained a " + self.deck.kingdomCards[x][0].cardName + ".\n")
+								self.send_data(each.playerConn, self.playerName + " has gained a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 						del self.deck.kingdomCards[x][0]
 						break
 			break
@@ -191,6 +194,7 @@ class Player(object):
 		self.checkSetAside()
 		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
 			self.actionPhase()
+			self.buyPhase()
 			self.cleanUpPhase()
 			return
 		else:
@@ -199,6 +203,7 @@ class Player(object):
 			self.playerTurnTreasure = 0
 			self.playerTreasurePlayed = False
 			self.actionPhase()
+			self.buyPhase()
 			self.cleanUpPhase()
 			return
 		return
@@ -208,7 +213,7 @@ class Player(object):
 		self.printRosterHand(self.roster)
 		while True:
 			if self.playerTurnActions == 0 or self.playerTreasurePlayed == True:
-				self.buyPhase()
+#				self.buyPhase()
 				return
 			else:
 				self.printPlayerHand()
@@ -241,12 +246,12 @@ class Player(object):
 								i = eval(i.lower())
 								if i[0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n" )
-									continue
+									break
 								else:
 									self.playerPlay.append(i[0])
 									self.playerTurnTreasure -= i[0].cost
 									for each in self.roster:
-										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardName + ".\n")
+										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
 									del i[0]
 									self.playerTurnBuys -= 1
 									return
@@ -254,12 +259,12 @@ class Player(object):
 								x = 'card' + str(choice)
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
-									continue
+									break
 							else:
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
 								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 								for each in self.roster:
-									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardName + ".\n")
+									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
 								return
@@ -272,8 +277,8 @@ class Player(object):
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						cardToRead = str(self.recv_data(self.playerConn, 1024))
 						self.deck.readCard(cardToRead, self.playerConn)
-						self.printPlayerHand()
-						continue
+#						self.printPlayerHand()
+						break
 				continue
 		return
 
@@ -292,10 +297,10 @@ class Player(object):
 				self.playerPlay.append(self.playerHand[i - 1])
 				self.playerTurnTreasure += self.playerHand[i - 1].value
 				for each in self.roster:
-					self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardName + ".\n")
+					self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
 				del self.playerHand[i - 1]
 				self.playerTreasurePlayed = True
-				self.buyPhase()
+#				self.buyPhase()
 				return
 			elif self.playerHand[i - 1].action == True:
 				if self.playerTurnActions <= 0:
@@ -305,7 +310,7 @@ class Player(object):
 				else:
 					self.playerPlay.append(self.playerHand[i - 1])
 					for each in self.roster:
-						self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardName + ".\n")
+						self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
 					del self.playerHand[i - 1]
 					self.playerTurnActions -= 1
 					self.playerActionsPlayed += 1
@@ -320,6 +325,7 @@ class Player(object):
 			return
 		else:
 			while True:
+				if self.playerTurnBuys == 0: return
 				self.printPlayerHand()
 				self.send_data(self.playerConn, "\nWhat would you like to do: (P)lay, (B)uy, P(a)ss, (R)ead?\n")
 				choice = str(self.recv_data(self.playerConn, 1024))
@@ -343,7 +349,7 @@ class Player(object):
 							self.playerPlay.append(self.playerHand[i - 1])
 							self.playerTurnTreasure += self.playerHand[i - 1].value
 							for each in self.roster:
-								self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardName + ".\n")
+								self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
 							del self.playerHand[i - 1]
 							break
 				elif choice.lower() == 'b':
@@ -371,10 +377,10 @@ class Player(object):
 								self.playerPlay.append(i[0])
 								self.playerTurnTreasure -= i[0].cost
 								for each in self.roster:
-									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardName + ".\n")
+									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
 								del i[0]
 								self.playerTurnBuys -= 1
-								return
+								break
 						elif int(i) in range(10):
 							x = 'card' + i
 							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
@@ -384,7 +390,7 @@ class Player(object):
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
 								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 								for each in self.roster:
-									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardName + ".\n")
+									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
 								break
@@ -396,13 +402,13 @@ class Player(object):
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					cardToRead = str(self.recv_data(self.playerConn, 1024))
 					self.deck.readCard(cardToRead, self.playerConn)
-					self.printPlayerHand()
+#					self.printPlayerHand()
 					break
-			if self.playerTurnBuys < 1:
-				return
-			else:
-				self.buyPhase()
-				return
+#			if self.playerTurnBuys < 1:
+#				return
+#			else:
+#				self.buyPhase()
+#				return
 		return
 
 	def cleanUpPhase(self):
@@ -488,7 +494,7 @@ class Player(object):
 	def printHandUpdate(self):
 		i = 1
 		for card in self.playerHand:
-			self.send_data(self.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+			self.send_data(self.playerConn, "[" + str(i) + "]" + card.cardPrint + "  \033[0m",)
 			i += 1
 		self.send_data(self.playerConn, "\n")
 
@@ -501,7 +507,7 @@ class Player(object):
 			i = 1
 			self.send_data(user.playerConn, "\nCurrent Hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
-				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardPrint + "  \033[0m",)
 				i += 1
 			self.send_data(user.playerConn, "\n")
 
@@ -521,7 +527,7 @@ class Player(object):
 			i = 1
 			self.send_data(user.playerConn, "\nCurrent hand (" + user.playerName + "):\n")
 			for card in user.playerHand:
-				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardColor + card.cardName + "  \033[0m",)
+				self.send_data(user.playerConn, "[" + str(i) + "]" + card.cardPrint + "  \033[0m",)
 				i += 1
 			self.send_data(user.playerConn, "\n")
 
