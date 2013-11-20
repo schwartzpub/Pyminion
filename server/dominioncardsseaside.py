@@ -1,15 +1,15 @@
 import dominionsock, sys, os, time
 
 class AmbassadorCard(KingdomCard):
-        cardEval = "AmbassadorCard"
-        cardName = "Ambassador"
-        cardPrint = "\033[1;31mAmbassador\033[0m"
-        description = "Reveal a card from your hand. Return up to 2 copies of it from your hand to the Supply. Then each other player gains a copy of it."
-        cost = 3
-        action = True
-        attack = True
-        def __init__(self):
-                pass
+	cardEval = "AmbassadorCard"
+	cardName = "Ambassador"
+	cardPrint = "\033[1;31mAmbassador\033[0m"
+	description = "Reveal a card from your hand. Return up to 2 copies of it from your hand to the Supply. Then each other player gains a copy of it."
+	cost = 3
+	action = True
+	attack = True
+	def __init__(self):
+		pass
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -320,16 +320,16 @@ class LookoutCard(KingdomCard):
 				del self.current[choice]
 				break
 		send_data(self.player.playerConn, "Choose a card to discard:\n")
-                while True:
-                        for each in self.current:
-                                send_data(self.player.playerConn, each.cardPrint + ,)
-                        send_data(self.player.playerConn, "\n")
-                        choice = recv_data(self.player.playerConn, 1024)
-                        try:
-                                choice = int(choice) - 1
-                        except: continue
-                        if choice not in range(len(self.current)): continue
-                        else:
+		while True:
+			for each in self.current:
+				send_data(self.player.playerConn, each.cardPrint + ,)
+			send_data(self.player.playerConn, "\n")
+			choice = recv_data(self.player.playerConn, 1024)
+			try:
+				choice = int(choice) - 1
+			except: continue
+			if choice not in range(len(self.current)): continue
+			else:
 				self.player.playerDiscard.append(self.current[choice])
 				del self.current[choice]
 				break
@@ -593,7 +593,59 @@ class SmugglersCard(KingdomCard):
 		pass
 
 	def playCard(self, player, roster, deck):
-		pass
+		self.player = player
+		self.roster = roster
+		self.previous = 0
+		self.options = []
+		i = 1
+		for position, user in enumerate(self.roster):
+			if user.playerName == self.player.playerName:
+				if position == 0:
+					if any(i.cost <= 6 for i in self.roster[-1].gained) and len(self.roster[-1].gained) > 0:
+						for card in self.roster[-1].gained:
+							if card.cost <= 6:
+								self.options.append(card)
+							else: pass
+						send_data(self.player.playerConn, "Please choose a card to Gain: ",)
+						for card in self.options:
+							send_data(self.player.playerConn, "[" + str(i) + "]" + card.cardPrint + " ",)
+							i += 1
+						send_data(self.player.playerConn, "\n")
+						while True:
+							choice = recv_data(self.player.playerConn, 1024)
+							try: choice = int(choice) - 1
+							except: continue
+							if choice not in range(len(self.options)): continue
+							else:
+								self.player.gainCard(0, 0, 'discard', card.cardName)
+								for each in self.roster:
+									send_data(each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
+								break
+					else: return
+				else:
+					if any(i.cost <= 6 for i in self.roster[self.previous].gained) and len(self.roster[self.previous].gained) > 0:
+						self.previous = position - 1
+						for card in self.roster[self.previous].gained:
+							if card.cost <= 6:
+								self.options.append(card)
+							else: pass
+						send_data(self.player.playerConn, "Please choose a card to Gain: ",)
+						for card in self.options:
+							send_data(self.player.playerConn, "[" + str(i) + "]" + card.cardPrint + " ",)
+							i += 1
+						send_data(self.player.playerConn, "\n")
+						while True:
+							choice = recv_data(self.player.playerConn, 1024)
+							try: choice = int(choice) - 1
+							except: continue
+							if choice not in range(len(self.options)): continue
+							else:
+								self.player.gainCard(0, 0, 'discard', card.cardName)
+								for each in self.roster:
+									send_data(each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
+								break
+					else: return
+		return
 
 class TacticianCard(KingdomCard):
 	cardEval = "TacticianCard"
@@ -743,8 +795,8 @@ class WharfCard(KingdomCard):
 	def playDuration(self. player, roster, deck):
 		self.player = player
 		self.roster = roster
-		                self.player.drawOneCard()
-                self.player.drawOneCard()
-                self.player.playerTurnBuys += 1
-                for each in self.roster:
-                        send_data(each.playerConn, self.player.playerName + " draws two cards and gets +1 Buy from his Wharf.\n")
+				self.player.drawOneCard()
+		self.player.drawOneCard()
+		self.player.playerTurnBuys += 1
+		for each in self.roster:
+			send_data(each.playerConn, self.player.playerName + " draws two cards and gets +1 Buy from his Wharf.\n")

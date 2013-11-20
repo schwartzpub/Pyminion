@@ -591,6 +591,7 @@ class Player(object):
 		else:
 			self.passTurn()
 			return
+
 	def endGame(self):
 		for each in self.roster:
 			self.send_data(each.playerConn, "GAME OVER! The scores are: ")

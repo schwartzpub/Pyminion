@@ -189,15 +189,17 @@ def build_game(client, addr, name):
 		player = player.lower()
 		if player not in client_list:
 			if player == '!go' and len(game.keys()) >= 2:
-				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game: \033[0m\n") for c in clients]
+				[send_data(c, "\033[1;32m** GAME STARTING: The following players are entering a new game:\n") for c in clients]
 				for p in game:
 					clients.remove(client_list[p][0])
 					client_list[p][1].ingame()
+#					[send_data(c, "[ " + p + " ]",) for c in clients]
 					print "client " + p + " joined game"
+#				[send_data(c, "\033[0m\n") for c in clients]
 				start_handle(game, user)
 				for p in game:
 					try:
-						send_data(client_list[p][0], 'CLRSCRN_FULL\n')
+						send_data(client_list[p][0], '\nCLRSCRN_FULL\n')
 						clients.append(client_list[p][0])
 						client_list[p][1].resume()
 						print "client " + p + " finished game"
@@ -307,7 +309,6 @@ class DomGame(threading.Thread):
 			except:
 				break
 			if self.playerTurn < players:
-				print "next player"
 				self.playerRost[self.playerTurn].playerTurn = True
 				self.playerRost[self.playerTurn].playTurn()
 				if self.playerTurn == 'gameover':
