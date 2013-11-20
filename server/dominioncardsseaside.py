@@ -157,6 +157,7 @@ class FishingVillageCard(KingdomCard):
 		self.player = player
 		self.player.playerTurnActions += 1
 		self.player.playerTurnTreasure += 1
+		return
 
 class GhostShipCard(KingdomCard):
 	cardEval = "GhostChipCard"
@@ -394,6 +395,33 @@ class NavigatorCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnTreasure += 2
+		send_data(self.playerConn, "The top 5 cards of your deck are: ",)
+		for i in range(5):
+			send_data(self.player.playerConn, self.player.playerDeck[i].cardPrint + " ",)
+		send_data(self.player.playerConn, "\n")
+		send_data(self.player.playerConn, "Would you like to (d)iscard them or (r)eturn them to the deck?\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			if choice.lower() not in ['d', 'r']: continue
+			elif choice.lower() == 'd':
+				i = 0
+				while i < 4:
+					self.player.playerDiscard.append(self.player.playerDeck[0])
+					del self.player.playerDeck[0]
+					i += 1
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " has discarded the top 5 cards of his deck.\n")
+				break
+			else:
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " has done nothing.\n")
+				break
+		return
+
 class OutpostCard(KingdomCard):
 	cardEval = "OutpostCard"
 	cardName = "Outpost"
@@ -402,6 +430,10 @@ class OutpostCard(KingdomCard):
 	action = True
 	duration = True
 	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
 		pass
 
 class PearlDiverCard(KingdomCard):
@@ -414,6 +446,27 @@ class PearlDiverCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		send_data(self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[-1].cardPrint + ". Put it on top of your deck (y/n)?\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			if choice.lower() not in ['y', 'n']: continue
+			elif choice.lower() == 'y':
+				self.player.playerDeck.insert(self.player.playerDeck[-1])
+				del self.player.playerDeck[-1]
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " places the bottom card of his deck on top of his deck.\n")
+				break
+			else:
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " does nothing.\n")
+				break
+		return
+
 class PirateShipCard(KingdomCard):
 	cardEval = "PirateShipCard"
 	cardName = "Pirate Ship"
@@ -424,6 +477,60 @@ class PirateShipCard(KingdomCard):
 	attack = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		send_data(self.player.playerConn, "Choose one: (A)ttack players, or (T)ake coins.\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			if choice.lower() not in ['a', 't']: continue
+			elif choice.lower() == 'a':
+				self.trashed = False
+				self.trash = []
+				for each in self.roster:
+					each.playerDiscardToDeck()
+					self.trash.append(each.player.playerDeck[0])
+					del each.player.playerDeck[0]
+					each.playerDiscardToDeck()
+					self.trash.append(each.player.playerDeck[0])
+					del each.player.playerDeck[0]
+					if any(i.treasure for i in self.trash):
+						self.trashed = True
+						send_data(self.player.playerConn, "Choose one to trash: [1]" + self.trash[0].cardPrint + " [2]" + self.trash[1].cardPrint + "\n")
+						for player in self.roster:
+							send_data(player.playerConn, each.playerName + " reveals: [1]" + self.trash[0].cardPrint + " [2]" + self.trash[1].cardPrint + "\n")
+						while True:
+							choice = recv_data(self.player.playerConn, 1024)
+							if choice not in ['1', '2']: continue
+							elif choice == '1' and self.trash[0].treasure:
+								for player in self.roster:
+									send_data(player.playerConn, self.player.playerName + " trashes " + self.trash[0].cardPrint + "\n")
+								del self.trash[0]
+								each.playerDiscard.append(self.trash[0])
+								del self.trash[0]
+								break
+							elif choice == '2' and self.trash[1].treasure:
+								for player in self.roster:
+									send_data(player.playerConn, self.player.playerName + " trashes " + self.trash[1].cardPrint + "\n")
+								del self.trash[1]
+								each.playerDiscard.append(self.trash[0])
+								del self.trash[0]
+								break
+					else:
+						for player in self.roster:
+							send_data(player.playerConn, each.playerName + " reveals: [1]" + self.trash[0].cardPrint + " [2]" + self.trash[1].cardPrint + "\n")
+						each.playerDiscard.append(self.trash[0])
+						each.playerDiscard.append(self.trash[1])
+						del self.trash[0]
+						del self.trash[0]
+				if self.trashed:
+					self.player.pirateMat += 1
+					break
+			elif choice.lower == 't':
+				self.player.playerTurnTreasure += self.player.pirateMat
+				break
+		return				
 
 class SalvagerCard(KingdomCard):
 	cardEval = "SalvagerCard"

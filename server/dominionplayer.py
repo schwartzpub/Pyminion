@@ -29,7 +29,7 @@ class Player(object):
 		self.playerConn = ''
 		self.playerTurn = False
 		self.islandMat = []
-		self.pirateMat = []
+		self.pirateMat = 0
 		self.nativeMat = []
 
 	def send_data (self, client, data):
