@@ -542,6 +542,23 @@ class SalvagerCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerTurnBuys += 1
+		send_data(self.player.playerConn, "Please choose a card to trash, +$ equal to its cost.\n")
+		while True:
+			choice = recv_data(self.player.playerConn, 1024)
+			try: choice = int(choice) - 1
+			except: continue
+			if choice not in range(len(self.player.playerHand)): continue
+			else:
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " trashes a card.\n")
+				del self.player.playerHand[choice]
+				break
+		return
+
 class SeaHagCard(KingdomCard):
 	cardEval = "SeaHagCard"
 	cardName = "Sea Hag"
@@ -553,6 +570,18 @@ class SeaHagCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		for each in self.roster:
+			each.playerDiscard.append(each.playerDeck[0])
+			del each.playerDeck[0]
+			for player in self.roster:
+				send_data(player.playerConn, each.playerName + " discards a card, and gains a " + self.deck.curseCards[0] + "on top of his deck.\n")
+			each.gainCard(0, 0, 'deck', 'curseCards')
+		return
+
 class SmugglersCard(KingdomCard):
 	cardEval = "SmugglersCard"
 	cardName = "Smugglers"
@@ -561,6 +590,9 @@ class SmugglersCard(KingdomCard):
 	cost = 3
 	action = True
 	def __init__(self):
+		pass
+
+	def playCard(self, player, roster, deck):
 		pass
 
 class TacticianCard(KingdomCard):
@@ -574,6 +606,30 @@ class TacticianCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.playerHasDuration = True
+		if len(self.player.playerHand) == 0: return
+		else:
+			i = 0
+			while i < len(self.player.playerHand):
+				self.player.playerDiscard.append(self.player.playerHand[0])
+				del self.player.playerHand[0]
+				for each in self.roster:
+					send_data(each.playerConn, self.player.playerName + " discards his hand.  Next turn +5 cards, +1 Buy, +1 Action.\n")
+				break
+			return
+
+	def playDuration(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		for i in range(5):
+			self.player.drawOneCard()
+		self.player.playerTurnBuys += 1
+		self.player.playerTurnActions += 1
+		return
+
 class TreasureMapCard(KingdomCard):
 	cardEval = "TreasureMapCard"
 	cardName = "Treasure Map"
@@ -583,6 +639,29 @@ class TreasureMapCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.deck = deck
+		if any(i.cardName == 'Treasure Map' for i in self.player.playerHand):
+			del self.player.playerPlay[-1]
+			for card in self.player.playerHand:
+				if card.cardName != 'Treasure Map': pass
+				else:
+					self.player.playerHand.remove(card)
+					for i in range(4):
+						if len(self.deck.goldCards) > 0:
+							self.player.playerDeck.insert(self.deck.goldCards[0])
+						else: pass
+			for each in self.roster:
+				send_data(each.playerConn, self.player, playerName + " has trashed two Treasure Maps, and gained 4 " + self.deck.goldCards[0].cardPrint + "s on his deck.\n")
+		else:
+			del self.player.playerPlay[-1]
+			for each in self.roster:
+				send_data(each.playerConn, self.player.playerName + " has trashed a Treasure Map.\n")
+		return
 
 class TreasuryCard(KingdomCard):
 	cardEval = "TreasuryCard"
@@ -594,6 +673,22 @@ class TreasuryCard(KingdomCard):
 	def __init__(self):
 		pass
 
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.drawOneCard()
+		self.playerTurnActions += 1
+		self.playerTurnTreasure += 1
+
+	def playDiscard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		if not self.player.boughtVictory:
+			self.player.playerDeck.insert(self.player.playerPlay[0])
+			del self.player.playerPlay[0]
+		for each in self.roster:
+			send_data(each.playerConn, self.player.playerName + " places a Treasury on top of his deck.\n")
+
 class WarehouseCard(KingdomCard):
 	cardEval = "WarehouseCard"
 	cardName = "Warehouse"
@@ -603,6 +698,27 @@ class WarehouseCard(KingdomCard):
 	action = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		for i in range(3):
+			self.player.drawOneCard()
+		self.player.playerTurnActions += 1
+		for i in range(3):
+			send_data(self.player.playerConn, "Choose one to discard:\n")
+			self.player.printPlayerReveal()
+			while True:
+				choice = recv_data(self.player.playerConn, 1024)
+				try: choice = int(choice) - 1
+				except: continue
+				if choice not in range(len(self.player.playerHand)): continue
+				else:
+					self.player.playerDiscard.append(self.player.playerHand[choice])
+					del self.player.playerHand[choice]
+		for each in self.roster:
+			send_data(each.playerConn, self.player.playerName + " draws 3 cards, and discards 3 cards.\n")
+		return
 
 class WharfCard(KingdomCard):
 	cardEval = "WharfCard"
@@ -614,3 +730,21 @@ class WharfCard(KingdomCard):
 	duration = True
 	def __init__(self):
 		pass
+
+	def playCard(self, player, roster, deck):
+		self.player = player
+		self.roster = roster
+		self.player.drawOneCard()
+		self.player.drawOneCard()
+		self.player.playerTurnBuys += 1
+		for each in self.roster:
+			send_data(each.playerConn, self.player.playerName + " draws two cards.\n")
+
+	def playDuration(self. player, roster, deck):
+		self.player = player
+		self.roster = roster
+		                self.player.drawOneCard()
+                self.player.drawOneCard()
+                self.player.playerTurnBuys += 1
+                for each in self.roster:
+                        send_data(each.playerConn, self.player.playerName + " draws two cards and gets +1 Buy from his Wharf.\n")

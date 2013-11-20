@@ -25,12 +25,14 @@ class Player(object):
 		self.game = ''		
 		self.reactionImmunity = False
 		self.durationImmunity = False
+		self.boughtVictory = False
 		self.totalVictory = 0
 		self.playerConn = ''
 		self.playerTurn = False
 		self.islandMat = []
 		self.pirateMat = 0
 		self.nativeMat = []
+		self.gained = []
 
 	def send_data (self, client, data):
 		message = str(data)
@@ -153,7 +155,7 @@ class Player(object):
 					if len(eval(self.type)) == 0:
 						break
 					else:
-						self.player.playerDiscard.append(eval(self.type)[0])
+						self.location.append(eval(self.type)[0])
 						del eval(self.type)[0]
 						break
 				if choice.lower() in nonkingdom:
@@ -190,12 +192,14 @@ class Player(object):
 						del self.deck.kingdomCards[x][0]
 						break
 			break
+		self.gained.append(self.location[-1])
 		return self.location[-1]
 
 	def playTurn(self):
 		if len(self.game.playerRost) == 1: return
 		self.checkPlayerDeck()
 		self.checkSetAside()
+		self.gained = []
 		if self.playerTurnActions == 1 and self.playerTurnBuys == 1 and self.playerTurnTreasure == 0:
 			self.checkDurationEffects()
 			self.actionPhase()
@@ -257,6 +261,7 @@ class Player(object):
 									self.playerTurnTreasure -= i[0].cost
 									for each in self.roster:
 										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
+									if i[0].victory: self.boughtVictory = True
 									del i[0]
 									self.playerTurnBuys -= 1
 									return
@@ -391,6 +396,7 @@ class Player(object):
 								self.playerTurnTreasure -= i[0].cost
 								for each in self.roster:
 									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
+								if i[0].victory: self.boughtVictory = True
 								del i[0]
 								self.playerTurnBuys -= 1
 								break
@@ -427,9 +433,13 @@ class Player(object):
 		x = len(self.playerPlay)
 		y = len(self.playerHand)
 		while x == len(self.playerPlay) and x > 0:
-			self.playerDiscard.append(self.playerPlay[0])
-			del self.playerPlay[0]
-			x -= 1
+			if self.playerPlay[0].cardName == 'Treasury':
+				self.playerPlay[0].playDiscard(self.player, self.roster, self.deck)
+				x -= 1
+			else:
+				self.playerDiscard.append(self.playerPlay[0])
+				del self.playerPlay[0]
+				x -= 1
 		while y == len(self.playerHand) and y > 0:
 			self.playerDiscard.append(self.playerHand[0])
 			del self.playerHand[0]
@@ -437,9 +447,6 @@ class Player(object):
 		time.sleep(1)
 		self.drawHand()
 		self.checkWin()
-		return
-
-	def passTurn(self):
 		return
 
 	def checkDurationEffects(self):
