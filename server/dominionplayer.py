@@ -589,7 +589,7 @@ class Player(object):
 			self.endGame()
 			return
 		else:
-			self.passTurn()
+#			self.passTurn()
 			return
 
 	def endGame(self):
