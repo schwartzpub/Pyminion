@@ -1,7 +1,9 @@
 #Dominion card classes
 import os
 import time
-import dominionsock
+
+#import dominionsock
+from dominioncardsseaside import *
 
 #Treasure Cards
 class TreasureCard(object):
@@ -25,8 +27,10 @@ class GoldCard(TreasureCard):
 	quantity = 30
 	value = 3
 	cost = 6
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+		self.embargoed = False
+                self.embargo = 0
 
 class SilverCard(TreasureCard):
 	cardName = "Silver"
@@ -34,8 +38,10 @@ class SilverCard(TreasureCard):
 	quantity = 40
 	value = 2
 	cost = 3
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 class CopperCard(TreasureCard):
 	cardName = "Copper"
@@ -43,8 +49,10 @@ class CopperCard(TreasureCard):
 	quantity = 60
 	value = 1
 	cost = 0
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 #Victory Cards
 class VictoryCard(object):
@@ -67,24 +75,30 @@ class ProvinceCard(VictoryCard):
 	cardPrint = "\033[32mProvince\033[0m"
 	victoryPoints = 6
 	cost = 8
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 class DuchyCard(VictoryCard):
 	cardName = "Duchy"
 	cardPrint = "\033[32mDuchy\033[0m"
 	victoryPoints = 3
 	cost = 5
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 class EstateCard(VictoryCard):
 	cardName = "Estate"
 	cardPrint = "\033[32mEstate\033[0m"
 	victoryPoints = 2
 	cost = 2
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 #Curse Cards
 class CurseCard(object):
@@ -103,8 +117,10 @@ class CurseCard(object):
 	reaction = False
 	attack = False
 	victoryPoints = -1
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 #Action Cards
 class KingdomCard(object):
@@ -133,9 +149,11 @@ class CellarCard(KingdomCard):
 	description = "+1 Action.  Discard any number of cards.  +1 Card per card discarded."
 	cost = 2
 	action = True
-	def __init__(self):
-		pass
-	
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
+
 	def recv_data (self, client, length):
 	        data = client.recv(length)
 	        if not data: return data
@@ -189,8 +207,10 @@ class ChapelCard(KingdomCard):
 	description = "Trash up to 4 cards from your hand."
 	cost = 2
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -237,8 +257,10 @@ class MoatCard(KingdomCard):
 	cost = 2
 	action = True
 	reaction = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 	
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -290,8 +312,10 @@ class ChancellorCard(KingdomCard):
 	description = "+$2.  You may immediately put your deck into your discard pile."
 	cost = 3
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -320,12 +344,14 @@ class ChancellorCard(KingdomCard):
 class VillageCard(KingdomCard):
 	cardEval = "VillageCard"
 	cardName = "Village"
-	cardPrint = "\033[37mVilalge\033[0m"
+	cardPrint = "\033[37mVillage\033[0m"
 	description = "+1 Card. +2 Actions."
 	cost = 3
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -346,8 +372,10 @@ class WoodcutterCard(KingdomCard):
 	description = "+1 Buy. +$2."
 	cost = 3	
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -371,8 +399,10 @@ class WorkshopCard(KingdomCard):
 	description = "Gain a card costing up to $4."
 	cost = 3
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -397,8 +427,10 @@ class BureaucratCard(KingdomCard):
 	cost = 4
 	action = True
 	attack = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -456,8 +488,10 @@ class FeastCard(KingdomCard):
 	description = "Trash this card. Gain a card costing up to $5."
 	cost = 4
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -491,8 +525,10 @@ class GardensCard(KingdomCard):
 	victoryPoints = 1
 	action = False
 	victory = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
 class MilitiaCard(KingdomCard):
 	cardEval = "MilitiaCard"
@@ -502,8 +538,10 @@ class MilitiaCard(KingdomCard):
 	cost = 4
 	action = True
 	attack = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -549,8 +587,10 @@ class MoneylenderCard(KingdomCard):
 	description = "Trash a Copper from your hand. If you do, +$3."
 	cost = 4
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -593,8 +633,10 @@ class RemodelCard(KingdomCard):
 	description = "Trash a card from your hand. Gain a card costing up to $2 more than the trashed card."
 	cost = 4
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -636,8 +678,10 @@ class SmithyCard(KingdomCard):
 	description = "+3 Cards."
 	cost = 4
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -662,8 +706,10 @@ class SpyCard(KingdomCard):
 	cost = 4
 	action = True
 	attack = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -713,8 +759,10 @@ class ThiefCard(KingdomCard):
 	cost = 4
 	action = True
 	attack = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -797,8 +845,10 @@ class ThroneRoomCard(KingdomCard):
 	description = "Choose an Action card in your hand. Play it twice."
 	cost = 4
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 	
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -840,12 +890,14 @@ class ThroneRoomCard(KingdomCard):
 class CouncilRoomCard(KingdomCard):
 	cardEval = "CouncilRoomCard"
 	cardName = "Council Room"
-	cardPrint = "\033[37mCouncil Room \033[0m"
+	cardPrint = "\033[37mCouncil Room\033[0m"
 	description = "+4 Cards; +1 Buy.  Each other player draws a card."
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -876,8 +928,10 @@ class FestivalCard(KingdomCard):
 	description = "+2 Actions; +1 Buy; +$2"
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -902,8 +956,9 @@ class LaboratoryCard(KingdomCard):
 	description = "+2 Cards; +1 Action"
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
 	
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -928,8 +983,10 @@ class LibraryCard(KingdomCard):
 	description = "Draw until you have 7 cards in hand. You may set aside any Action cards drawn this way, as you draw them; discard the set aside cards after you finish drawing."
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -974,12 +1031,14 @@ class LibraryCard(KingdomCard):
 class MarketCard(KingdomCard):
 	cardEval = "MarketCard"
 	cardName = "Market"
-	cardColor = "\033[37mMarket\033[0m"
+	cardPrint = "\033[37mMarket\033[0m"
 	description = "+1 Card; +1 Action; +1 Buy, +$1"
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -1001,12 +1060,14 @@ class MarketCard(KingdomCard):
 class MineCard(KingdomCard):
 	cardEval = "MineCard"
 	cardName = "Mine"
-	cardColor = "\033[37mMine\033[0m"
+	cardPrint = "\033[37mMine\033[0m"
 	description = "Trash a tresure card from your hand. gain a Treasure card costing up to $3 more; put it into your hand."
 	cost = 5
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -1024,16 +1085,16 @@ class MineCard(KingdomCard):
 			self.player.printHandUpdate()
 			i = self.recv_data(self.player.playerConn, 1024)
 			try:
-				i = int(i)
+				i = int(i) - 1
 			except:
 				continue
-			if self.player.playerHand[i - 1].treasure != True:
+			if self.player.playerHand[i].treasure != True or i not in range(len(self.player.playerHand)):
 				continue
 			else:
-				value = self.player.playerHand[i - 1].cost + 3
+				value = self.player.playerHand[i].cost + 3
 				for user in roster:
 					self.send_data(user.playerConn, self.player.playerName + " has trashed a card.\n")
-				del self.player.playerHand[i - 1]
+				del self.player.playerHand[i]
 				self.player.gainCard(value, 1, 'hand', 'treasure')
 				break
 		return
@@ -1041,13 +1102,15 @@ class MineCard(KingdomCard):
 class WitchCard(KingdomCard):
 	cardEval = "WitchCard"
 	cardName = "Witch"
-	cardColor = "\033[1;31mWitch\033[0m"
+	cardPrint = "\033[1;31mWitch\033[0m"
 	description = "+2 Cards.  Each other player gains a Curse card."
 	cost = 5
 	action = True
 	attack = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+                self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)
@@ -1064,7 +1127,7 @@ class WitchCard(KingdomCard):
 		self.deck = deck
 		self.player.drawOneCard()
 		self.player.drawOneCard()
-		self.palyer.checkReactions('attack')
+		self.player.checkReactions('attack')
 		for each in self.roster:
 			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 				each.playerDiscard.append(self.deck.curseCards[0])
@@ -1078,12 +1141,14 @@ class WitchCard(KingdomCard):
 class AdventurerCard(KingdomCard):
 	cardEval = "AdventurerCard"
 	cardName = "Adventurer"
-	cardColor = "\033[37mAdventurer\033[0m"
+	cardPrint = "\033[37mAdventurer\033[0m"
 	description = "Reveal cards from your deck until you reveal 2 Treasure cards. Put those Treasure cards in your hand and discard the other revealed cards."
 	cost = 6
 	action = True
-	def __init__(self):
-		pass
+	def __init__(self, game):
+		self.game = game
+                self.embargoed = False
+		self.embargo = 0
 
         def recv_data (self, client, length):
                 data = client.recv(length)

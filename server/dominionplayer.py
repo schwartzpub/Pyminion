@@ -152,11 +152,15 @@ class Player(object):
 					if choice.lower() not in choices:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 				elif self.type not in ['treasure', 'kingdom', 'victory', 'any']:
-					if len(eval(self.type)) == 0:
+					card = "self.deck." + self.type
+					card = eval(card)
+					if len(card) == 0:
+						print "breaking when i shouldnt break"
 						break
 					else:
-						self.location.append(eval(self.type)[0])
-						del eval(self.type)[0]
+						self.location.append(card[0])
+						print self.location[0].cardPrint
+						del card[0]
 						break
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
@@ -192,8 +196,12 @@ class Player(object):
 						del self.deck.kingdomCards[x][0]
 						break
 			break
-		self.gained.append(self.location[-1])
-		return self.location[-1]
+		if len(self.location) > 1:
+			self.gained.append(self.location[-1])
+			return self.location[-1]
+		else:
+			self.gained.append(self.location[0])
+			return self.location[0]
 
 	def playTurn(self):
 		if len(self.game.playerRost) == 1: return
@@ -252,7 +260,7 @@ class Player(object):
 								s = self.deck.silverCards
 								c = self.deck.copperCards
 								u = self.deck.curseCards
-								i = eval(i.lower())
+								i = eval(choice.lower())
 								if i[0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n" )
 									break
@@ -262,6 +270,7 @@ class Player(object):
 									for each in self.roster:
 										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
 									if i[0].victory: self.boughtVictory = True
+									if i[0].embargoed: self.player.gainCard(0, i[0].embargo, 'discard', 'curseCards')
 									del i[0]
 									self.playerTurnBuys -= 1
 									return
@@ -270,14 +279,15 @@ class Player(object):
 								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									break
-							else:
-								self.playerPlay.append(self.deck.kingdomCards[x][0])
-								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
-								for each in self.roster:
-									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
-								del self.deck.kingdomCards[x][0]
-								self.playerTurnBuys -= 1
-								return
+								else:
+									self.playerPlay.append(self.deck.kingdomCards[x][0])
+									self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
+									for each in self.roster:
+										self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
+									if self.deck.kingdomCards[x][0].embargoed: self.player.gainCard(0, self.deck.kingdomCards[x][0].embargo, 'discard', 'curseCards')
+									del self.deck.kingdomCards[x][0]
+									self.playerTurnBuys -= 1
+									return
 							break
 						self.buyPhase()
 						return
@@ -350,6 +360,7 @@ class Player(object):
 				if choice.lower() not in ['p', 'b', 'a', 'r']:
 					continue
 				elif choice.lower() == 'p':
+					if len(self.playerHand) == 0: continue
 					while True:
 						self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
 						i = self.recv_data(self.playerConn, 2014)
@@ -359,6 +370,7 @@ class Player(object):
 							continue
 						if i > len(self.playerHand) or i <= 0:
 							continue
+	
 						elif self.playerHand[i - 1].treasure != True and self.playerHand[i - 1].action != False or self.playerHand[i - 1].treasure != True:
 							self.send_data(self.playerConn, "You are in the buy phase, please play a Treasure.\n")
 							time.sleep(2)
@@ -397,6 +409,7 @@ class Player(object):
 								for each in self.roster:
 									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
 								if i[0].victory: self.boughtVictory = True
+								if i[0].embargoed: self.player.gainCard(0, i[0].embargo, 'discard', 'curseCards')
 								del i[0]
 								self.playerTurnBuys -= 1
 								break
@@ -410,6 +423,7 @@ class Player(object):
 								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 								for each in self.roster:
 									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
+								if self.deck.kingdomCards[x][0].embargoed: self.player.gainCard(0, self.deck.kingdomCards[x][0].embargo, 'discard', 'curseCards')
 								del self.deck.kingdomCards[x][0]
 								self.playerTurnBuys -= 1
 								break
@@ -597,6 +611,9 @@ class Player(object):
 			self.send_data(each.playerConn, "GAME OVER! The scores are: ")
 		for each in self.roster:
 			each.playerDeckToDiscard()
+			for i in range(len(each.islandMat)):
+				each.playerDiscard.append(each.islandMat[0])
+				del each.islandMat[0]
 			for i in range(len(each.playerHand)):
 				each.playerDiscard.append(each.playerHand[0])
 				del each.playerHand[0]
