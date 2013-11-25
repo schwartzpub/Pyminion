@@ -26,6 +26,8 @@ class Player(object):
 		self.reactionImmunity = False
 		self.durationImmunity = False
 		self.boughtVictory = False
+		self.outpostPlayed = False
+		self.outpostTurn = False
 		self.totalVictory = 0
 		self.playerConn = ''
 		self.playerTurn = False
@@ -70,20 +72,20 @@ class Player(object):
 					self.send_data(user.playerConn, self.playerName + " is taking a bit to respond...be patient.\n")
 		except socket.error, e:
 			if e.errno == errno.EPIPE:
-                                for player in self.roster:
-                                        if player.playerConn == client:
+				for player in self.roster:
+					if player.playerConn == client:
 						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Broken Pipe)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
-                                                print player.playerName + " has quit mid-game. (Broken Pipe)"
-                                                self.roster.remove(player)
+						print player.playerName + " has quit mid-game. (Broken Pipe)"
+						self.roster.remove(player)
 						self.game.playerRost.remove(player)
 						time.sleep(2)
 			else:
-                                clients.remove(client)
-                                for player in self.roster:
-                                        if player.playerConn == client:
+				clients.remove(client)
+				for player in self.roster:
+					if player.playerConn == client:
 						[self.send_data(c, player.playerName + " has been disconnected and removed from the game. (Connection Reset by Peer)\n") for c in (u.playerConn for u in self.roster if u.playerConn != client )]
-                                                print player.playerName + " has quit. (Connection Reset By peer)"
-                                                self.roster.remove(player)
+						print player.playerName + " has quit. (Connection Reset By peer)"
+						self.roster.remove(player)
 						self.game.playerRost.remove(player)
 						time.sleep(2)
 
@@ -155,13 +157,12 @@ class Player(object):
 					card = "self.deck." + self.type
 					card = eval(card)
 					if len(card) == 0:
-						print "breaking when i shouldnt break"
-						break
+						continue
 					else:
 						self.location.append(card[0])
 						print self.location[0].cardPrint
 						del card[0]
-						break
+						continue
 				if choice.lower() in nonkingdom:
 					if choice.lower() == 'o' or choice.lower == 'l':
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
@@ -183,7 +184,7 @@ class Player(object):
 							for each in self.roster:
 								self.send_data(each.playerConn, self.playerName + " has gained a " + choice[0].cardPrint + ".\n")
 							del choice[0]
-							break
+							continue
 				elif choice.lower() in kingdom:
 					x = 'card' + choice.lower()
 					if self.deck.kingdomCards[x][0].cost > cost:
@@ -194,7 +195,7 @@ class Player(object):
 						for each in self.roster:
 								self.send_data(each.playerConn, self.playerName + " has gained a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 						del self.deck.kingdomCards[x][0]
-						break
+						continue
 			break
 		if len(self.location) > 1:
 			self.gained.append(self.location[-1])
@@ -266,6 +267,7 @@ class Player(object):
 									break
 								else:
 									self.playerPlay.append(i[0])
+									self.gained.append(i[0])
 									self.playerTurnTreasure -= i[0].cost
 									for each in self.roster:
 										self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
@@ -281,6 +283,7 @@ class Player(object):
 									break
 								else:
 									self.playerPlay.append(self.deck.kingdomCards[x][0])
+									self.gained.append(self.deck.kingdomCards[x][0])
 									self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 									for each in self.roster:
 										self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
@@ -297,7 +300,7 @@ class Player(object):
 						self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 						cardToRead = str(self.recv_data(self.playerConn, 1024))
 						self.deck.readCard(cardToRead, self.playerConn)
-						break
+						continue
 				continue
 		return
 
@@ -327,14 +330,14 @@ class Player(object):
 					return
 				else:
 					if self.playerHand[i - 1].duration:
-                                                self.playerDuration.append(self.playerHand[i - 1])
-                                                for each in self.roster:
-                                                        self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
-                                                del self.playerHand[i - 1]
-                                                self.playerTurnActions -= 1
-                                                self.playerActionsPlayed += 1
-                                                self.playerDuration[-1].playCard(self.player, self.roster, self.deck)
-                                                return
+						self.playerDuration.append(self.playerHand[i - 1])
+						for each in self.roster:
+							self.send_data(each.playerConn, self.playerName + " has played a " + self.playerHand[i - 1].cardPrint + ".\n")
+						del self.playerHand[i - 1]
+						self.playerTurnActions -= 1
+						self.playerActionsPlayed += 1
+						self.playerDuration[-1].playCard(self.player, self.roster, self.deck)
+						return
 					else:
 						self.playerPlay.append(self.playerHand[i - 1])
 						for each in self.roster:
@@ -405,6 +408,7 @@ class Player(object):
 								continue
 							else:
 								self.playerPlay.append(i[0])
+								self.gained.append(i[0])
 								self.playerTurnTreasure -= i[0].cost
 								for each in self.roster:
 									self.send_data(each.playerConn, self.playerName + " has bought a " + i[0].cardPrint + ".\n")
@@ -420,6 +424,7 @@ class Player(object):
 								continue
 							else:
 								self.playerPlay.append(self.deck.kingdomCards[x][0])
+								self.gained.append(self.deck.kingdomCards[x][0])
 								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 								for each in self.roster:
 									self.send_data(each.playerConn, self.playerName + " has bought a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
@@ -435,7 +440,7 @@ class Player(object):
 					self.send_data(self.playerConn, "Which card would you like to read: (n)umber?\n")
 					cardToRead = str(self.recv_data(self.playerConn, 1024))
 					self.deck.readCard(cardToRead, self.playerConn)
-					break
+					continue
 		return
 
 	def cleanUpPhase(self):
@@ -446,6 +451,8 @@ class Player(object):
 		self.playerTreasurePlayed = False
 		x = len(self.playerPlay)
 		y = len(self.playerHand)
+		if any(i.cardName == 'Outpost' for i in self.playerDuration) and self.outpostPlayed == False: self.outpostPlayed = True
+		else: self.outpostPlayed = False
 		while x == len(self.playerPlay) and x > 0:
 			if self.playerPlay[0].cardName == 'Treasury':
 				self.playerPlay[0].playDiscard(self.player, self.roster, self.deck)
@@ -459,7 +466,21 @@ class Player(object):
 			del self.playerHand[0]
 			y -= 1
 		time.sleep(1)
-		self.drawHand()
+		if self.outpostPlayed == True:
+			for i in range(3):
+				if len(self.playerDeck) > 0:
+					self.playerHand.append(self.playerDeck[0])
+					del self.playerDeck[0]
+				else:
+					self.playerDiscardToDeck()
+					self.playerHand.append(self.playerDeck[0])
+					del self.playerDeck[0]
+			if self.game.playerTurn == 0:
+				self.game.playerTurn = len(self.roster) - 1
+			else:
+				self.game.playerTurn -= 1
+		else:
+			self.drawHand()
 		self.checkWin()
 		return
 
@@ -470,6 +491,8 @@ class Player(object):
 				self.playerDiscard.append(self.playerDuration[0])
 				del self.playerDuration[0]
 			self.playerHasDuration = False
+			self.playerDuration = []
+			print "is this thing on? tap tap tap"
 			return				
 		else:
 			return
@@ -491,10 +514,10 @@ class Player(object):
 						else:
 							pass
 					for card in each.playerDuration:
-                                                if card.reaction == True:
-                                                        card.reactCard(each, self.roster, 'attack')
-                                                else:
-                                                        pass
+						if card.reaction == True:
+							card.reactCard(each, self.roster, 'attack')
+						else:
+							pass
 		elif self.type == 'gain':
 			for each in self.roster:
 				if any(i.reaction == True for i in each.playerHand):
@@ -574,10 +597,10 @@ class Player(object):
 			self.send_data(user.playerConn, "\n\nDeck [",)
 			for i in range(len(user.playerDeck)):
 				self.send_data(user.playerConn, "|",)
-			self.send_data(user.playerConn, "] -- Discard [",)
-			for i in range(len(user.playerDiscard)):
-				self.send_data(user.playerConn, "|",)
-			self.send_data(user.playerConn, "]\n\n")
+			self.send_data(user.playerConn, "]\n")
+#			for i in range(len(user.playerDiscard)):
+#				self.send_data(user.playerConn, "|",)
+#			self.send_data(user.playerConn, "]\n\n")
 
 	def printTurnCount(self, roster):
 		for user in roster:

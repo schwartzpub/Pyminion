@@ -288,7 +288,7 @@ class DomGame(threading.Thread):
 			self.playerWait[0].playerConn = conn
 			self.playerRost.append(self.playerWait[0])
 			del self.playerWait[0]
-		newDeck = DomDeck()
+		newDeck = DomDeck(self)
 		newDeck.buildDeck(len(self.playerRost))
 		for player in self.playerRost:
 			player.deck = newDeck

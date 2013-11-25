@@ -4,7 +4,6 @@ def send_data (self, client, data):
 	message = str(data)
 	try:
 		return client.send(message)
-
 	except socket.error, e:
 		if e.errno == errno.EPIPE:
 			for player in self.roster:
@@ -21,7 +20,6 @@ def send_data (self, client, data):
 					print player.playerName + " has quit. (Connection Reset By peer)"
 					self.roster.remove(player)
 					time.sleep(2)
-
 def recv_data (self, client, length):
 	try:
 		self.playerConn.settimeout(600)
@@ -29,8 +27,7 @@ def recv_data (self, client, length):
 		self.playerConn.settimeout(None)
 		if not data: self.send_data(self.playerConn, "Please choose an option...\n")
 		return data
-
-	except socket.timeout:
+		except socket.timeout:
 		for user in self.roster:
 			if user.playerConn != self.playerConn:
 				self.send_data(user.playerConn, self.playerName + " is taking a bit to respond...be patient.\n")

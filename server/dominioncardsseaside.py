@@ -222,13 +222,18 @@ class EmbargoCard(SeasideCard):
 					SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " has Embargoed " + choice[0].cardPrint + ".\n")
 				break
 			elif int(choice) in range(10):
-				x = 'card' + i
+				x = 'card' + choice
 				self.deck.kingdomCards[x][0].embargoed = True
 				self.deck.kingdomCards[x][0].embargo += 1
 				for each in self.roster:
 					SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " has Embargoed " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 				break
 			break
+		for card in self.player.playerPlay:
+			if card.cardName != 'Embargo': pass
+			else:
+				self.player.playerPlay.remove(card)
+				return
 
 class ExplorerCard(SeasideCard):
 	cardEval = "ExplorerCard"
@@ -284,6 +289,7 @@ class FishingVillageCard(SeasideCard):
 		self.player = player
 		self.player.playerTurnActions += 2
 		self.player.playerTurnTreasure += 1
+		self.player.playerHasDuration = True
 
 	def playDuration(self, player, roster, deck):
 		self.player = player
@@ -309,11 +315,11 @@ class GhostShipCard(SeasideCard):
 		self.player.drawOneCard()
 		self.player.drawOneCard()
 		for each in self.roster:
-			if len(each.playerHand) >= 4 or each != self.player or each.reactionImmunity == False or each.durationImmunity == False:
+			if len(each.playerHand) >= 4 and each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
 				SeasideCard.send_data(self, self.game, each.playerConn, "Please discard cards until you have 3 cards in your hand.")
 				while len(each.playerHand) > 3:
-					each.printPlayerReveal()
-					choice = (each.playerConn, 1024)
+					each.printHandUpdate()
+					choice = SeasideCard.recv_data(self, self.game, each.playerConn, 1024)
 					try:
 						choice = int(choice) - 1
 					except:
@@ -617,6 +623,10 @@ class OutpostCard(SeasideCard):
 
 	def playCard(self, player, roster, deck):
 		self.player = player
+		self.player.playerHasDuration = True
+		pass
+
+	def playDuration(self, player, roster, deck):
 		pass
 
 class PearlDiverCard(SeasideCard):
@@ -721,7 +731,7 @@ class PirateShipCard(SeasideCard):
 						SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " places a coin on his Pirate mat.\n")
 					break
 				else: break
-			elif choice.lower == 't':
+			elif choice.lower() == 't':
 				self.player.playerTurnTreasure += self.player.pirateMat
 				break
 		return				
@@ -875,7 +885,6 @@ class TacticianCard(SeasideCard):
 				del self.player.playerHand[0]
 				for each in self.roster:
 					SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " discards his hand.  Next turn +5 cards, +1 Buy, +1 Action.\n")
-				break
 			return
 
 	def playDuration(self, player, roster, deck):
@@ -914,7 +923,7 @@ class TreasureMapCard(SeasideCard):
 							self.player.playerDeck.insert(0, self.deck.goldCards[0])
 						else: pass
 			for each in self.roster:
-				SeasideCard.send_data(self, self.game, each.playerConn, self.player, playerName + " has trashed two Treasure Maps, and gained 4 " + self.deck.goldCards[0].cardPrint + "s on his deck.\n")
+				SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " has trashed two Treasure Maps, and gained 4 " + self.deck.goldCards[0].cardPrint + "s on his deck.\n")
 		else:
 			del self.player.playerPlay[-1]
 			for each in self.roster:
@@ -999,6 +1008,7 @@ class WharfCard(SeasideCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.roster = roster
+		self.player.playerHasDuration = True
 		self.player.drawOneCard()
 		self.player.drawOneCard()
 		self.player.playerTurnBuys += 1
