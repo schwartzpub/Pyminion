@@ -111,8 +111,11 @@ class Player(object):
 
 	def drawOneCard(self):
 		self.playerDiscardToDeck()
-		self.playerHand.append(self.playerDeck[0])
-		del self.playerDeck[0]
+		if len(self.playerDiscard) == 0 and len(self.playerDeck) == 0:
+			return
+		else:
+			self.playerHand.append(self.playerDeck[0])
+			del self.playerDeck[0]
 
 	def gainCard(self, cost, number, location, type):
 		self.cost = cost
@@ -266,7 +269,7 @@ class Player(object):
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n" )
 									break
 								else:
-									self.playerPlay.append(i[0])
+									self.playerDiscard.append(i[0])
 									self.gained.append(i[0])
 									self.playerTurnTreasure -= i[0].cost
 									for each in self.roster:
@@ -282,7 +285,7 @@ class Player(object):
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									break
 								else:
-									self.playerPlay.append(self.deck.kingdomCards[x][0])
+									self.playerDiscard.append(self.deck.kingdomCards[x][0])
 									self.gained.append(self.deck.kingdomCards[x][0])
 									self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 									for each in self.roster:
@@ -307,12 +310,23 @@ class Player(object):
 	def playCard(self):
 		if len(self.playerHand) == 0: return
 		while True:
-			self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
+			self.send_data(self.playerConn, "Which card would you like to play: (n)umber? (or (a)ll treasures)\n")
 			i = str(self.recv_data(self.playerConn, 1024))
 			try:
 				i = int(i)
 			except:
-				continue
+				if i.lower() == 'a':
+					for card in self.playerHand:
+						if card.treasure and not card.action:
+					                self.playerPlay.append(card)
+			                                self.playerTurnTreasure += card.value
+			                                for each in self.roster:
+                        			                self.send_data(each.playerConn, self.playerName + " has played a " + card.cardPrint + ".\n")
+                        			        self.playerTreasurePlayed = True
+			                        else: pass
+					self.playerHand = [x for x in self.playerHand if x.action == True or x.victory == True]
+					return
+				else: continue
 			if i > len(self.playerHand):
 				continue
 			elif self.playerHand[i - 1].treasure == True:
@@ -365,12 +379,23 @@ class Player(object):
 				elif choice.lower() == 'p':
 					if len(self.playerHand) == 0: continue
 					while True:
-						self.send_data(self.playerConn, "Which card would you like to play: (n)umber?\n")
+						self.send_data(self.playerConn, "Which card would you like to play: (n)umber? (or (a)ll treasures)\n")
 						i = self.recv_data(self.playerConn, 2014)
 						try:
 							i = int(i)
 						except:
-							continue
+			                                if i.lower() == 'a':
+                        			                for card in self.playerHand:
+			                                                if card.treasure and not card.action:
+                        			                                self.playerPlay.append(card)
+                                                			        self.playerTurnTreasure += card.value
+			                                                        for each in self.roster:
+                        			                                        self.send_data(each.playerConn, self.playerName + " has played a " + card.cardPrint + ".\n")
+			                                                        self.playerTreasurePlayed = True
+                        			                        else: pass
+			                                        self.playerHand = [x for x in self.playerHand if x.action == True or x.victory == True]
+			                                        break
+							else: continue
 						if i > len(self.playerHand) or i <= 0:
 							continue
 	
@@ -407,7 +432,7 @@ class Player(object):
 								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
-								self.playerPlay.append(i[0])
+								self.playerDiscard.append(i[0])
 								self.gained.append(i[0])
 								self.playerTurnTreasure -= i[0].cost
 								for each in self.roster:
@@ -423,7 +448,7 @@ class Player(object):
 								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
-								self.playerPlay.append(self.deck.kingdomCards[x][0])
+								self.playerDiscard.append(self.deck.kingdomCards[x][0])
 								self.gained.append(self.deck.kingdomCards[x][0])
 								self.playerTurnTreasure -= self.deck.kingdomCards[x][0].cost
 								for each in self.roster:

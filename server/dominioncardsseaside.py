@@ -441,6 +441,10 @@ class LighthouseCard(SeasideCard):
 		self.player.playerTurnTreasure += 1
 		self.player.durationImmunity = False
 
+	def reactCard(self, player, roster, type):
+		pass
+
+
 class LookoutCard(SeasideCard):
 	cardEval = "LookoutCard"
 	cardName = "Lookout"
@@ -945,7 +949,7 @@ class TreasuryCard(SeasideCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.roster = roster
-		self.drawOneCard()
+		self.player.drawOneCard()
 		self.playerTurnActions += 1
 		self.playerTurnTreasure += 1
 
