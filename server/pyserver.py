@@ -149,15 +149,15 @@ def send_data (client, data):
 #method that prints the commands to the user in the lobby
 def help_commands(client):
 	send_data(client, "\033[1;31m** HELP: The commands for this server are: \n")
-	send_data(client, "**   !help -- displays this message\n")
-	send_data(client, "**   !start -- starts a new game.  You will add users until you have 2-4 players\n")
-	send_data(client, "**      !cancel -- cancels game creation once you have entered the !start command.\n")
-	send_data(client, "**      !go -- begins the game once you have run !start and added your players.\n")
-	send_data(client, "**   !away -- sets your client to away, you will not be able to join a game if you are away.\n")
-	send_data(client, "**   !back -- sets your client back from away.\n")
-	send_data(client, "**   !quit -- quits the server.  You will not be asked to confirm.  This works from the lobby\n")
-	send_data(client, "**   !clear -- clears the screen.  This works in the lobby\n")
-	send_data(client, "**   !list -- lists the users currently in the lobby.\033[0m\n")
+	send_data(client, "\033[1;31m**   !help -- displays this message\n")
+	send_data(client, "\033[1;31m**   !start -- starts a new game.  You will add users until you have 2-4 players\n")
+	send_data(client, "\033[1;31m**      !cancel -- cancels game creation once you have entered the !start command.\n")
+	send_data(client, "\033[1;31m**      !go -- begins the game once you have run !start and added your players.\n")
+	send_data(client, "\033[1;31m**   !away -- sets your client to away, you will not be able to join a game if you are away.\n")
+	send_data(client, "\033[1;31m**   !back -- sets your client back from away.\n")
+	send_data(client, "\033[1;31m**   !quit -- quits the server.  You will not be asked to confirm.  This works from the lobby\n")
+	send_data(client, "\033[1;31m**   !clear -- clears the screen.  This works in the lobby\n")
+	send_data(client, "\033[1;31m**   !list -- lists the users currently in the lobby.\033[0m\n")
 
 #method that prints a user list to the client in the lobby
 def list_users(client):
@@ -244,14 +244,14 @@ def start_server ():
 		print 'Connection from:', addr
 		display_logo(conn)
 		send_data(conn, 'CLRSCRN_FULL\n')
-		send_data(conn, "\033[36mWelcome to the Pyminion server, please select a username:\033[0m\n")
+		send_data(conn, "\033[36mWelcome to the Pyminion server, please select a username:\n")
 		while True:
 			client_name = str(recv_data(conn, 1024))
 			if client_name.lower() in client_list:
 				send_data(conn, "\033[1;31m** Sorry, that name is in use, please choose another name.\033[0m\n")
 			else:
 				break
-		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[36m!  Currently connected clients are: ",)
+		send_data(conn, "\033[36mWelcome to Dominion, \033[33m" + client_name + "\033[36m!  Type !help for commands. Currently connected clients are: ",)
 	        for key in client_list.keys():
 	                if client_list[key][1].game:
         	                send_data(conn,"\033[34m [ " + key + " (in game) ]",)

@@ -126,7 +126,7 @@ class BazaarCard(SeasideCard):
 class CaravanCard(SeasideCard):
 	cardEval = "CaravanCard"
 	cardName = "Caravan"
-	cardPrint = "\033[38;5;202mCaravan\033[0m"
+	cardPrint = "\033[38;5;214mCaravan\033[0m"
 	description = "+1 Card; +1 Action. At the start of your next turn, +1 Card"
 	cost = 4
 	action = True
@@ -275,7 +275,7 @@ class ExplorerCard(SeasideCard):
 class FishingVillageCard(SeasideCard):
 	cardEval = "FishingVillageCard"
 	cardName = "Fishing Village"
-	cardPrint = "\033[38;5;202mFishing Village\033[0m"
+	cardPrint = "\033[38;5;214mFishing Village\033[0m"
 	description = "+2 Actions; +$1.  At the start of your next turn: +1 Action; +$1"
 	cost = 3
 	action = True
@@ -335,7 +335,7 @@ class GhostShipCard(SeasideCard):
 class HavenCard(SeasideCard):
 	cardEval = "HavenCard"
 	cardName = "Haven"
-	cardPrint = "\033[38;5;202mHaven\033[0m"
+	cardPrint = "\033[38;5;214mHaven\033[0m"
 	description = "+1 Card, +1 Action. Set aside a card from your hand face down. At the start of your next turn, put it into your hand."
 	cost = 2
 	action = True
@@ -416,7 +416,7 @@ class IslandCard(SeasideCard):
 class LighthouseCard(SeasideCard):
 	cardEval = "LighthouseCard"
 	cardName = "Lighthouse"
-	cardPrint = "\033[38;5;202mLighthouse\033[0m"
+	cardPrint = "\033[38;5;214mLighthouse\033[0m"
 	description = "+1 Action. Now and at the start of your next turn, +$1.  While this is in play, when another player plays an Attack card, it doesn't affect you."
 	cost = 2
 	action = True
@@ -449,7 +449,7 @@ class LookoutCard(SeasideCard):
 	cardEval = "LookoutCard"
 	cardName = "Lookout"
 	cardPrint = "\033[37mLookout\033[0m"
-	description = "Look at the top 3 cards of your deck. Trash one of them. Discard one of them. Put the other one on top of your deck."
+	description = "+1 Action. Look at the top 3 cards of your deck. Trash one of them. Discard one of them. Put the other one on top of your deck."
 	cost = 3
 	action = True
 	def __init__(self, game):
@@ -461,8 +461,10 @@ class LookoutCard(SeasideCard):
 		self.player = player
 		self.roster = roster
 		self.current = []
+		self.player.playerTurnActions += 1
 		i = 1
 		while i <= 3:
+			self.player.playerDiscardToDeck()
 			self.current.append(self.player.playerDeck[0])
 			del self.player.playerDeck[0]
 			i += 1
@@ -498,7 +500,7 @@ class LookoutCard(SeasideCard):
 class MerchantShipCard(SeasideCard):
 	cardEval = "MerchantShipCard"
 	cardName = "Merchant Ship"
-	cardPrint = "\033[38;5;202mMerchant Ship\033[0m"
+	cardPrint = "\033[38;5;214mMerchant Ship\033[0m"
 	description = "Now and at the start of your next turn: +$2"
 	cost = 5
 	action = True
@@ -615,7 +617,7 @@ class NavigatorCard(SeasideCard):
 class OutpostCard(SeasideCard):
 	cardEval = "OutpostCard"
 	cardName = "Outpost"
-	cardPrint = "\033[38;5;202mOutpost\033[0m"
+	cardPrint = "\033[38;5;214mOutpost\033[0m"
 	description = "You only draw 3 cards (instead of 5) in this turn's Clean-up phase. Take an extra turn after this one. This can't cause you to take more than two consecutive turns."
 	cost = 5
 	action = True
@@ -834,7 +836,7 @@ class SmugglersCard(SeasideCard):
 							except: continue
 							if choice not in range(len(self.options)): continue
 							else:
-								self.player.gainCard(0, 1, 'discard', card.cardName)
+								self.player.gainCard(0, 1, 'discard', card)
 								for each in self.roster:
 									SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
 								break
@@ -857,7 +859,7 @@ class SmugglersCard(SeasideCard):
 							except: continue
 							if choice not in range(len(self.options)): continue
 							else:
-								self.player.gainCard(0, 1, 'discard', card.cardName)
+								self.player.gainCard(0, 1, 'discard', card)
 								for each in self.roster:
 									SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
 								break
@@ -867,7 +869,7 @@ class SmugglersCard(SeasideCard):
 class TacticianCard(SeasideCard):
 	cardEval = "TacticianCard"
 	cardName = "Tactician"
-	cardPrint = "\033[38;5;202mTactician\033[0m"
+	cardPrint = "\033[38;5;214mTactician\033[0m"
 	description = "Discard your hand. If you discarded any cards this way, then at the start of your next turn, +5 Cards; +1 Buy; and +1 Action."
 	cost = 5
 	action = True
@@ -999,7 +1001,7 @@ class WarehouseCard(SeasideCard):
 class WharfCard(SeasideCard):
 	cardEval = "WharfCard"
 	cardName = "Wharf"
-	cardPrint = "\033[38;5;202mWharf\033[0m"
+	cardPrint = "\033[38;5;214mWharf\033[0m"
 	description = "Now and at the start of your next turn: +2 Cards; +1 Buy."
 	cost = 5
 	action = True

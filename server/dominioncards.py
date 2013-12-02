@@ -1133,7 +1133,7 @@ class WitchCard(KingdomCard):
 				each.playerDiscard.append(self.deck.curseCards[0])
 				del self.deck.curseCards[0]
 			for player in self.roster:
-				send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards.cardprint + ".\n")
+				self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards.cardprint + ".\n")
 			else:
 				pass
 		for each in self.roster:
