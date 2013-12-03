@@ -1129,11 +1129,11 @@ class WitchCard(KingdomCard):
 		self.player.drawOneCard()
 		self.player.checkReactions('attack')
 		for each in self.roster:
-			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False:
+			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False and len(self.deck.curseCards) > 0:
 				each.playerDiscard.append(self.deck.curseCards[0])
 				del self.deck.curseCards[0]
 			for player in self.roster:
-				self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards.cardprint + ".\n")
+				self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards[0].cardprint + ".\n")
 			else:
 				pass
 		for each in self.roster:

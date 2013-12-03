@@ -324,7 +324,7 @@ class Player(object):
                         			                self.send_data(each.playerConn, self.playerName + " has played a " + card.cardPrint + ".\n")
                         			        self.playerTreasurePlayed = True
 			                        else: pass
-					self.playerHand = [x for x in self.playerHand if x.cardName != 'Gold' or x.cardName != 'Silver' or x.cardName != 'Copper']
+					self.playerHand = [x for x in self.playerHand if x.cardName.lower() not in ('gold', 'silver', 'copper')]
 					return
 				else: continue
 			if i > len(self.playerHand):
@@ -393,7 +393,7 @@ class Player(object):
                         			                                        self.send_data(each.playerConn, self.playerName + " has played a " + card.cardPrint + ".\n")
 			                                                        self.playerTreasurePlayed = True
                         			                        else: pass
-			                                        self.playerHand = [x for x in self.playerHand if x.cardName != 'Gold' or x.cardName != 'Silver' or x.cardName != 'Copper']
+			                                        self.playerHand = [x for x in self.playerHand if x.cardName.lower() not in ('gold', 'silver', 'copper')]
 			                                        break
 							else: continue
 						if i > len(self.playerHand) or i <= 0:
