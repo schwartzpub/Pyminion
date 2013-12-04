@@ -2,7 +2,7 @@
 
 #This is the Server component.  I will be slowly injecting the game component into this portion to run the game.
  
-import socket, struct, threading, cgi, random, time, errno
+import socket, struct, threading, cgi, random, time, errno, sys, traceback
 from dominiondeck import *
 from dominioncards import *
 from dominionplayer import *
@@ -26,42 +26,45 @@ class Lobby_Client(threading.Thread):
 		self.game = False
 
 	def run(self):
-		lock = threading.Lock()
-		while 1:
-			while self.game:
-				continue
-			data = recv_data(self.client, 1024)
-			if not data: break
-			if data == '!quit': break
-			if data == '!start':
-				while 1:
-					build_game(self.client, self.addr, self.name)
-					break
-			if data == '!help' : help_commands(self.client)
-			if data == '!list' : list_users(self.client)
-			if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL\n')
-			if data == '!away' :
-				if self.away == True:
-					send_data(self.client, "\033[1;31m** You are already set to away, please type !back to return from being away.\033[0m\n")
-				elif self.away == False:
-					self.away = True
-					send_data(self.client, "\033[1;31m** You have been set as away, you cannot join a game until you set yourself back.\033[0m\n")
-			if data == '!back' :
-				if self.away == False:
-					send_data(self.client, "\033[1;31m** You are not currently away.\033[0m\n")
-				elif self.away == True:
-					self.away = False
-					send_data(self.client, "\033[1;31m** You have been set back from away.\033[0m\n")
+		try:
+			lock = threading.Lock()
+			while 1:
+				while self.game:
+					continue
+				data = recv_data(self.client, 1024)
+				if not data: break
+				if data == '!quit': break
+				if data == '!start':
+					while 1:
+						build_game(self.client, self.addr, self.name)
+						break
+				if data == '!help' : help_commands(self.client)
+				if data == '!list' : list_users(self.client)
+				if data == '!clear' : send_data(self.client, 'CLRSCRN_FULL\n')
+				if data == '!away' :
+					if self.away == True:
+						send_data(self.client, "\033[1;31m** You are already set to away, please type !back to return from being away.\033[0m\n")
+					elif self.away == False:
+						self.away = True
+						send_data(self.client, "\033[1;31m** You have been set as away, you cannot join a game until you set yourself back.\033[0m\n")
+				if data == '!back' :
+					if self.away == False:
+						send_data(self.client, "\033[1;31m** You are not currently away.\033[0m\n")
+					elif self.away == True:
+						self.away = False
+						send_data(self.client, "\033[1;31m** You have been set back from away.\033[0m\n")
+				lock.acquire()
+				[send_data(c, "<" + self.name + "> " + data + "\n") for c in (u for u in self.clients if u != self.client)]
+				lock.release()
+			print 'Client closed:', self.addr
+			[send_data(c, "\033[1;31m** QUIT: " + self.name + " has left the server!\033[0m\n") for c in (u for u in self.clients if u != self.client)]
 			lock.acquire()
-			[send_data(c, "<" + self.name + "> " + data + "\n") for c in (u for u in self.clients if u != self.client)]
+			self.clients.remove(self.client)
+			del client_list[self.name]
 			lock.release()
-		print 'Client closed:', self.addr
-		[send_data(c, "\033[1;31m** QUIT: " + self.name + " has left the server!\033[0m\n") for c in (u for u in self.clients if u != self.client)]
-		lock.acquire()
-		self.clients.remove(self.client)
-		del client_list[self.name]
-		lock.release()
-		self.client.close()
+			self.client.close()
+		except Exception, err:
+			print traceback.format_exc()
 
 #dominion logo
 def display_logo(client):

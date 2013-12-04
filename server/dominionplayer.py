@@ -157,7 +157,7 @@ class Player(object):
 					if choice.lower() not in choices:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 				elif self.type not in ['treasure', 'kingdom', 'victory', 'any']:
-					card = "self.deck." + self.type
+					card = "self.deck." + str(self.type)
 					card = eval(card)
 					if len(card) == 0:
 						continue

@@ -469,6 +469,8 @@ class BureaucratCard(KingdomCard):
 						else:
 							for player in self.roster:
 								self.send_data(player.playerConn, each.playerName + " reveals " + each.playerHand[(int(choice) - 1)].cardPrint + ".\n")
+							each.playerDeck.insert(0, each.playerHand[(int(choice) - 1)])
+							del each.playerHand[(int(choice) - 1)]
 							break
 				else:
 					for player in self.roster:
@@ -876,12 +878,12 @@ class ThroneRoomCard(KingdomCard):
 					continue
 				if i not in range(len(self.player.playerHand)):
 					continue
-				elif self.player.playerHand[i - 1].action != True:
+				elif self.player.playerHand[i].action != True:
 					continue
 				else:
-					self.player.playerPlay.append(self.player.playerHand[i - 1])
+					self.player.playerPlay.append(self.player.playerHand[i])
 					playTwice = self.player.playerPlay[-1]
-					del self.player.playerHand[i - 1]
+					del self.player.playerHand[i]
 					playTwice.playCard(self.player, self.roster, self.deck)
 					playTwice.playCard(self.player, self.roster, self.deck)
 					break
@@ -1132,8 +1134,8 @@ class WitchCard(KingdomCard):
 			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False and len(self.deck.curseCards) > 0:
 				each.playerDiscard.append(self.deck.curseCards[0])
 				del self.deck.curseCards[0]
-			for player in self.roster:
-				self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards[0].cardprint + ".\n")
+				for player in self.roster:
+					self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards[0].cardPrint + ".\n")
 			else:
 				pass
 		for each in self.roster:
