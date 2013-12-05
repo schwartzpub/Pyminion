@@ -177,7 +177,12 @@ def list_users(client):
 #handles game starting
 def start_handle(user_dict, user):
 	newGame[user] = DomGame()
-	newGame[user].startGame(user_dict, user)
+	scores = newGame[user].startGame(user_dict, user)
+	insertion = len(game_scores) + 1
+	game_scores[insertion] = []
+	for key, value in scores.iteritems():
+		game_scores[insertion].append(key)
+		game_scores[insertion].append(str(value))
 	del newGame[user]
 	return
 
@@ -196,9 +201,7 @@ def build_game(client, addr, name):
 				for p in game:
 					clients.remove(client_list[p][0])
 					client_list[p][1].ingame()
-#					[send_data(c, "[ " + p + " ]",) for c in clients]
 					print "client " + p + " joined game"
-#				[send_data(c, "\033[0m\n") for c in clients]
 				start_handle(game, user)
 				for p in game:
 					try:
@@ -208,6 +211,7 @@ def build_game(client, addr, name):
 						print "client " + p + " finished game"
 					except:
 						pass
+				[send_data(c, "\033[1;26m** GAME OVER: " + ''.join(game_scores[len(game_scores)]) + "\n") for c in clients]
 				break
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m\n")
@@ -283,6 +287,7 @@ class DomGame(threading.Thread):
 		self.playerWait = [self.player1, self.player2, self.player3, self.player4]
 		self.playerRost = []
 		self.playerTurn = 0
+		self.scores = {}
 		pass
 
 	def startGame(self, user_dict, user):
@@ -300,7 +305,7 @@ class DomGame(threading.Thread):
 			player.drawHand()
 			player.game = self
 		self.playLoop()
-		return
+		return self.scores
 
 	def playLoop(self):
 		while True:
@@ -313,6 +318,7 @@ class DomGame(threading.Thread):
 				break
 			if self.playerTurn < players:
 				self.playerRost[self.playerTurn].playerTurn = True
+				send_data(self.playerRost[self.playerTurn].playerConn, "\a\n")
 				self.playerRost[self.playerTurn].playTurn()
 				if self.playerTurn == 'gameover':
 					break
@@ -324,6 +330,8 @@ class DomGame(threading.Thread):
 				continue
 			break
 		return
+
+game_scores = {}
 newGame = {}
 clients = []
 client_list = {}

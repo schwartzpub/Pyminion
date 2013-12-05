@@ -162,8 +162,10 @@ class Player(object):
 					if len(card) == 0:
 						continue
 					else:
-						self.location.append(card[0])
-						print self.location[0].cardPrint
+						if self.location == self.playerDeck:
+							self.location.insert(0, card[0])
+						else:
+							self.location.append(card[0])
 						del card[0]
 						continue
 				if choice.lower() in nonkingdom:
@@ -183,25 +185,34 @@ class Player(object):
 							self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 							continue
 						else:
-							self.location.append(choice[0])
-							for each in self.roster:
+								if self.location == self.playerDeck:
+									self.location.insert(0, choice[0])
+								else:
+									self.location.append(choice[0])
+						for each in self.roster:
 								self.send_data(each.playerConn, self.playerName + " has gained a " + choice[0].cardPrint + ".\n")
-							del choice[0]
-							continue
+								del choice[0]
+						continue
 				elif choice.lower() in kingdom:
 					x = 'card' + choice.lower()
 					if self.deck.kingdomCards[x][0].cost > cost:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
 						continue
 					else:
-						self.location.append(self.deck.kingdomCards[x][0])
+						if self.location == self.playerDeck:
+							self.location.insert(0, self.deck.kingdomCards[x][0])
+						else:
+							self.location.append(self.deck.kingdomCards[x][0])
 						for each in self.roster:
 								self.send_data(each.playerConn, self.playerName + " has gained a " + self.deck.kingdomCards[x][0].cardPrint + ".\n")
 						del self.deck.kingdomCards[x][0]
 						continue
 			break
 		if len(self.location) > 1:
-			self.gained.append(self.location[-1])
+			if self.location == self.playerDeck:
+				self.gained.append(self.location[0])
+			else:
+				self.gained.append(self.location[-1])
 			return self.location[-1]
 		else:
 			self.gained.append(self.location[0])
@@ -265,7 +276,10 @@ class Player(object):
 								c = self.deck.copperCards
 								u = self.deck.curseCards
 								i = eval(choice.lower())
-								if i[0].cost > self.playerTurnTreasure:
+								if len(i) == 0:
+									self.send_data(self.playerConn, "This supply is empty, choose another card..\n" )
+									break
+								elif i[0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n" )
 									break
 								else:
@@ -281,7 +295,10 @@ class Player(object):
 									return
 							elif int(choice) in range(10):
 								x = 'card' + str(choice)
-								if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
+								if len(self.deck.kingdomCards[x]) == 0:
+									self.send_data(self.playerConn, "This supply is empty, choose another card..\n")
+									break
+								elif self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 									self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 									break
 								else:
@@ -428,7 +445,10 @@ class Player(object):
 							c = self.deck.copperCards
 							u = self.deck.curseCards	
 							i = eval(i.lower())
-							if i[0].cost > self.playerTurnTreasure:
+							if len(i) == 0:
+								self.send_data(self.playerConn, "This supply pile is empty, choose another card.\n")
+								continue
+							elif i[0].cost > self.playerTurnTreasure:
 								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
@@ -444,7 +464,10 @@ class Player(object):
 								break
 						elif int(i) in range(10):
 							x = 'card' + i
-							if self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
+							if len(self.deck.kingdomCards[x]) == 0:
+								self.send_data(self.playerConn, "This supply pile is empty, choose another card.\n")
+								continue
+							elif self.deck.kingdomCards[x][0].cost > self.playerTurnTreasure:
 								self.send_data(self.playerConn, " You do not have enough to buy this.\n")
 								continue
 							else:
@@ -670,6 +693,7 @@ class Player(object):
 				else: each.totalVictory += i.victoryPoints
 			for player in self.roster:
 				self.send_data(player.playerConn, "  " + each.playerName + ": " + str(each.totalVictory) + " ",)
+			self.game.scores["[" + each.playerName + ":"] = " " + str(each.totalVictory) + "] "
 		for player in self.roster:
 			self.send_data(player.playerConn, "\n")
 		time.sleep(10)

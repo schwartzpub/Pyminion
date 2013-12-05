@@ -261,21 +261,21 @@ class ExplorerCard(SeasideCard):
 					for each in self.roster:
 						SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " reveals a Province.\n")
 					if len(self.deck.goldCards) > 0:
-						self.player.gainCard(0, 1, 'hand', GoldCard)
+						self.player.gainCard(0, 1, 'hand', 'goldCards')
 						for each in self.roster:
-							SeasideCard.send_data(self, self.game, each.playerConn, self.player.playername + " gains a Gold.\n")	
+							SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a Gold.\n")	
 					else: return
 				elif choice.lower() == 'n':
 					if len(self.deck.silverCards) > 0:
-						self.player.gainCard(0, 1, 'hand', SilverCard)
+						self.player.gainCard(0, 1, 'hand', 'silverCards')
 						for each in self.roster:
-							SeasideCard.send_data(self, self.game, each.playerConn, self.player.playername + " gains a Silver.\n")
+							SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a Silver.\n")
 					else: return
 		else:
 			if len(self.deck.silverCards) > 0:
-                        	self.player.gainCard(0, 1, 'hand', SilverCard)
+                        	self.player.gainCard(0, 1, 'hand', 'silverCards')
                                 for each in self.roster:
-                                	SeasideCard.send_data(self, self.game, each.playerConn, self.player.playername + " gains a Silver.\n")
+                                	SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a Silver.\n")
                         else: return
 
 class FishingVillageCard(SeasideCard):
@@ -475,10 +475,11 @@ class LookoutCard(SeasideCard):
 			del self.player.playerDeck[0]
 			i += 1
 		SeasideCard.send_data(self, self.game, self.player.playerConn, "Choose a card to trash:\n")
-		self.player.printHandUpdate()
 		while True:
+			x = 0
 			for each in self.current:
-				SeasideCard.send_data(self, self.game, self.player.playerConn, each.cardPrint + " ",)
+				x += 1
+				SeasideCard.send_data(self, "[" + str(x) + "]" + self.game, self.player.playerConn, each.cardPrint + " ",)
 			SeasideCard.send_data(self, self.game, self.player.playerConn, "\n")
 			choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
 			try:
@@ -799,6 +800,7 @@ class SeaHagCard(SeasideCard):
 		for each in self.roster:
 			if each.playerTurn: pass
 			else:
+				each.playerDiscardToDeck()
 				each.playerDiscard.append(each.playerDeck[0])
 				del each.playerDeck[0]
 				for player in self.roster:
@@ -959,8 +961,8 @@ class TreasuryCard(SeasideCard):
 		self.player = player
 		self.roster = roster
 		self.player.drawOneCard()
-		self.playerTurnActions += 1
-		self.playerTurnTreasure += 1
+		self.player.playerTurnActions += 1
+		self.player.playerTurnTreasure += 1
 
 	def playDiscard(self, player, roster, deck):
 		self.player = player

@@ -457,14 +457,14 @@ class BureaucratCard(KingdomCard):
 				if any(i.cardType == 'victory' for i in each.playerHand):
 					while True:
 						each.printPlayerReveal()
-						self.send_data(each.playerConn, "Which card would you like to reveal?\n")
+						self.send_data(each.playerConn, "Which Victory card would you like to reveal?\n")
 						choice = self.recv_data(each.playerConn, 1024)
 						try:
 							choice = int(choice)
 						except:
 							continue
 						if each.playerHand[int(choice) - 1].cardType != 'victory':
-							self_self.send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
+							self.send_data(each.playerConn, "Invalid choice, please choose a Victory card.\n")
 							continue
 						else:
 							for player in self.roster:
