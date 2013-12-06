@@ -660,7 +660,9 @@ class PearlDiverCard(SeasideCard):
 		self.roster = roster
 		self.player.drawOneCard()
 		self.player.playerTurnActions += 1
-		SeasideCard.send_data(self, self.game, self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[-1].cardPrint + ". Put it on top of your deck (y/n)?\n")
+		self.player.payerDiscardToDeck()
+		if len(self.player.playerDeck) == 1: SeasideCard.send_data(self, self.game, self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[0].cardPrint + ". Put it on top of your deck (y/n)?\n")
+		else: SeasideCard.send_data(self, self.game, self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[-1].cardPrint + ". Put it on top of your deck (y/n)?\n")
 		while True:
 			choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
 			if choice.lower() not in ['y', 'n']: continue

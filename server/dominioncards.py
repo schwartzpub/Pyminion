@@ -23,7 +23,7 @@ class TreasureCard(object):
 
 class GoldCard(TreasureCard):
 	cardName = "Gold"
-	cardPrint = "\033[33mGold\033[0m"
+	cardPrint = "\033[43mGold\033[0m"
 	quantity = 30
 	value = 3
 	cost = 6
@@ -34,7 +34,7 @@ class GoldCard(TreasureCard):
 
 class SilverCard(TreasureCard):
 	cardName = "Silver"
-	cardPrint = "\033[33mSilver\033[0m"
+	cardPrint = "\033[43mSilver\033[0m"
 	quantity = 40
 	value = 2
 	cost = 3
@@ -45,7 +45,7 @@ class SilverCard(TreasureCard):
 
 class CopperCard(TreasureCard):
 	cardName = "Copper"
-	cardPrint = "\033[33mCopper\033[0m"
+	cardPrint = "\033[43mCopper\033[0m"
 	quantity = 60
 	value = 1
 	cost = 0
@@ -1004,6 +1004,7 @@ class LibraryCard(KingdomCard):
 		self.setAside = False
 		self.setAsideNum = 0
 		while len(self.player.playerHand) < 7:
+			self.player.checkPlayerDeck()
 			i = self.player.playerDeck[0]
 			self.send_data(self.player.playerConn, "You have drawn: " + i.cardPrint + "\n")
 			if i.action != True:
@@ -1132,10 +1133,9 @@ class WitchCard(KingdomCard):
 		self.player.checkReactions('attack')
 		for each in self.roster:
 			if each != self.player and each.reactionImmunity == False and each.durationImmunity == False and len(self.deck.curseCards) > 0:
-				each.playerDiscard.append(self.deck.curseCards[0])
-				del self.deck.curseCards[0]
+				each.gainCard(0, 1, 'discard', 'curseCards')
 				for player in self.roster:
-					self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.curseCards[0].cardPrint + ".\n")
+					self.send_data(player.playerConn, each.playerName + " has gained a " + self.deck.CurseCard.cardPrint + ".\n")
 			else:
 				pass
 		for each in self.roster:
