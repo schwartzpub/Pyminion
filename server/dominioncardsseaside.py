@@ -105,6 +105,7 @@ class AmbassadorCard(SeasideCard):
 				SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " reveals: " + self.player.playerHand[choice].cardPrint + ".\n")
 				card_return = self.player.playerHand[choice].cardName
 				card_print = self.player.playerHand[choice].cardPrint
+				card_choice = self.player.playerHand[choice]
 				for index, card in enumerate(self.deck.kingdomCardPicks):
 					if card.cardName == card_return:
 						card_index = index
@@ -127,7 +128,18 @@ class AmbassadorCard(SeasideCard):
 										break
 							else: break
 					else: pass				
-				
+				for each in self.roster:
+					if each.playerTurn or each.reactionImmunity == True or each.durationImmunity == True: pass
+					else:
+						if card_choice.cardName not in ['Province', 'Duchy', 'Estate', 'Curse', 'Gold', 'Silver', 'Copper', 'Curse', 'Colony', 'Platinum', 'Potion']:
+							for index, pick in enumerate(self.deck.kingdomCardPicks):
+								if pick.cardName == card_choice.cardName:
+									choice_index = index
+									gain_card = "kingdomCards[card" + str(choice_index) + "]"
+						else:
+							gain_card = card_choice.cardEval
+							gain_card = gain_card[0].lower() + gain_card[1:]
+						each.gainCard(0, 1, 'discard', gain_card)				
 
 class BazaarCard(SeasideCard):
 	cardEval = "BazaarCard"
@@ -138,8 +150,8 @@ class BazaarCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -157,8 +169,8 @@ class CaravanCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -180,8 +192,8 @@ class CutpurseCard(SeasideCard):
 	attack = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -268,8 +280,8 @@ class ExplorerCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -297,10 +309,10 @@ class ExplorerCard(SeasideCard):
 					else: return
 		else:
 			if len(self.deck.silverCards) > 0:
-                        	self.player.gainCard(0, 1, 'hand', 'silverCards')
-                                for each in self.roster:
-                                	SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a Silver.\n")
-                        else: return
+				self.player.gainCard(0, 1, 'hand', 'silverCards')
+				for each in self.roster:
+					SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a Silver.\n")
+			else: return
 
 class FishingVillageCard(SeasideCard):
 	cardEval = "FishingVillageCard"
@@ -312,8 +324,8 @@ class FishingVillageCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -336,8 +348,8 @@ class GhostShipCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -372,8 +384,8 @@ class HavenCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -413,8 +425,8 @@ class IslandCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -454,8 +466,8 @@ class LighthouseCard(SeasideCard):
 	reaction = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 	
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -484,8 +496,8 @@ class LookoutCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -541,8 +553,8 @@ class MerchantShipCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -561,8 +573,8 @@ class NativeVillageCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -597,8 +609,8 @@ class NavigatorCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -658,8 +670,8 @@ class OutpostCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -678,8 +690,8 @@ class PearlDiverCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -714,8 +726,8 @@ class PirateShipCard(SeasideCard):
 	attack = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -728,7 +740,7 @@ class PirateShipCard(SeasideCard):
 				self.trashed = False
 				self.trash = []
 				for each in self.roster:
-					if each == self.player: pass
+					if each.playerTurn or each.reactionImmunity == True or each.durationImmunity == True: pass
 					else:
 						each.playerDiscardToDeck()
 						self.trash.append(each.player.playerDeck[0])
@@ -776,7 +788,7 @@ class PirateShipCard(SeasideCard):
 			elif choice.lower() == 't':
 				self.player.playerTurnTreasure += self.player.pirateMat
 				for player in self.roster:
-	                                 SeasideCard.send_data(self, self.game, player.playerConn, each.playerName + " receives " + str(self.player.pirateMat) + " from the Pirate Ship.\n")
+					 SeasideCard.send_data(self, self.game, player.playerConn, each.playerName + " receives " + str(self.player.pirateMat) + " from the Pirate Ship.\n")
 				break
 		return				
 
@@ -789,8 +801,8 @@ class SalvagerCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -823,8 +835,8 @@ class SeaHagCard(SeasideCard):
 	attack = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -851,8 +863,8 @@ class SmugglersCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -879,7 +891,15 @@ class SmugglersCard(SeasideCard):
 							except: continue
 							if choice not in range(len(self.options)): continue
 							else:
-								self.player.gainCard(0, 1, 'discard', card)
+								if self.options[choice].cardName not in ['Province', 'Duchy', 'Estate', 'Curse', 'Gold', 'Silver', 'Copper', 'Curse', 'Colony', 'Platinum', 'Potion']:
+									for index, pick in enumerate(self.deck.kingdomCardPicks):
+										if pick.cardName == self.options[choice].cardName:
+											choice_index = index
+											gain_card = "kingdomCards[card" + str(choice_index) + "]" 
+								else:
+									gain_card = self.options[choice].cardEval
+									gain_card = gain_card[0].lower() + gain_card[1:]
+								self.player.gainCard(0, 1, 'discard', gain_card)
 								for each in self.roster:
 									SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
 								break
@@ -902,6 +922,14 @@ class SmugglersCard(SeasideCard):
 							except: continue
 							if choice not in range(len(self.options)): continue
 							else:
+								if self.options[choice].cardName not in ['Province', 'Duchy', 'Estate', 'Curse', 'Gold', 'Silver', 'Copper', 'Curse', 'Colony', 'Platinum', 'Potion']:
+									for index, pick in enumerate(self.deck.kingdomCardPicks):
+										if pick.cardName == self.options[choice].cardName:
+											choice_index = index
+											gain_card = "kingdomCards[card" + str(choice_index) + "]"
+								else:
+									gain_card = self.options[choice].cardEval
+									gain_card = gain_card[0].lower() + gain_card[1:]
 								self.player.gainCard(0, 1, 'discard', card)
 								for each in self.roster:
 									SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " gains a " + card.cardPrint + ".\n")
@@ -919,8 +947,8 @@ class TacticianCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -954,8 +982,8 @@ class TreasureMapCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -988,8 +1016,8 @@ class TreasuryCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -1025,8 +1053,8 @@ class WarehouseCard(SeasideCard):
 	action = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
@@ -1060,8 +1088,8 @@ class WharfCard(SeasideCard):
 	duration = True
 	def __init__(self, game):
 		self.game = game
-                self.embargoed = False
-                self.embargo = 0
+		self.embargoed = False
+		self.embargo = 0
 
 	def playCard(self, player, roster, deck):
 		self.player = player
