@@ -40,6 +40,7 @@ class SeasideCard(object):
 						print player.playerName + " has quit. (Connection Reset By peer)"
 						self.roster.remove(player)
 						time.sleep(2)
+
 	def recv_data (self, game, client, length):
 		self.playerConn = client
 		self.game = game
@@ -101,8 +102,31 @@ class AmbassadorCard(SeasideCard):
 				continue
 			if choice not in range(len(self.player.playerHand)): continue
 			else:
-				for each in self.roster:
-					SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " reveals: " + self.player.playerHand[choice].cardPrint + ".\n")
+				SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " reveals: " + self.player.playerHand[choice].cardPrint + ".\n")
+				card_return = self.player.playerHand[choice].cardName
+				card_print = self.player.playerHand[choice].cardPrint
+				for index, card in enumerate(self.deck.kingdomCardPicks):
+					if card.cardName == card_return:
+						card_index = index
+					else: pass
+				for i in range(2):
+					if any(i.cardName == card_return for i in self.playerHand):
+						SeasideCard.send_data(self, self.game, self.player.playerConn, "Would you like to return " + card_print + " to the supply (y/n)?\n")
+						while True:
+							choice2 = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
+							try: choice2 = choice.lower()
+							except: pass
+							if choice2 == 'n': break
+							elif choice2 == 'y':
+								self.deck.kingdomCards['card' + str(card_index)].append(self.player.playerHand[choice])
+								for trash in self.player.playerHand:
+									if trash.cardName = card_return
+										del trash
+										for each in self.roster:
+											SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " returns a copy to the supply.\n")
+										break
+							else: break
+					else: pass				
 				
 
 class BazaarCard(SeasideCard):
