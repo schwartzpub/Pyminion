@@ -23,7 +23,7 @@ class TreasureCard(object):
 
 class GoldCard(TreasureCard):
 	cardName = "Gold"
-	cardPrint = "\033[43mGold\033[0m"
+	cardPrint = "\033[1;33mGold\033[0m"
 	quantity = 30
 	value = 3
 	cost = 6
@@ -34,7 +34,7 @@ class GoldCard(TreasureCard):
 
 class SilverCard(TreasureCard):
 	cardName = "Silver"
-	cardPrint = "\033[43mSilver\033[0m"
+	cardPrint = "\033[1;33mSilver\033[0m"
 	quantity = 40
 	value = 2
 	cost = 3
@@ -45,7 +45,7 @@ class SilverCard(TreasureCard):
 
 class CopperCard(TreasureCard):
 	cardName = "Copper"
-	cardPrint = "\033[43mCopper\033[0m"
+	cardPrint = "\033[1;33mCopper\033[0m"
 	quantity = 60
 	value = 1
 	cost = 0
@@ -507,14 +507,8 @@ class FeastCard(KingdomCard):
 	def playCard(self, player, roster, deck):
 		self.player = player
 		self.deck = deck
-		while True:
-			for card in self.player.playerHand:
-				if card.cardName == 'Feast':
-					self.player.playerHand.remove(card)
-					break
-				else:
-					continue
-			break
+		if self.playerPlay == 1: del self.player.playerPlay[0]
+		else: del self.player.playerPlay[-1]
 		self.player.gainCard(5, 1, 'discard', 'any')
 		return
 
@@ -884,6 +878,8 @@ class ThroneRoomCard(KingdomCard):
 					self.player.playerPlay.append(self.player.playerHand[i])
 					playTwice = self.player.playerPlay[-1]
 					del self.player.playerHand[i]
+					for each in self.roster:
+						self.send_data(each.playerConn, self.player.playerName + " played the Throne Room with: " + playTwice.cardPrint + "\n")
 					playTwice.playCard(self.player, self.roster, self.deck)
 					playTwice.playCard(self.player, self.roster, self.deck)
 					break

@@ -42,7 +42,7 @@ class DomDeck(object):
 		self.ambassadorCard = AmbassadorCard(self.game)
 		self.fishingVillageCard = FishingVillageCard(self.game)
 		self.lookoutCard = LookoutCard(self.game)
-		self.smugglersCard = SmugglersCard(self.game)
+#		self.smugglersCard = SmugglersCard(self.game)
 		self.warehouseCard = WarehouseCard(self.game)
 		self.caravanCard = CaravanCard(self.game)
 		self.cutpurseCard = CutpurseCard(self.game)
@@ -89,7 +89,7 @@ class DomDeck(object):
 			self.nativeVillageCard,
 			self.pearlDiverCard,
 			self.lookoutCard,
-			self.smugglersCard,
+#			self.smugglersCard,
 			self.warehouseCard,
 			self.caravanCard,
 			self.cutpurseCard,
@@ -159,7 +159,7 @@ class DomDeck(object):
 					else:
 						self.kingdomCards['card' + str(i)].append(self.kingdomCardPicks[i])
 		if players == 2:
-			x = 1
+			x = 8
 		else:
 			x = 12
 		for i in range(x):

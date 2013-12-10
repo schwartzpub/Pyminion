@@ -34,6 +34,7 @@ class Lobby_Client(threading.Thread):
 				data = recv_data(self.client, 1024)
 				if not data: break
 				if data == '!quit': break
+				if data == '!scores': print_scores(self.client, 5)
 				if data == '!start':
 					while 1:
 						build_game(self.client, self.addr, self.name)
@@ -211,7 +212,7 @@ def build_game(client, addr, name):
 						print "client " + p + " finished game"
 					except:
 						pass
-				[send_data(c, "\033[1;26m** GAME OVER: " + ''.join(game_scores[len(game_scores)]) + "\n") for c in clients]
+				[send_data(c, "\033[38;5;70m** GAME OVER: " + ''.join(game_scores[len(game_scores)]) + "\033[0m\n") for c in clients]
 				break
 			elif player == '!go' and len(game.keys()) < 2:
 				send_data(client, "\033[1;31m** You don't have enough players in your game, please add more before starting your game.\033[0m\n")
@@ -239,6 +240,15 @@ def build_game(client, addr, name):
 				send_data(client, "( " + str(key) + " ) ",)
 			send_data(client, "\033[0m\n")
 	return
+
+#takes list of scores from the game and adds it to the main scorelist.
+def print_scores(client, num):
+	x = 0
+	send_data(client, "\033[38;5;70m The last " + str(num) + " game scores: \n")
+	for i in range(num):
+		x += 1
+		send_data(client, ''.join(game_scores[len(game_scores) - x]) + "\n")
+	send_data(client, "\033[0m\n")
 
 #starts the server up indefinitely
 def start_server ():

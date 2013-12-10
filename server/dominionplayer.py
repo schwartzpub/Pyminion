@@ -156,6 +156,7 @@ class Player(object):
 					choice = self.recv_data(self.playerConn, 1024)
 					if choice.lower() not in choices:
 						self.send_data(self.playerConn, "Invalid selection, please choose another card!\n")
+						continue
 				elif self.type not in ['treasure', 'kingdom', 'victory', 'any']:
 					card = "self.deck." + str(self.type)
 					card = eval(card)

@@ -479,7 +479,7 @@ class LookoutCard(SeasideCard):
 			x = 0
 			for each in self.current:
 				x += 1
-				SeasideCard.send_data(self, "[" + str(x) + "]" + self.game, self.player.playerConn, each.cardPrint + " ",)
+				SeasideCard.send_data(self, self.game, self.player.playerConn, "[" + str(x) + "]" + each.cardPrint + " ",)
 			SeasideCard.send_data(self, self.game, self.player.playerConn, "\n")
 			choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
 			try:
@@ -491,8 +491,10 @@ class LookoutCard(SeasideCard):
 				break
 		SeasideCard.send_data(self, self.game, self.player.playerConn, "Choose a card to discard:\n")
 		while True:
+			x = 0
 			for each in self.current:
-				SeasideCard.send_data(self, self.game, self.player.playerConn, each.cardPrint + " ",)
+				x += 1
+				SeasideCard.send_data(self, self.game, self.player.playerConn, "[" + str(x) + "]" + each.cardPrint + " ",)
 			SeasideCard.send_data(self, self.game, self.player.playerConn, "\n")
 			choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
 			try:
@@ -660,7 +662,7 @@ class PearlDiverCard(SeasideCard):
 		self.roster = roster
 		self.player.drawOneCard()
 		self.player.playerTurnActions += 1
-		self.player.payerDiscardToDeck()
+		self.player.playerDiscardToDeck()
 		if len(self.player.playerDeck) == 1: SeasideCard.send_data(self, self.game, self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[0].cardPrint + ". Put it on top of your deck (y/n)?\n")
 		else: SeasideCard.send_data(self, self.game, self.player.playerConn, "The bottom card of your deck is: " + self.player.playerDeck[-1].cardPrint + ". Put it on top of your deck (y/n)?\n")
 		while True:
@@ -749,6 +751,8 @@ class PirateShipCard(SeasideCard):
 				else: break
 			elif choice.lower() == 't':
 				self.player.playerTurnTreasure += self.player.pirateMat
+				for player in self.roster:
+	                                 SeasideCard.send_data(self, self.game, player.playerConn, each.playerName + " receives " + str(self.player.pirateMat) + " from the Pirate Ship.\n")
 				break
 		return				
 
@@ -770,9 +774,12 @@ class SalvagerCard(SeasideCard):
 		self.player.playerTurnBuys += 1
 		SeasideCard.send_data(self, self.game, self.player.playerConn, "Please choose a card to trash, +$ equal to its cost.\n")
 		while True:
+			self.player.printHandUpdate()
 			choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
 			try: choice = int(choice) - 1
-			except: continue
+			except: 
+				SeasideCard.send_data(self, self.game, self.player.playerConn, "Invalid choice, please choose another card.\n")
+				continue
 			if choice not in range(len(self.player.playerHand)): continue
 			else:
 				for each in self.roster:
@@ -799,8 +806,9 @@ class SeaHagCard(SeasideCard):
 		self.player = player
 		self.roster = roster
 		self.deck = deck
+		self.player.checkReactions('attack')
 		for each in self.roster:
-			if each.playerTurn: pass
+			if each.playerTurn or each.reactionImmunity == True or each.durationImmunity == True: pass
 			else:
 				each.playerDiscardToDeck()
 				each.playerDiscard.append(each.playerDeck[0])
@@ -970,10 +978,19 @@ class TreasuryCard(SeasideCard):
 		self.player = player
 		self.roster = roster
 		if not self.player.boughtVictory:
-			self.player.playerDeck.insert(0, self.player.playerPlay[0])
-			del self.player.playerPlay[0]
-		for each in self.roster:
-			SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " places a Treasury on top of his deck.\n")
+			SeasideCard.send_data(self, self.game, self.player.playerConn, "Would you like to place your Treasury on top of your deck (y/n)?\n")
+			while True:
+				choice = SeasideCard.recv_data(self, self.game, self.player.playerConn, 1024)
+				try: choice = choice.lower()
+				except: continue
+				if choice == 'n': break
+				elif choice == 'y':
+					self.player.playerDeck.insert(0, self.player.playerPlay[0])
+					del self.player.playerPlay[0]
+					for each in self.roster:
+						SeasideCard.send_data(self, self.game, each.playerConn, self.player.playerName + " places a Treasury on top of his deck.\n")
+					break
+				else: pass
 
 class WarehouseCard(SeasideCard):
 	cardEval = "WarehouseCard"
